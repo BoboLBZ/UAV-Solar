@@ -70,7 +70,7 @@ public class MediaFragment extends Fragment {
 
         //test
         List<Fragment> fragments=new ArrayList<>();
-        fragments.add(MediaListFragment.newInstance());
+        fragments.add(MediaLocalFragment.newInstance());
         fragments.add(MissionFragment.newInstance());
 
         String[] titles=new String[]{"本地","相机"};

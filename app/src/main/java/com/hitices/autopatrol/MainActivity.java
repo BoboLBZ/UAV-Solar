@@ -17,7 +17,8 @@ public class MainActivity extends AppCompatActivity
                                         AircraftFragment.OnFragmentInteractionListener,
                                         MissionFragment.OnFragmentInteractionListener,
                                         MediaFragment.OnFragmentInteractionListener,
-                                        MediaListFragment.OnFragmentInteractionListener{
+                                        MediaLocalFragment.OnFragmentInteractionListener,
+                                        MediaSDFragment.OnFragmentInteractionListener{
     //radio
     private RadioGroup tabBar;
     private RadioButton rbMission,rbAircraft,rbMedia;

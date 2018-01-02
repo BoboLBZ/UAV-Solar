@@ -32,7 +32,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaListFragment extends Fragment {
+public class MediaLocalFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     public static final int INDEX = 1;
@@ -43,11 +43,11 @@ public class MediaListFragment extends Fragment {
     protected static final String STATE_PAUSE_ON_FLING = "STATE_PAUSE_ON_FLING";
     protected boolean pauseOnScroll = false;
     protected boolean pauseOnFling = true;
-    public MediaListFragment() {
+    public MediaLocalFragment() {
     }
 
-    public static MediaListFragment newInstance() {
-        MediaListFragment fragment = new MediaListFragment();
+    public static MediaLocalFragment newInstance() {
+        MediaLocalFragment fragment = new MediaLocalFragment();
         return fragment;
     }
 
