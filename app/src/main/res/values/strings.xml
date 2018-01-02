@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">AutoPatrol</string>
+    <string name="mission">mission</string>
+    <string name="aircraft">aircraft</string>
+    <string name="media">media</string>
+    <string name="aircraft_unknown">type:unknown</string>
+    <string name="camera_unknown">unknown camera</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="menu_item_clear_memory_cache">Clear memory cache</string>
+    <string name="menu_item_clear_disc_cache">Clear disc cache</string>
+    <string name="menu_item_pause_on_scroll">Pause on scroll</string>
+    <string name="menu_item_pause_on_fling">Pause on fling</string>
+</resources>
