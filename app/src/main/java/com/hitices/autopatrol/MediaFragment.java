@@ -49,7 +49,6 @@ public class MediaFragment extends Fragment {
             }
             fragmentTransaction.commit();
         }
-
     }
     @Override
     public void onSaveInstanceState(Bundle outState){
@@ -71,13 +70,14 @@ public class MediaFragment extends Fragment {
         //test
         List<Fragment> fragments=new ArrayList<>();
         fragments.add(MediaLocalFragment.newInstance());
-        fragments.add(MissionFragment.newInstance());
+        fragments.add(MediaSDFragment.newInstance());
 
         String[] titles=new String[]{"本地","相机"};
         MediaViewPagerAdapter viewPagerAdapter =
                 new MediaViewPagerAdapter(getActivity().getSupportFragmentManager(),fragments, Arrays.asList(titles));
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(onPageChangeListener);
+        setHasOptionsMenu(true);
         return view;
     }
     TabLayout.OnTabSelectedListener onTabSelectedListener=new TabLayout.OnTabSelectedListener() {

@@ -34,43 +34,25 @@ import dji.sdk.products.Aircraft;
  * create an instance of this fragment.
  */
 public class AircraftFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private static final String AIRCRAFT_STATE_SAVE_IS_HIDDEN="AIRCRAFT_STATE_SAVE_IS_HIDDEN";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private TextView tvAircraftType;
     private TextView tvCameraType;
     private SeekBar seekBarBegin;
+    private Spinner spinnerMission;
     private OnFragmentInteractionListener mListener;
-    private String[] testItems = {"mission one","mission two","mission three","mission four","mission five","mission six"};
 
     public AircraftFragment() {
         // Required empty public constructor
     }
-    public static AircraftFragment newInstance(String param1, String param2) {
+    public static AircraftFragment newInstance() {
         AircraftFragment fragment = new AircraftFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AutoPatrolApplication.FLAG_CONNECTION_CHANGE);
-        getActivity().registerReceiver(mReceiver, filter);
 
         if(savedInstanceState != null){
             boolean isSupportHidden=savedInstanceState.getBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN);
@@ -91,13 +73,9 @@ public class AircraftFragment extends Fragment {
         View view= inflater.inflate(R.layout.fragment_aircraft,container,false);
         tvAircraftType = view.findViewById(R.id.aircraft_type);
         tvCameraType = view.findViewById(R.id.camera_type);
-        Spinner spinnerMission = view.findViewById(R.id.missionSelected);
+        spinnerMission = view.findViewById(R.id.missionSelected);
         seekBarBegin =view.findViewById(R.id.seekBar_begin);
-        ArrayAdapter<String> arrayAdapter=new ArrayAdapter<>(view.getContext(),android.R.layout.simple_spinner_item,testItems);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerMission.setAdapter(arrayAdapter);
-
-        spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
+        refreshSpinner();
         seekBarBegin.setOnSeekBarChangeListener(onSeekBarChangeListener);
         seekBarBegin.setMax(100);
         seekBarBegin.setProgress(0);
@@ -114,6 +92,11 @@ public class AircraftFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AutoPatrolApplication.FLAG_CONNECTION_CHANGE);
+        filter.addAction("MISSION_ITEMS_CHANGE");
+        context.registerReceiver(mReceiver, filter);
+
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -125,6 +108,7 @@ public class AircraftFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        getContext().unregisterReceiver(mReceiver);
         super.onDetach();
         mListener = null;
     }
@@ -143,7 +127,10 @@ public class AircraftFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            refreshSDKRelativeUI();
+            if(intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE))
+               refreshSDKRelativeUI();
+            else if(intent.getAction().equals("MISSION_ITEMS_CHANGE"))
+                refreshSpinner();
         }
     };
     private void setResultToToast(final String result) {
@@ -155,7 +142,7 @@ public class AircraftFragment extends Fragment {
         if (null != mProduct && mProduct.isConnected()) {
             Log.v("connection", "refreshSDK: True");
 
-            String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
+           // String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
             if (null != mProduct.getModel()) {
                 tvAircraftType.setText("type:" + mProduct.getModel().getDisplayName());
                 if(null != mProduct.getCamera())
@@ -163,16 +150,26 @@ public class AircraftFragment extends Fragment {
                 else {
                     tvCameraType.setText(R.string.camera_unknown);
                 }
+                getView().setBackgroundColor(getResources().getColor(R.color.selected));
             } else {
                 tvAircraftType.setText(R.string.aircraft_unknown);
                 tvCameraType.setText(R.string.camera_unknown);
+                getView().setBackgroundColor(getResources().getColor(R.color.background));
             }
 
         } else {
+            setResultToToast("no connection");
             Log.v("connection", "refreshSDK: False");
             tvAircraftType.setText(R.string.aircraft_unknown);
             tvCameraType.setText(R.string.camera_unknown);
+            getView().setBackgroundColor(getResources().getColor(R.color.background));
         }
+    }
+    private void refreshSpinner(){
+        ArrayAdapter<String> arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMission.setAdapter(arrayAdapter);
+        spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
     }
     AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
        @Override

@@ -10,7 +10,7 @@
         android:id="@+id/media_tab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
+        android:background="@color/colorPrimary"
         app:tabTextColor="@color/unselected"
         app:tabSelectedTextColor="@color/selected"
         app:tabGravity="fill"

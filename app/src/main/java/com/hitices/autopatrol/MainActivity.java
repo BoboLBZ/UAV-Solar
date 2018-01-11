@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity
         initUI();
     }
     public void initUI(){
-
         tabBar=findViewById(R.id.tab_bar);
         tabBar.setOnCheckedChangeListener(this);
         rbAircraft=findViewById(R.id.aircraft);

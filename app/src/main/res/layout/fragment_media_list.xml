@@ -1,10 +1,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hitices.autopatrol.MediaLocalFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/local_toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="?attr/colorPrimary"-->
+        <!--android:elevation="4dp"-->
+        <!--app:showAsAction="always"-->
+        <!--android:theme="@style/ThemeOverlay.AppCompat.ActionBar"-->
+        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>-->
     <GridView
         android:id="@+id/imageGrid"
         android:layout_width="match_parent"
@@ -15,5 +23,11 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="4dp"
         android:padding="4dp"/>
+    <ImageView
+        android:id="@+id/imageView_local"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="0dp"
+        android:visibility="invisible" />
 
 </FrameLayout>

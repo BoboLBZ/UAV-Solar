@@ -3,8 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hitices.autopatrol.MediaSDFragment">
-
-    <android.support.v7.app.AlertController.RecycleListView
+    <ImageView
+        android:id="@+id/imageView_sd"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="0dp"
+        android:visibility="invisible" />
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/imageList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

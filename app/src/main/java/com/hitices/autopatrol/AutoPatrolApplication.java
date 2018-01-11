@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.audiofx.Equalizer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
@@ -12,6 +13,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import android.os.Handler;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
@@ -28,15 +33,27 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change";
-
+    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/Missions";
     private static BaseProduct mProduct;
-
     private Handler mHandler;
 
-    /**
-     * This function is used to get the instance of DJIBaseProduct.
-     * If no product is connected, it returns null.
-     */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mHandler = new Handler(Looper.getMainLooper());
+        //check alert window
+
+        //Check the permissions before registering the application for android system 6.0 above.
+        int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permissionCheck2 = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (permissionCheck == 0 && permissionCheck2 == 0)) {
+            //This is used to start SDK services and initiate SDK.
+            DJISDKManager.getInstance().registerApp(this, mDJISDKManagerCallback);
+        } else {
+            Toast.makeText(getApplicationContext(), "Please check if the permission is granted.", Toast.LENGTH_LONG).show();
+        }
+    }
     public static synchronized BaseProduct getProductInstance() {
         if (null == mProduct) {
             mProduct = DJISDKManager.getInstance().getProduct();
@@ -82,25 +99,22 @@ public class AutoPatrolApplication extends Application {
         return isCameraModuleAvailable() &&
                 (null != AutoPatrolApplication.getProductInstance().getCamera().getPlaybackManager());
     }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mHandler = new Handler(Looper.getMainLooper());
-        //check alert window
-
-        //Check the permissions before registering the application for android system 6.0 above.
-        int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int permissionCheck2 = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || (permissionCheck == 0 && permissionCheck2 == 0)) {
-            //This is used to start SDK services and initiate SDK.
-            DJISDKManager.getInstance().registerApp(this, mDJISDKManagerCallback);
-        } else {
-            Toast.makeText(getApplicationContext(), "Please check if the permission is granted.", Toast.LENGTH_LONG).show();
+    public static List<String> getMissionList(){
+        File dir=new File(missionDir);
+        List<String> missionList =new ArrayList<>();
+        missionList.add("test.xml");
+        if(dir.exists()){
+            for(int i=0;i<dir.listFiles().length;i++){
+                File f=dir.listFiles()[i];
+                if(f.isFile()){
+                    if(f.getName().endsWith("xml")) {//xml file
+                        missionList.add(f.getName());
+                    }
+                }
+            }
         }
+        return missionList;
     }
-
     private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.SDKManagerCallback() {
 
         //Listens to the SDK registration result
@@ -141,7 +155,6 @@ public class AutoPatrolApplication extends Application {
             notifyStatusChange();
         }
     };
-
     private BaseProduct.BaseProductListener mDJIBaseProductListener = new BaseProduct.BaseProductListener() {
 
         @Override
@@ -160,7 +173,6 @@ public class AutoPatrolApplication extends Application {
         }
 
     };
-
     private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
 
         @Override
@@ -169,12 +181,10 @@ public class AutoPatrolApplication extends Application {
         }
 
     };
-
     private void notifyStatusChange() {
         mHandler.removeCallbacks(updateRunnable);
         mHandler.postDelayed(updateRunnable, 500);
     }
-
     private Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {

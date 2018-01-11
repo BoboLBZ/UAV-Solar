@@ -3,7 +3,7 @@
     <string name="mission">mission</string>
     <string name="aircraft">aircraft</string>
     <string name="media">media</string>
-    <string name="aircraft_unknown">type:unknown</string>
+    <string name="aircraft_unknown">unknown aircraft</string>
     <string name="camera_unknown">unknown camera</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -12,4 +12,11 @@
     <string name="menu_item_clear_disc_cache">Clear disc cache</string>
     <string name="menu_item_pause_on_scroll">Pause on scroll</string>
     <string name="menu_item_pause_on_fling">Pause on fling</string>
+
+    <string name="title_activity_show_full_image">ShowFullImageActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_play_video">PlayVideo</string>
+
 </resources>

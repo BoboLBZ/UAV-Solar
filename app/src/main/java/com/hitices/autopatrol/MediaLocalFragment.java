@@ -1,12 +1,15 @@
 package com.hitices.autopatrol;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,11 +41,17 @@ public class MediaLocalFragment extends Fragment {
     public static final int INDEX = 1;
     private GridView gridView;
     private static String tag;
+    private String[] urls;
+    private ImageView showImageView;
+    private List<String> imageurls;
+    private List<String> videourls;
     //menu
     protected static final String STATE_PAUSE_ON_SCROLL = "STATE_PAUSE_ON_SCROLL";
     protected static final String STATE_PAUSE_ON_FLING = "STATE_PAUSE_ON_FLING";
     protected boolean pauseOnScroll = false;
     protected boolean pauseOnFling = true;
+
+//    private Toolbar toolbar;
     public MediaLocalFragment() {
     }
 
@@ -55,7 +64,7 @@ public class MediaLocalFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //base
-        setHasOptionsMenu(true);
+        urls=getUrls();
     }
 
     @Override
@@ -66,13 +75,19 @@ public class MediaLocalFragment extends Fragment {
         gridView=view.findViewById(R.id.imageGrid);
         gridView.setAdapter(new ImageAdapter(getActivity()));
         gridView.setOnItemClickListener(onItemClickListener);
+        showImageView=view.findViewById(R.id.imageView_local);
+        //toolbar
+//        toolbar=view.findViewById(R.id.local_toolbar);
+//        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+//        getActivity().invalidateOptionsMenu();
+//        setHasOptionsMenu(true);
         return view;
     }
     AdapterView.OnItemClickListener  onItemClickListener=new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             /////show image
-            startImagePagerActivity(i);
+            showFullImage(i);
         }
     };
     // TODO: Rename method, update argument and hook method into UI event
@@ -108,7 +123,8 @@ public class MediaLocalFragment extends Fragment {
     }
 
     private  class ImageAdapter extends BaseAdapter{
-        private String[] IMAGE_URLS= getUrls();
+        //private String[] IMAGE_URLS= getUrls();
+        private String[] IMAGE_URLS=urls;
         private LayoutInflater inflater;
         private DisplayImageOptions options;
         ImageAdapter(Context context) {
@@ -184,10 +200,13 @@ public class MediaLocalFragment extends Fragment {
     }
     //base menu o
     public void onCreateOptionsMenu(Menu menu,MenuInflater inflater){
+        menu.clear();
         inflater.inflate(R.menu.main_menu,menu);
+        Log.e("menu","on local create");
     }
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
+        Log.e("menu","on local prepare");
         MenuItem pauseOnScrollItem = menu.findItem(R.id.item_pause_on_scroll);
         pauseOnScrollItem.setVisible(true);
         pauseOnScrollItem.setChecked(pauseOnScroll);
@@ -196,7 +215,6 @@ public class MediaLocalFragment extends Fragment {
         pauseOnFlingItem.setVisible(true);
         pauseOnFlingItem.setChecked(pauseOnFling);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -215,19 +233,27 @@ public class MediaLocalFragment extends Fragment {
         }
     }
 
-    protected void startImagePagerActivity(int position) {
-//        Intent intent = new Intent(getActivity(), SimpleImageActivity.class);
-//        intent.putExtra(SyncStateContract.Constants.Extra.FRAGMENT_INDEX, ImagePagerFragment.INDEX);
-//        intent.putExtra(Constants.Extra.IMAGE_POSITION, position);
-//        startActivity(intent);
-        Toast.makeText(getActivity(),"start image pager",Toast.LENGTH_LONG).show();
+    protected void showFullImage(int position) {
+//        showImageView.setVisibility(View.VISIBLE);
+//        ImageLoader.getInstance()
+//                .displayImage(urls[position], showImageView);
+
+        Intent intent=new Intent(getActivity(),ShowFullImageActivity.class);
+        intent.putExtra("url",urls[position]);
+        if(imageurls.contains(urls[position]))
+            intent.putExtra("type",0);
+        else if(videourls.contains(urls[position]))
+            intent.putExtra("type",1);
+        else
+            intent.putExtra("type",2);
+        startActivity(intent);
     }
 
     private void applyScrollListener() {
         gridView.setOnScrollListener(new PauseOnScrollListener(ImageLoader.getInstance(), pauseOnScroll, pauseOnFling));
     }
-    private List<String> getLocalImageUrls(){
-        List<String> urls=new ArrayList<>();
+    private void getLocalImageUrls(){
+        imageurls=new ArrayList<>();
         Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projImage = { MediaStore.Images.Media._ID
                 , MediaStore.Images.Media.DATA
@@ -245,15 +271,14 @@ public class MediaLocalFragment extends Fragment {
                 String path = "file://"+ mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
 //                String s=new File(path).getParentFile().getAbsolutePath();
                 Log.e("image",path);
-                urls.add(path);
+                imageurls.add(path);
             }
             mCursor.close();
         }
 //        Toast.makeText(getActivity(),String.valueOf(urls.size()),Toast.LENGTH_LONG).show();
-        return  urls;
     }
-    private  List<String> getLocalVideoUrls(){
-        List<String> urls=new ArrayList<>();
+    private  void getLocalVideoUrls(){
+        videourls=new ArrayList<>();
         Uri mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] projImage = { MediaStore.Video.Thumbnails._ID
                 , MediaStore.Video.Thumbnails.DATA
@@ -271,17 +296,18 @@ public class MediaLocalFragment extends Fragment {
             while(mCursor.moveToNext()){
                 String path = "file://"+ mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DATA));
                 Log.e("video",path);
-                urls.add(path);
+                videourls.add(path);
             }
             mCursor.close();
         }
 //        Toast.makeText(getActivity(),String.valueOf(urls.size()),Toast.LENGTH_LONG).show();
-        return  urls;
     }
     private String[] getUrls(){
         List<String> urls=new ArrayList<>();
-        urls.addAll(getLocalImageUrls());
-        urls.addAll(getLocalVideoUrls());
+        getLocalImageUrls();
+        getLocalVideoUrls();
+        urls.addAll(imageurls);
+        urls.addAll(videourls);
         return urls.toArray(new String[0]);
     }
 }

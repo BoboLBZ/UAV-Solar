@@ -5,12 +5,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +68,9 @@ public class MediaSDFragment extends Fragment {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_media_sd, container, false);
         listView=view.findViewById(R.id.imageList);
+
+        LinearLayoutManager layoutManager=new LinearLayoutManager(getActivity(), OrientationHelper.VERTICAL,false);
+        listView.setLayoutManager(layoutManager);
         mListAdapter = new FileListAdapter();
         listView.setAdapter(mListAdapter);
         return view;
@@ -106,16 +110,16 @@ public class MediaSDFragment extends Fragment {
                 scheduler.removeAllTasks();
             }
         }
-
-        AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError mError) {
-                if (mError != null){
-                    setResultToToast("Set Shoot Photo Mode Failed" + mError.getDescription());
+        if(AutoPatrolApplication.getCameraInstance() != null) {
+            AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError mError) {
+                    if (mError != null) {
+                        setResultToToast("Set Shoot Photo Mode Failed" + mError.getDescription());
+                    }
                 }
-            }
-        });
-
+            });
+        }
         if (mediaFileList != null) {
             mediaFileList.clear();
         }
@@ -192,8 +196,6 @@ public class MediaSDFragment extends Fragment {
             DJILog.e(TAG, "Product disconnected");
             return;
         } else {
-            //rhys
-
             if (null != AutoPatrolApplication.getCameraInstance() && AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
                 mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
                 if (null != mMediaManager) {
@@ -274,6 +276,8 @@ public class MediaSDFragment extends Fragment {
                     }
                 });
             }
+        } else {
+            setResultToToast("this is no camera connect");
         }
     }
     private void getThumbnails() {
