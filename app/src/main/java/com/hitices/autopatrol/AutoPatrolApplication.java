@@ -102,7 +102,6 @@ public class AutoPatrolApplication extends Application {
     public static List<String> getMissionList(){
         File dir=new File(missionDir);
         List<String> missionList =new ArrayList<>();
-        missionList.add("test.xml");
         if(dir.exists()){
             for(int i=0;i<dir.listFiles().length;i++){
                 File f=dir.listFiles()[i];

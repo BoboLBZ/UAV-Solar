@@ -11,28 +11,20 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waypoint mission Configuration"
-        android:layout_gravity="center_horizontal">
+        android:text="Waypoint Configuration"
+        android:layout_gravity="right">
     </TextView>
-    <LinearLayout
-        android:layout_width="match_parent"
+    <View
+       android:layout_width="match_parent"
+       android:layout_height="20dp"/>
+    <TextView
+        android:id="@+id/setting_mName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mission name:">
-        </TextView>
-        <EditText
-            android:id="@+id/name"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content">
-        </EditText>
-    </LinearLayout>
+        android:text="Mission name:"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/pink">
+    </TextView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -57,38 +49,27 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed:">
-        </TextView>
-        <RadioGroup
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:text="Speed:"></TextView>
+
+        <SeekBar
             android:id="@+id/speed"
-            android:layout_gravity="center_horizontal">
-            <RadioButton
-                android:id="@+id/lowSpeed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Low"/>
-            <RadioButton
-                android:id="@+id/MidSpeed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mid"/>
-            <RadioButton
-                android:id="@+id/HighSpeed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="High"/>
-        </RadioGroup>
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/seekBar_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
@@ -192,4 +173,55 @@
                 android:text="Use Waypoint"/>
         </RadioGroup>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="General Waypoint Actions:"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1154555555"/>
+        </LinearLayout>
 </LinearLayout>

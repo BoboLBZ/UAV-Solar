@@ -35,4 +35,5 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     compileOnly files('libs/universal-image-loader-1.9.5.jar')
     compile 'com.getbase:floatingactionbutton:1.10.1'
+    compileOnly files('libs/AMap_Location_V3.7.0_20171218.jar')
 }

@@ -1,26 +1,40 @@
 package com.hitices.autopatrol;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
@@ -31,44 +45,38 @@ import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.hitices.autopatrol.missions.WaypointsMission;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dji.common.mission.waypoint.Waypoint;
-import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
-import dji.common.mission.waypoint.WaypointMissionFlightPathMode;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MissionFragment extends Fragment
-        implements View.OnClickListener, AMap.OnMapClickListener {
+        implements View.OnClickListener,
+             AMap.OnMapClickListener{
 
     private OnFragmentInteractionListener mListener;
     private static final String MISSION_STATE_SAVE_IS_HIDDEN="MISSION_STATE_SAVE_IS_HIDDEN";
 
     FloatingActionsMenu menu;
     FloatingActionButton btn_waypoint,btn_polygon,btn_import,btn_adjust;
+    ImageButton btn_setting;
     private AMap aMap;
     private MapView mapView;
     private Spinner spinner;
+    private ArrayAdapter<String> arrayAdapter;
     //mission
+    private WaypointsMission currentMission;
     private boolean creatable;
-    private float altitude=50.0f;//默认相对起点高度50米
-    private float speed = 10.0f;
-    private List<Waypoint> waypointList = new ArrayList<>();
     private final Map<Integer,Marker> mMarkers = new ConcurrentHashMap<>();
-    public static WaypointMission.Builder waypoinyMissionBuilder;
     private WaypointMissionOperator instance;
-    private WaypointMissionFinishedAction missionFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
-    private WaypointMissionHeadingMode missionHeadingMode = WaypointMissionHeadingMode.AUTO; //航向
-
+    //location
+    private AMapLocationClient mlocationClient;
 
     public MissionFragment() {
         // Required empty public constructor
@@ -93,51 +101,19 @@ public class MissionFragment extends Fragment
         }
     }
     @Override
-    public void onSaveInstanceState(Bundle outState){
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(MISSION_STATE_SAVE_IS_HIDDEN,isHidden());
+    public void onResume(){
+        super.onResume();
+        mapView.onResume();
     }
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view=  inflater.inflate(R.layout.fragment_mission, container, false);
-        mapView=view.findViewById(R.id.map);
-        initMapView();
-        mapView.onCreate(savedInstanceState);
-        creatable=false;
-        spinner=view.findViewById(R.id.missionSelected_mission);
-        refreshSpinner();
-        menu=view.findViewById(R.id.mission_menu);
-        btn_adjust=view.findViewById(R.id.adjust_mission);
-        btn_polygon=view.findViewById(R.id.add_polygon_mission);
-        btn_waypoint=view.findViewById(R.id.add_waypoint_mission);
-        btn_import=view.findViewById(R.id.import_mission);
-        btn_adjust.setOnClickListener(this);
-        btn_polygon.setOnClickListener(this);
-        btn_waypoint.setOnClickListener(this);
-        btn_import.setOnClickListener(this);
-        return view;
-    }
-    protected void refreshSpinner(){
-        ArrayAdapter<String> arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(arrayAdapter);
-        spinner.setOnItemSelectedListener(onItemSelectedListener);
+    public void onPause(){
+        super.onPause();
+        mapView.onPause();
     }
     @Override
-    public void onClick(View view){
-        switch (view.getId()){
-            case R.id.add_polygon_mission:
-                break;
-            case R.id.add_waypoint_mission:
-                break;
-            case R.id.import_mission:
-                break;
-            case R.id.adjust_mission:
-                break;
-            default:
-                break;
-        }
+    public void onDestroy(){
+        super.onDestroy();
+        mapView.onDestroy();
     }
     @Override
     public void onAttach(Context context) {
@@ -162,9 +138,63 @@ public class MissionFragment extends Fragment
 
         @Override
         public void onReceive(Context context, Intent intent) {
-           // refreshSDKRelativeUI();
+            // refreshSDKRelativeUI();
         }
     };
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(MISSION_STATE_SAVE_IS_HIDDEN,isHidden());
+    }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view=  inflater.inflate(R.layout.fragment_mission, container, false);
+        mapView=view.findViewById(R.id.map);
+        initMapView();
+        mapView.onCreate(savedInstanceState);
+        creatable=false;
+        spinner=view.findViewById(R.id.missionSelected_mission);
+        initSpinner();
+        menu=view.findViewById(R.id.mission_menu);
+        btn_adjust=view.findViewById(R.id.adjust_mission);
+        btn_polygon=view.findViewById(R.id.add_polygon_mission);
+        btn_waypoint=view.findViewById(R.id.add_waypoint_mission);
+        btn_import=view.findViewById(R.id.import_mission);
+        btn_setting=view.findViewById(R.id.mission_setting);
+        btn_adjust.setOnClickListener(this);
+        btn_polygon.setOnClickListener(this);
+        btn_waypoint.setOnClickListener(this);
+        btn_import.setOnClickListener(this);
+        btn_setting.setOnClickListener(this);
+        return view;
+    }
+    protected void initSpinner(){
+        arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(arrayAdapter);
+        spinner.setOnItemSelectedListener(onItemSelectedListener);
+    }
+    @Override
+    public void onClick(View view){
+        menu.collapse();
+        switch (view.getId()){
+            case R.id.add_polygon_mission:
+                break;
+            case R.id.add_waypoint_mission:
+                addWaypointMission();
+                break;
+            case R.id.import_mission:
+                break;
+            case R.id.adjust_mission:
+                break;
+            case R.id.mission_setting:
+                if (creatable)
+                   showSettingDialog();
+            default:
+                break;
+        }
+    }
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
@@ -173,33 +203,99 @@ public class MissionFragment extends Fragment
         if(aMap == null){
             aMap=mapView.getMap();
             aMap.setOnMapClickListener(this);
+            aMap.setOnMarkerClickListener(markerClickListener);
+            aMap.setOnMarkerDragListener(markerDragListener);
         }
-        LatLng harbin = new LatLng(45.75,126.63);
-        aMap.addMarker(new MarkerOptions().position(harbin).title("marker"));
-        aMap.moveCamera(CameraUpdateFactory.newLatLng(harbin));
-        cameraUpdate(harbin);
+        //location
+        AMapLocationClientOption mLocationOption  = new AMapLocationClientOption();
+        mlocationClient = new AMapLocationClient(getContext());
+        mlocationClient.setLocationListener(aMapLocationListener);
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+        mLocationOption.setInterval(2000);
+        mlocationClient.setLocationOption(mLocationOption);
+        mlocationClient.startLocation();
+        //info
+        aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
+        myInfoWindowAdapter myInfoWindowAdapter=new myInfoWindowAdapter();
+        aMap.setInfoWindowAdapter(myInfoWindowAdapter);
     }
     @Override
     public void onMapClick(LatLng latLng){
         markWaypoint(latLng);
         setWaypointList(latLng);
     }
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            //showSingleWaypointSetting();
+            marker.showInfoWindow();
+            return true;
+        }
+    };
+    AMapLocationListener aMapLocationListener=new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+                    LatLng harbin = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
+                    MarkerOptions markerOptions=  new MarkerOptions();
+                    markerOptions.position(harbin);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_location_marker)));
+                    aMap.addMarker(markerOptions);
+                    aMap.moveCamera(CameraUpdateFactory.newLatLng(harbin));
+                    cameraUpdate(harbin);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError","location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
+    AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
+        LatLng tempLatlng;
+        @Override
+        public void onMarkerDragStart(Marker arg0) {
+            tempLatlng=arg0.getPosition();
+        }
+        @Override
+        public void onMarkerDragEnd(Marker arg0) {
+            currentMission.waypointList.remove(new Waypoint(tempLatlng.latitude,tempLatlng.longitude,currentMission.altitude));
+            currentMission.addWaypointList(arg0.getPosition());
+        }
+        @Override
+        public void onMarkerDrag(Marker arg0) {
+        }
+    };
+    AMap.OnInfoWindowClickListener onInfoWindowClickListener=new AMap.OnInfoWindowClickListener() {
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+
+        }
+    };
     private void markWaypoint(LatLng latLng){
         //amap about
         if(creatable){
             MarkerOptions markerOptions =new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            markerOptions.draggable(true);
+            markerOptions.title("ttt");
             aMap.addMarker(markerOptions);
             Marker marker =aMap.addMarker(markerOptions);
+//            marker.showInfoWindow();
             mMarkers.put(mMarkers.size(),marker);
-         }
+         }else {
+            setResultToToast("can't add waypoint");
+        }
     }
     private void setWaypointList(LatLng latLng){
         //dji mission about
-        if(creatable){
-            Waypoint waypoint=new Waypoint(latLng.latitude,latLng.longitude,altitude);
-            waypointList.add(waypoint);
+        //直接加到class里
+        if(creatable && currentMission != null){
+            currentMission.addWaypointList(latLng);
         }
     }
     private void cameraUpdate(LatLng pos){
@@ -211,34 +307,43 @@ public class MissionFragment extends Fragment
     private void showSettingDialog(){
         LinearLayout wayPointSettings = (LinearLayout)getLayoutInflater().inflate(R.layout.dialog_waypointsetting,null);
         final TextView tv_wayPointAltitude= wayPointSettings.findViewById(R.id.altitude);
-        final TextView missionTitle=wayPointSettings.findViewById(R.id.name);
-        RadioGroup rg_speed = wayPointSettings.findViewById(R.id.speed);
+        final TextView seekBar_speed=wayPointSettings.findViewById(R.id.seekBar_text);
+        final TextView mName=wayPointSettings.findViewById(R.id.setting_mName);
+        SeekBar sb_speed=wayPointSettings.findViewById(R.id.speed);
         RadioGroup rg_actionAfterFinished =wayPointSettings.findViewById(R.id.actionAfterFinished);
         RadioGroup rg_heading =wayPointSettings.findViewById(R.id.heading);
-
-        rg_speed.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        //init
+        tv_wayPointAltitude.setText(String.valueOf(50));
+        mName.setText(arrayAdapter.getItem(0).toString());
+        sb_speed.setMax(15);
+        sb_speed.setProgress(10);
+        seekBar_speed.setText(String.valueOf(10)+" m/s");
+//        RadioButton rb_finishedAction =wayPointSettings.findViewById(R.id.finishGoHome);
+//        RadioButton rb_healing=wayPointSettings.findViewById(R.id.headingWP);
+//        rb_finishedAction.setSelected(true);
+//        rb_healing.setSelected(true);
+        sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if(i == R.id.lowSpeed){
-                    speed = 3.0f;
-                }else if(i == R.id.MidSpeed){
-                    speed = 5.0f;
-                }else if (i == R.id.HighSpeed){
-                    speed = 10.0f;
-                }
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                seekBar_speed.setText(String.valueOf(i)+" m/s");
+                currentMission.speed=i;
             }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if(i == R.id.finishNone){
-                    missionFinishedAction=WaypointMissionFinishedAction.NO_ACTION;
+                    currentMission.finishedAction=WaypointMissionFinishedAction.NO_ACTION;
                 }else if(i == R.id.finishGoHome){
-                    missionFinishedAction=WaypointMissionFinishedAction.GO_HOME;
+                    currentMission.finishedAction=WaypointMissionFinishedAction.GO_HOME;
                 }else if (i == R.id.finishAutoLanding){
-                    missionFinishedAction=WaypointMissionFinishedAction.AUTO_LAND;
+                    currentMission.finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
                 }else if (i == R.id.finishToFirst){
-                    missionFinishedAction=WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+                    currentMission.finishedAction=WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
                 }
             }
         });
@@ -246,13 +351,13 @@ public class MissionFragment extends Fragment
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if(i == R.id.headingNext){
-                    missionHeadingMode=WaypointMissionHeadingMode.AUTO;
+                    currentMission.headingMode=WaypointMissionHeadingMode.AUTO;
                 }else if(i == R.id.headingInitDirec){
-                    missionHeadingMode=WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+                    currentMission.headingMode=WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
                 }else if (i == R.id.headingRC){
-                    missionHeadingMode=WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+                    currentMission.headingMode=WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
                 }else if (i == R.id.headingWP){
-                    missionHeadingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+                    currentMission.headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
                 }
             }
         });
@@ -262,10 +367,8 @@ public class MissionFragment extends Fragment
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String altitudeStr = tv_wayPointAltitude.getText().toString();
-                        altitude = Integer.parseInt(nulltoIntgerDefault(altitudeStr));
-                        //rem
-                        configWaypointMission();
-                        saveMission(missionTitle.getText()+".xml");
+                        currentMission.altitude = Integer.parseInt(nulltoIntgerDefault(altitudeStr));
+                        saveMission();
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -276,74 +379,22 @@ public class MissionFragment extends Fragment
                 })
                 .create().show();
     }
-    private void configWaypointMission(){
-        if(waypoinyMissionBuilder == null){
-            waypoinyMissionBuilder =new WaypointMission.Builder().finishedAction(missionFinishedAction)
-                    .headingMode(missionHeadingMode)
-                    .autoFlightSpeed(speed)
-                    .maxFlightSpeed(speed)
-                    .flightPathMode(WaypointMissionFlightPathMode.NORMAL);
-        }else {
-            waypoinyMissionBuilder.finishedAction(missionFinishedAction)
-                    .headingMode(missionHeadingMode)
-                    .autoFlightSpeed(speed)
-                    .maxFlightSpeed(speed)
-                    .flightPathMode(WaypointMissionFlightPathMode.NORMAL);
-        }
-        if(waypoinyMissionBuilder.getWaypointList().size() > 0){
-            for(int i=0;i<waypoinyMissionBuilder.getWaypointList().size();i++){
-                waypoinyMissionBuilder.getWaypointList().get(i).altitude=altitude;
-            }
-            setResultToToast("set waypoint altitude success");
-        }
-//        DJIError djiError = getWaypointMissionOperator().loadMission(waypoinyMissionBuilder.build());
-//        if(djiError == null){
-//            setResultToToast("load waypoint succeed");
-//        }else {
-//            setResultToToast("load waypoint failed");
-//        }
-    }
     public WaypointMissionOperator getWaypointMissionOperator(){
         if(instance == null){
             instance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
         }
         return instance;
     }
-    private void setResultToToast(final String msg){
-                Toast.makeText(getActivity(),msg,Toast.LENGTH_LONG).show();
-    }
-    String nulltoIntgerDefault(String str){
-        if (!isInteger(str)){
-            str="0";
-        }
-        return str;
-    }
-    boolean isInteger(String str){
-        try{
-            str = str.replace(" ","");
-            Integer.parseInt(str);
-        }catch (Exception e){
+    private boolean saveMission(){
+        boolean flag=currentMission.saveMisson();
+        //update mission list
+        if(!flag){
+            setResultToToast("can't save current mission");
             return false;
         }
-        return true;
-    }
-    private boolean saveMission(String name){
-        File dir=new File(AutoPatrolApplication.missionDir);
-        if(!dir.exists()){
-            if(!dir.mkdirs()){
-                setResultToToast("can't create dir");
-            }
-        }
-        File newMission=new File(AutoPatrolApplication.missionDir+"/"+name);
-        try {
-            newMission.createNewFile();
-        }catch (IOException e){
-            e.printStackTrace();
-            return false;
-        }
-        refreshSpinner();
-        Intent intent=new Intent("MISSION_ITEMS_CHANGE");
-        getActivity().sendBroadcast(intent);
+        setResultToToast("success");
+        creatable=false;
+        sendMissionChange();
         return true;
     }
     AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
@@ -357,4 +408,92 @@ public class MissionFragment extends Fragment
 
         }
     };
+    private void addWaypointMission(){
+        AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());
+        adBuilder.setTitle("请输入任务名称");
+        final EditText input=new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        input.selectAll();
+        input.setFocusable(true);
+        input.setFocusableInTouchMode(true);
+        input.requestFocus();
+        adBuilder.setView(input);
+        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {}
+        });
+        final AlertDialog alertDialog= adBuilder.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String text=input.getText().toString().trim();
+                        if(text.length()>0) {
+                            arrayAdapter.insert(text, 0);
+                            currentMission = new WaypointsMission(arrayAdapter.getItem(0).toString());
+                            creatable = true;
+                            alertDialog.dismiss();
+                        }else {
+                            setResultToToast("任务名不能为空");
+                        }
+                    }
+                });
+
+        alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+    //single waypoint setting,infowindow
+    private class myInfoWindowAdapter implements AMap.InfoWindowAdapter,View.OnClickListener{
+        @Override
+        public View getInfoContents(Marker marker){
+           return null;
+        }
+        View infoWindow=null;
+        @Override
+        public View getInfoWindow(Marker marker){
+            if(infoWindow == null){
+                infoWindow=LayoutInflater.from(getContext()).inflate(R.layout.waypoint_infowindow,null);
+                render(marker,infoWindow);
+            }
+            return infoWindow;
+        }
+        public void render(Marker marker,View view){
+
+        }
+        @Override
+        public void onClick(View view){
+
+        }
+    }
+
+
+    private void setResultToToast(final String msg){
+        Toast.makeText(getActivity(),msg,Toast.LENGTH_LONG).show();
+    }
+    boolean isInteger(String str){
+        try{
+            str = str.replace(" ","");
+            Integer.parseInt(str);
+        }catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+    String nulltoIntgerDefault(String str){
+        if (!isInteger(str)){
+            str="0";
+        }
+        return str;
+    }
+    private void sendMissionChange(){
+        Intent intent=new Intent("MISSION_ITEMS_CHANGE");
+        getActivity().sendBroadcast(intent);
+    }
 }

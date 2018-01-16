@@ -54,14 +54,34 @@ public class MainActivity extends AppCompatActivity
     public void initUI(){
         tabBar=findViewById(R.id.tab_bar);
         tabBar.setOnCheckedChangeListener(this);
+
         rbAircraft=findViewById(R.id.aircraft);
         rbMedia=findViewById(R.id.media);
         rbMission=findViewById(R.id.mission);
-        rbMedia.setSelected(true);
-        rbMedia.setTextColor(getResources().getColor(R.color.selected));
-
-        position=R.id.media;
-        fragmentSelected(position);
+        setFirstView(R.id.mission);
+    }
+    private void setFirstView(int id){
+        switch (id){
+            case R.id.aircraft:
+                rbAircraft.setSelected(true);
+                rbAircraft.setTextColor(getResources().getColor(R.color.selected));
+                position=R.id.aircraft;
+                fragmentSelected(position);
+                break;
+            case R.id.mission:
+                rbMission.setSelected(true);
+                rbMission.setTextColor(getResources().getColor(R.color.selected));
+                position=R.id.mission;
+                fragmentSelected(position);
+                break;
+            case R.id.media:
+                rbMedia.setSelected(true);
+                rbMedia.setTextColor(getResources().getColor(R.color.selected));
+                position=R.id.media;
+                fragmentSelected(position);
+                break;
+            default:break;
+        }
     }
     @Override
     public void onCheckedChanged(RadioGroup radioGroup,int checkedId){
