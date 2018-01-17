@@ -54,6 +54,6 @@
             android:layout_height="wrap_content"
             android:numColumns="3"
             android:stretchMode="columnWidth"
-            android:scrollbars="none"/>
+            android:scrollbars="none" />
     </LinearLayout>
 </LinearLayout>

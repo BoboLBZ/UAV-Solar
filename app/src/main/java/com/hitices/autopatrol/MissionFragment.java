@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -75,7 +76,7 @@ public class MissionFragment extends Fragment
     //mission
     private WaypointsMission currentMission;
     private boolean creatable;
-    private final Map<Integer,Marker> mMarkers = new ConcurrentHashMap<>();
+    private List<Marker> mMarkers = new ArrayList<>();
     private WaypointMissionOperator instance;
     //location
     private AMapLocationClient mlocationClient;
@@ -253,16 +254,18 @@ public class MissionFragment extends Fragment
         }
     };
     private void markWaypoint(LatLng latLng){
+        if(currentMarker != null)
+            currentMarker.hideInfoWindow();
         //amap about
         if(creatable){
             MarkerOptions markerOptions =new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             markerOptions.draggable(true);
-            markerOptions.title("ttt");
+            markerOptions.title("waypoint");
             aMap.addMarker(markerOptions);
             Marker marker =aMap.addMarker(markerOptions);
-            mMarkers.put(mMarkers.size(),marker);
+            mMarkers.add(marker);
          }else {
             setResultToToast("can't add waypoint");
         }
@@ -449,9 +452,12 @@ public class MissionFragment extends Fragment
         EditText tv_altitude;
         GridView gv_actions;
         Waypoint waypoint;
+        Marker mMarker;
+        Button btn_deleteWaypoint;
         List<WaypointAction> actions;
-        public void getWaypoint(LatLng latLng){
-
+        public void getWaypoint(Marker marker){
+            mMarker=marker;
+            LatLng latLng=marker.getPosition();
             waypoint=currentMission.getWaypoint(latLng);
             if(waypoint == null){
                 actions=new ArrayList<>();
@@ -469,6 +475,8 @@ public class MissionFragment extends Fragment
             tv_index=view.findViewById(R.id.waypoint_index);
             tv_lat=view.findViewById(R.id.waypoint_lat);
             tv_lng=view.findViewById(R.id.waypoint_lng);
+            btn_deleteWaypoint=view.findViewById(R.id.deleteWaypoint);
+            btn_deleteWaypoint.setOnClickListener(this);
             gv_actions=view.findViewById(R.id.waypointActions);
             //init data
             int index=currentMission.findWaypoint(latLng);
@@ -483,14 +491,21 @@ public class MissionFragment extends Fragment
             ViewGroup.LayoutParams params=gv_actions.getLayoutParams();
             params.height=lines*30;
             gv_actions.setLayoutParams(params);
+            gv_actions.setPadding(0,0,0,0);
             return view;
         }
         @Override
         public void onClick(View view){
-
+            switch (view.getId())
+            {
+                case R.id.deleteWaypoint:
+                    deleteCurrentPoint();
+                    break;
+                default:
+                    break;
+            }
         }
         BaseAdapter myActionsAdapter=new BaseAdapter() {
-
             @Override
             public int getCount() {
                 return actions.size();
@@ -512,6 +527,7 @@ public class MissionFragment extends Fragment
                 }else {
                     textView=(TextView)view;
                 }
+                textView.setIncludeFontPadding(false);
                 textView.setText(actions.get(i).actionType.toString());
                 textView.setTextSize(10);
 //                textView.setText("测试用例");
@@ -519,9 +535,15 @@ public class MissionFragment extends Fragment
                 return textView;
             }
         };
+        private void deleteCurrentPoint(){
+            currentMission.removeWaypoint(mMarker.getPosition());
+            mMarkers.remove(mMarker);
+            mMarker.hideInfoWindow();
+            mMarker.destroy();
+        }
         @Override
         public View getInfoWindow(Marker marker){
-                getWaypoint(marker.getPosition());
+                getWaypoint(marker);
                 infoWindow=initView(marker.getPosition());
             return infoWindow;
         }
@@ -532,10 +554,9 @@ public class MissionFragment extends Fragment
             //showSingleWaypointSetting();
             if(currentMarker == null)
                 currentMarker=marker;
-            if(currentMarker == marker)
+            if(currentMarker.equals(marker))
             {
                 if (flag_isShow == false) {
-                    Log.e("latlng",String.valueOf(marker.getPosition().latitude));
                     marker.showInfoWindow();
                     flag_isShow = true;
                 } else {
@@ -545,6 +566,7 @@ public class MissionFragment extends Fragment
             }else {
                 currentMarker.hideInfoWindow();
                 marker.showInfoWindow();
+                flag_isShow = true;
             }
             currentMarker=marker;
             return true;

@@ -57,7 +57,7 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="ac562a3df12ec9ae404ac39d8cb30c5e" />
-
+        <service android:name="com.amap.api.location.APSService"/>
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
             android:theme="@android:style/Theme.Translucent">
