@@ -107,7 +107,7 @@ public class AutoPatrolApplication extends Application {
                 File f=dir.listFiles()[i];
                 if(f.isFile()){
                     if(f.getName().endsWith("xml")) {//xml file
-                        missionList.add(f.getName());
+                        missionList.add(f.getName().substring(0,f.getName().lastIndexOf(".")));
                     }
                 }
             }

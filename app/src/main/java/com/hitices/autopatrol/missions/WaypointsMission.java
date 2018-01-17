@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionFlightPathMode;
@@ -35,8 +36,8 @@ public class WaypointsMission extends Object {
     public float speed;
     public WaypointMissionFinishedAction finishedAction;
     public WaypointMissionHeadingMode headingMode;
-    private final Map<Waypoint,WaypointActions> mWaypointActions=new ConcurrentHashMap<>();
     private final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
+    private final List<WaypointAction> defaultActions=new ArrayList<>();
     public WaypointMission.Builder builder;
     public WaypointsMission(String mName){
         missionName=mName;
@@ -45,6 +46,13 @@ public class WaypointsMission extends Object {
         speed=10.0f;
         finishedAction=WaypointMissionFinishedAction.GO_HOME;
         headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+        //init actions
+        defaultActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,0));
+        defaultActions.add(new WaypointAction(WaypointActionType.START_RECORD,1));
+        defaultActions.add(new WaypointAction(WaypointActionType.CAMERA_FOCUS,2));
+        defaultActions.add(new WaypointAction(WaypointActionType.CAMERA_ZOOM,3));
+        defaultActions.add(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT,4));
+        defaultActions.add(new WaypointAction(WaypointActionType.GIMBAL_PITCH,5));
         builder=new WaypointMission.Builder();
     }
     public boolean saveMisson(){
@@ -66,6 +74,9 @@ public class WaypointsMission extends Object {
         }
         return true;
     }
+    public WaypointsMission loadMission(String path){
+        return new WaypointsMission(path);
+    }
     public WaypointMission.Builder getMissionBuilder(){
         if(builder == null) {
             builder=new WaypointMission.Builder();
@@ -79,24 +90,24 @@ public class WaypointsMission extends Object {
         builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
         return builder;
     }
-    public void addWaypointActions(Waypoint waypoint,List<WaypointAction> waypointActions){
-        mWaypointActions.put(waypoint,new WaypointActions(waypointActions));
-    }
     public int findWaypoint(LatLng latLng){
         Waypoint waypoint=waypoints.get(latLng);
         return waypointList.indexOf(waypoint);
     }
+    public Waypoint getWaypoint(LatLng latLng){
+        return waypointList.get(findWaypoint(latLng));
+    }
     public void addWaypointList(LatLng latLng){
         Waypoint waypoint=new Waypoint(latLng.latitude,latLng.longitude,altitude);
+        for(int i=0;i<defaultActions.size();i++)
+            waypoint.addAction(defaultActions.get(i));
         waypointList.add(waypoint);
         waypoints.put(latLng,waypoint);
     }
     public void removeWaypoint(LatLng latLng){
         int i=findWaypoint(latLng);
-        Waypoint waypoint=waypointList.get(i);
         waypointList.remove(i);
         waypoints.remove(latLng);
-        mWaypointActions.remove(waypoint);
     }
     public void initAllWaypoint(){
 
@@ -104,10 +115,5 @@ public class WaypointsMission extends Object {
     public void singleWaypointsetting(){
 
     }
-    private class WaypointActions{
-        public List<WaypointAction> waypointActions=new ArrayList<>();
-        WaypointActions(List<WaypointAction> waypointActions){
-            this.waypointActions=waypointActions;
-        }
-    }
+
 }

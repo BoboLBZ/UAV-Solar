@@ -1,6 +1,5 @@
 package com.hitices.autopatrol;
 
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +8,7 @@ import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -17,14 +17,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -47,18 +47,20 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.missions.WaypointsMission;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MissionFragment extends Fragment
-        implements View.OnClickListener,
-             AMap.OnMapClickListener{
+        implements View.OnClickListener{
 
     private OnFragmentInteractionListener mListener;
     private static final String MISSION_STATE_SAVE_IS_HIDDEN="MISSION_STATE_SAVE_IS_HIDDEN";
@@ -77,6 +79,9 @@ public class MissionFragment extends Fragment
     private WaypointMissionOperator instance;
     //location
     private AMapLocationClient mlocationClient;
+    //info window
+    private boolean flag_isShow=false;
+    private Marker currentMarker;
 
     public MissionFragment() {
         // Required empty public constructor
@@ -187,6 +192,7 @@ public class MissionFragment extends Fragment
             case R.id.import_mission:
                 break;
             case R.id.adjust_mission:
+                adjustMission();
                 break;
             case R.id.mission_setting:
                 if (creatable)
@@ -202,7 +208,13 @@ public class MissionFragment extends Fragment
     private void initMapView(){
         if(aMap == null){
             aMap=mapView.getMap();
-            aMap.setOnMapClickListener(this);
+            aMap.setOnMapClickListener(new AMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    markWaypoint(latLng);
+                    setWaypointList(latLng);
+                }
+            });
             aMap.setOnMarkerClickListener(markerClickListener);
             aMap.setOnMarkerDragListener(markerDragListener);
         }
@@ -213,47 +225,12 @@ public class MissionFragment extends Fragment
         mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
         mLocationOption.setInterval(2000);
         mlocationClient.setLocationOption(mLocationOption);
-        mlocationClient.startLocation();
+//        mlocationClient.startLocation();
         //info
         aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
         myInfoWindowAdapter myInfoWindowAdapter=new myInfoWindowAdapter();
         aMap.setInfoWindowAdapter(myInfoWindowAdapter);
     }
-    @Override
-    public void onMapClick(LatLng latLng){
-        markWaypoint(latLng);
-        setWaypointList(latLng);
-    }
-    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
-        @Override
-        public boolean onMarkerClick(Marker marker) {
-            //showSingleWaypointSetting();
-            marker.showInfoWindow();
-            return true;
-        }
-    };
-    AMapLocationListener aMapLocationListener=new AMapLocationListener() {
-        @Override
-        public void onLocationChanged(AMapLocation amapLocation) {
-            if (amapLocation != null) {
-                if (amapLocation.getErrorCode() == 0) {
-                    LatLng harbin = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
-                    MarkerOptions markerOptions=  new MarkerOptions();
-                    markerOptions.position(harbin);
-                    markerOptions.title("marker");
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_location_marker)));
-                    aMap.addMarker(markerOptions);
-                    aMap.moveCamera(CameraUpdateFactory.newLatLng(harbin));
-                    cameraUpdate(harbin);
-                } else {
-                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                    Log.e("AmapError","location Error, ErrCode:"
-                            + amapLocation.getErrorCode() + ", errInfo:"
-                            + amapLocation.getErrorInfo());
-                }
-            }
-        }
-    };
     AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
         LatLng tempLatlng;
         @Override
@@ -285,7 +262,6 @@ public class MissionFragment extends Fragment
             markerOptions.title("ttt");
             aMap.addMarker(markerOptions);
             Marker marker =aMap.addMarker(markerOptions);
-//            marker.showInfoWindow();
             mMarkers.put(mMarkers.size(),marker);
          }else {
             setResultToToast("can't add waypoint");
@@ -449,31 +425,153 @@ public class MissionFragment extends Fragment
 
         alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     }
-    //single waypoint setting,infowindow
+    public void adjustMission(){
+        String name=spinner.getSelectedItem().toString();
+        Log.e("adjust",name);
+    }
+    private void resetPars(){
+        //mission
+        currentMission=null;
+        creatable=false;
+        mMarkers.clear();
+        flag_isShow=false;
+        currentMarker=null;
+    }
     private class myInfoWindowAdapter implements AMap.InfoWindowAdapter,View.OnClickListener{
         @Override
         public View getInfoContents(Marker marker){
-           return null;
+            return null;
         }
         View infoWindow=null;
-        @Override
-        public View getInfoWindow(Marker marker){
-            if(infoWindow == null){
-                infoWindow=LayoutInflater.from(getContext()).inflate(R.layout.waypoint_infowindow,null);
-                render(marker,infoWindow);
-            }
-            return infoWindow;
-        }
-        public void render(Marker marker,View view){
+        TextView tv_index;
+        TextView tv_lat;
+        TextView tv_lng;
+        EditText tv_altitude;
+        GridView gv_actions;
+        Waypoint waypoint;
+        List<WaypointAction> actions;
+        public void getWaypoint(LatLng latLng){
 
+            waypoint=currentMission.getWaypoint(latLng);
+            if(waypoint == null){
+                actions=new ArrayList<>();
+                Log.e("rhys","can't find waypoint");
+            }else {
+                actions=waypoint.waypointActions;
+                Log.e("rhys","actions nums:"+String.valueOf(actions.size()));
+
+            }
+        }
+        @NonNull
+        public View initView(LatLng latLng){
+            View view=LayoutInflater.from(getContext()).inflate(R.layout.waypoint_infowindow,null);
+            tv_altitude=view.findViewById(R.id.waypoint_altitude);
+            tv_index=view.findViewById(R.id.waypoint_index);
+            tv_lat=view.findViewById(R.id.waypoint_lat);
+            tv_lng=view.findViewById(R.id.waypoint_lng);
+            gv_actions=view.findViewById(R.id.waypointActions);
+            //init data
+            int index=currentMission.findWaypoint(latLng);
+            if(index >= 0){
+                tv_altitude.setText(String.valueOf(currentMission.altitude));//remain to modify
+                tv_index.setText("编号："+String.valueOf(index));
+                tv_lat.setText("纬度："+String.valueOf(latLng.latitude));
+                tv_lng.setText("经度："+String.valueOf(latLng.longitude));
+            }
+            gv_actions.setAdapter(myActionsAdapter);
+            int lines=(int)(actions.size()/3+0.5);
+            ViewGroup.LayoutParams params=gv_actions.getLayoutParams();
+            params.height=lines*30;
+            gv_actions.setLayoutParams(params);
+            return view;
         }
         @Override
         public void onClick(View view){
 
         }
+        BaseAdapter myActionsAdapter=new BaseAdapter() {
+
+            @Override
+            public int getCount() {
+                return actions.size();
+            }
+            @Override
+            public Object getItem(int i) {
+                return actions.get(i);
+            }
+            @Override
+            public long getItemId(int i) {
+                return i;
+            }
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                TextView textView;
+                if(view == null) {
+                    textView = new TextView(getContext());
+                    textView.setLayoutParams(new GridView.LayoutParams(100,30));
+                }else {
+                    textView=(TextView)view;
+                }
+                textView.setText(actions.get(i).actionType.toString());
+                textView.setTextSize(10);
+//                textView.setText("测试用例");
+                Log.e("rhys", actions.get(i).actionType.toString());
+                return textView;
+            }
+        };
+        @Override
+        public View getInfoWindow(Marker marker){
+                getWaypoint(marker.getPosition());
+                infoWindow=initView(marker.getPosition());
+            return infoWindow;
+        }
     }
-
-
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            //showSingleWaypointSetting();
+            if(currentMarker == null)
+                currentMarker=marker;
+            if(currentMarker == marker)
+            {
+                if (flag_isShow == false) {
+                    Log.e("latlng",String.valueOf(marker.getPosition().latitude));
+                    marker.showInfoWindow();
+                    flag_isShow = true;
+                } else {
+                    marker.hideInfoWindow();
+                    flag_isShow = false;
+                }
+            }else {
+                currentMarker.hideInfoWindow();
+                marker.showInfoWindow();
+            }
+            currentMarker=marker;
+            return true;
+        }
+    };
+    AMapLocationListener aMapLocationListener=new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+                    LatLng harbin = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
+                    MarkerOptions markerOptions=  new MarkerOptions();
+                    markerOptions.position(harbin);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_location_marker)));
+                    aMap.addMarker(markerOptions);
+                    aMap.moveCamera(CameraUpdateFactory.newLatLng(harbin));
+                    cameraUpdate(harbin);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError","location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
     private void setResultToToast(final String msg){
         Toast.makeText(getActivity(),msg,Toast.LENGTH_LONG).show();
     }
