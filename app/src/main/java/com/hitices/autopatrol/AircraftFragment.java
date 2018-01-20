@@ -21,6 +21,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.maps2d.model.LatLng;
+import com.hitices.autopatrol.missions.WaypointsMission;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.File;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
+import dji.common.mission.waypoint.WaypointMissionFinishedAction;
+import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
 
@@ -40,8 +58,9 @@ public class AircraftFragment extends Fragment {
     private TextView tvCameraType;
     private SeekBar seekBarBegin;
     private Spinner spinnerMission;
+    private ArrayAdapter<String> arrayAdapter;
     private OnFragmentInteractionListener mListener;
-
+    private WaypointsMission waypointsMission;
     public AircraftFragment() {
         // Required empty public constructor
     }
@@ -75,7 +94,11 @@ public class AircraftFragment extends Fragment {
         tvCameraType = view.findViewById(R.id.camera_type);
         spinnerMission = view.findViewById(R.id.missionSelected);
         seekBarBegin =view.findViewById(R.id.seekBar_begin);
-        refreshSpinner();
+        arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMission.setAdapter(arrayAdapter);
+        spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
+
         seekBarBegin.setOnSeekBarChangeListener(onSeekBarChangeListener);
         seekBarBegin.setMax(100);
         seekBarBegin.setProgress(0);
@@ -166,15 +189,16 @@ public class AircraftFragment extends Fragment {
         }
     }
     private void refreshSpinner(){
-        ArrayAdapter<String> arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerMission.setAdapter(arrayAdapter);
-        spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
+        arrayAdapter.clear();
+        arrayAdapter.addAll(AutoPatrolApplication.getMissionList());
     }
     AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
        @Override
        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
+           String name=arrayAdapter.getItem(i);
+           if(name.length()>0)
+             waypointsMission=readMission(AutoPatrolApplication.missionDir+"/"+name+".xml");
+           else setResultToToast("选择任务失败");
        }
 
        @Override
@@ -200,4 +224,117 @@ public class AircraftFragment extends Fragment {
 
         }
     };
+
+    public WaypointsMission readMission(String path){
+        try {
+            //need test,
+            File file = new File(path);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+//            //root
+//            doc.getDocumentElement().normalize();
+//            System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+            //name
+            NodeList nodes=doc.getElementsByTagName("missionName");
+            if(nodes.item(0) == null){
+                return null;
+            }
+            WaypointsMission newMission=new WaypointsMission(nodes.item(0).getTextContent());
+
+            nodes=doc.getElementsByTagName("speed");
+            if(nodes.item(0) != null){
+                newMission.speed=Float.parseFloat(nodes.item(0).getTextContent());
+            }
+            //finishedAction
+            nodes=doc.getElementsByTagName("finishedAction");
+            if(nodes.item(0) != null){
+                newMission.finishedAction=getFinishedAction(nodes.item(0).getTextContent());
+            }
+            //headingMode
+            nodes=doc.getElementsByTagName("headingMode");
+            if(nodes.item(0) != null){
+                newMission.headingMode=getHeadingMode(nodes.item(0).getTextContent());
+            }
+            //Waypoints
+            nodes=doc.getElementsByTagName("Waypoints");
+            Node node=nodes.item(0);
+            //single waypoint
+            NodeList nWaypointList = ((Element)node).getElementsByTagName("waypoint");
+            for (int temp = 0; temp < nWaypointList.getLength(); temp++) {
+                Node nNode = nWaypointList.item(temp);
+                System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    LatLng ll=new LatLng(
+                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
+                    Waypoint w=new Waypoint(
+                            ll.latitude,ll.longitude,
+                            Float.parseFloat(eElement.getElementsByTagName("altitude").item(0).getTextContent()));
+                    NodeList eActions=eElement.getElementsByTagName("actions");
+                    for(int j=0;j<eActions.getLength();j++){
+                        Node n=eActions.item(j);
+                        if(n.getNodeType() == Node.ELEMENT_NODE) {
+                            Element e=(Element)n;
+                            NodeList t=e.getChildNodes();
+                            for(int k=0;k<t.getLength();k++){
+                                WaypointActionType type=getAction(t.item(k).getNodeName());
+                                w.addAction(new WaypointAction(type,k));
+                            }
+                        }
+                    }
+                    newMission.waypointList.add(w);
+                    newMission.waypoints.put(ll,w);
+                    System.out.println("\nlat and lng" + String.valueOf(ll.latitude)+" : "+String.valueOf(ll.longitude));
+                }
+            }
+            newMission.FLAG_ISSAVED=true;
+            return newMission;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private WaypointMissionFinishedAction getFinishedAction(String s){
+        if(s.equals(WaypointMissionFinishedAction.AUTO_LAND.toString())){
+            return WaypointMissionFinishedAction.AUTO_LAND;
+        }else if(s.equals(WaypointMissionFinishedAction.GO_FIRST_WAYPOINT.toString())) {
+            return WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+        }else if(s.equals(WaypointMissionFinishedAction.GO_HOME.toString())) {
+            return WaypointMissionFinishedAction.GO_HOME;
+        }else  {
+            return WaypointMissionFinishedAction.NO_ACTION;
+        }
+    }
+    private WaypointMissionHeadingMode getHeadingMode(String s){
+        if(s.equals(WaypointMissionHeadingMode.AUTO.toString())){
+            return WaypointMissionHeadingMode.AUTO;
+        }else if(s.equals(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION.toString())) {
+            return WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+        }else if(s.equals(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER.toString())) {
+            return WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+        }else  {
+            return WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+        }
+    }
+    private WaypointActionType getAction(String s){
+        if( WaypointActionType.STAY.toString().equals(s))
+            return WaypointActionType.STAY;
+        else if( WaypointActionType.CAMERA_ZOOM.toString().equals(s))
+            return WaypointActionType.CAMERA_ZOOM;
+        else if( WaypointActionType.CAMERA_FOCUS.toString().equals(s))
+            return WaypointActionType.CAMERA_FOCUS;
+        else if( WaypointActionType.GIMBAL_PITCH.toString().equals(s))
+            return WaypointActionType.GIMBAL_PITCH;
+        else if( WaypointActionType.START_RECORD.toString().equals(s))
+            return WaypointActionType.START_RECORD;
+        else if( WaypointActionType.STOP_RECORD.toString().equals(s))
+            return WaypointActionType.STOP_RECORD;
+        else if( WaypointActionType.ROTATE_AIRCRAFT.toString().equals(s))
+            return WaypointActionType.ROTATE_AIRCRAFT;
+        else if( WaypointActionType.START_TAKE_PHOTO.toString().equals(s))
+            return WaypointActionType.START_TAKE_PHOTO;
+        else return null;
+    }
 }

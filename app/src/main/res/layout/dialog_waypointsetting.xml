@@ -19,9 +19,10 @@
        android:layout_height="20dp"/>
     <TextView
         android:id="@+id/setting_mName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Mission name:"
+        android:gravity="center"
         android:layout_gravity="center_horizontal"
         android:background="@color/pink">
     </TextView>
@@ -63,7 +64,7 @@
         <SeekBar
             android:id="@+id/speed"
             style="@android:style/Widget.Holo.SeekBar"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content" />
 
         <TextView
@@ -185,6 +186,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="General Waypoint Actions:"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+        <GridView
+            android:id="@+id/gv_general_actions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:choiceMode="multipleChoiceModal">
+        </GridView>
     </LinearLayout>
 
 </LinearLayout>

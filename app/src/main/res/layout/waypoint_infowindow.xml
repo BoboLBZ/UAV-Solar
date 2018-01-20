@@ -52,7 +52,7 @@
             android:id="@+id/waypointActions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:numColumns="3"
+            android:numColumns="2"
             android:stretchMode="columnWidth"
             android:scrollbars="none" />
     </LinearLayout>

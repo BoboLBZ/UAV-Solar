@@ -2,18 +2,34 @@ package com.hitices.autopatrol.missions;
 
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.amap.api.maps2d.model.LatLng;
 import com.hitices.autopatrol.AutoPatrolApplication;
 
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
@@ -34,48 +50,105 @@ public class WaypointsMission extends Object {
     public List<Waypoint> waypointList=new ArrayList();
     public float altitude;
     public float speed;
+    public boolean FLAG_ISSAVED;
     public WaypointMissionFinishedAction finishedAction;
     public WaypointMissionHeadingMode headingMode;
-    private final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
-    private final List<WaypointAction> defaultActions=new ArrayList<>();
+    public final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
+    public List<WaypointAction> currentGeneralActions=new ArrayList<>();
     public WaypointMission.Builder builder;
     public WaypointsMission(String mName){
         missionName=mName;
+        FLAG_ISSAVED=false;
         date=new Date();
         altitude=50.0f;
         speed=10.0f;
         finishedAction=WaypointMissionFinishedAction.GO_HOME;
         headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         //init actions
-        defaultActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,0));
-        defaultActions.add(new WaypointAction(WaypointActionType.START_RECORD,1));
-        defaultActions.add(new WaypointAction(WaypointActionType.CAMERA_FOCUS,2));
-        defaultActions.add(new WaypointAction(WaypointActionType.CAMERA_ZOOM,3));
-        defaultActions.add(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT,4));
-        defaultActions.add(new WaypointAction(WaypointActionType.GIMBAL_PITCH,5));
+        currentGeneralActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,0));
         builder=new WaypointMission.Builder();
     }
     public boolean saveMisson(){
-        Log.e("rhys","in save class");
+//        Log.e("rhys","in save class");
         File dir=new File(AutoPatrolApplication.missionDir);
         if(!dir.exists()){
             if(!dir.mkdirs()){
                 Log.e("rhys","dirs failed");
+                FLAG_ISSAVED=false;
                 return false;
             }
         }
-        File newMission=new File(AutoPatrolApplication.missionDir+"/"+missionName+".xml");
-        try {
-            Log.e("rhys",newMission.getName().toString());
-            newMission.createNewFile();
-        }catch (IOException e){
-            e.printStackTrace();
+        try{
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            // root elements
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("mission");
+            doc.appendChild(rootElement);
+            //general parameter
+            Element eName=doc.createElement("missionName");
+            eName.appendChild(doc.createTextNode(missionName));
+            rootElement.appendChild(eName);
+
+            Element eSpeed=doc.createElement("speed");
+            eSpeed.appendChild(doc.createTextNode(String.valueOf(speed)));
+            rootElement.appendChild(eSpeed);
+
+            Element eFinishedAction=doc.createElement("finishedAction");
+            eFinishedAction.appendChild(doc.createTextNode(finishedAction.name()));
+            rootElement.appendChild(eFinishedAction);
+
+            Element eHeadingMode=doc.createElement("headingMode");
+            eHeadingMode.appendChild(doc.createTextNode(headingMode.name()));
+            rootElement.appendChild(eHeadingMode);
+            // waypoint elements
+            Element waypoints = doc.createElement("Waypoints");
+            waypoints.setAttribute("nums",String.valueOf(waypointList.size()));
+            rootElement.appendChild(waypoints);
+            for(int i=0;i<waypointList.size();i++){
+                Waypoint w=waypointList.get(i);
+                Element eWaypoint = doc.createElement("waypoint");
+                eWaypoint.setAttribute("id",String.valueOf(i));
+                //lat & lng & altitude
+                Element lat=doc.createElement("latitude");
+                lat.appendChild(doc.createTextNode(String.valueOf(w.coordinate.getLatitude())));
+                eWaypoint.appendChild(lat);
+                Element lng=doc.createElement("longitude");
+                lng.appendChild(doc.createTextNode(String.valueOf(w.coordinate.getLongitude())));
+                eWaypoint.appendChild(lng);
+                Element alt=doc.createElement("altitude");
+                alt.appendChild(doc.createTextNode(String.valueOf(w.altitude)));
+                eWaypoint.appendChild(alt);
+                //waypoint actions
+                Element eActions=doc.createElement("actions");
+                eActions.setAttribute("nums",String.valueOf(w.waypointActions.size()));
+                for(int j=0;j<w.waypointActions.size();j++){
+                    Element a=doc.createElement(w.waypointActions.get(j).actionType.toString());
+                    //a.appendChild(doc.createTextNode(w.waypointActions.get(j).actionType.toString()));
+                    eActions.appendChild(a);
+                }
+                eWaypoint.appendChild(eActions);
+                waypoints.appendChild(eWaypoint);
+            }
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(AutoPatrolApplication.missionDir+"/"+missionName+".xml"));
+             StreamResult result1 = new StreamResult(System.out);
+            transformer.transform(source, result);
+            transformer.transform(source, result1);
+            FLAG_ISSAVED=true;
+        }catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+            FLAG_ISSAVED=false;
+            return false;
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+            FLAG_ISSAVED=false;
             return false;
         }
         return true;
-    }
-    public WaypointsMission loadMission(String path){
-        return new WaypointsMission(path);
     }
     public WaypointMission.Builder getMissionBuilder(){
         if(builder == null) {
@@ -98,9 +171,10 @@ public class WaypointsMission extends Object {
         return waypointList.get(findWaypoint(latLng));
     }
     public void addWaypointList(LatLng latLng){
+        //use default values
         Waypoint waypoint=new Waypoint(latLng.latitude,latLng.longitude,altitude);
-        for(int i=0;i<defaultActions.size();i++)
-            waypoint.addAction(defaultActions.get(i));
+        for(int i=0;i<currentGeneralActions.size();i++)
+            waypoint.addAction(currentGeneralActions.get(i));
         waypointList.add(waypoint);
         waypoints.put(latLng,waypoint);
     }
@@ -109,11 +183,30 @@ public class WaypointsMission extends Object {
         waypointList.remove(i);
         waypoints.remove(latLng);
     }
-    public void initAllWaypoint(){
-
+    public void genernalWaypointSetting(float alt,List<WaypointActionType> selectedType){
+        //general setting,used to all waypoints
+        //altitude,waypoint actions
+        currentGeneralActions.clear();
+        for(int i = 0;i<selectedType.size();i++){
+            currentGeneralActions.add(new WaypointAction(selectedType.get(i),i));
+        }
+        for(int i = 0;i<waypointList.size();i++){
+            waypointList.get(i).altitude=alt;
+            waypointList.get(i).removeAllAction();
+            for(int j=0;j<selectedType.size();j++){
+                waypointList.get(i).addAction(new WaypointAction(selectedType.get(j),j));
+            }
+        }
     }
-    public void singleWaypointsetting(){
-
+    public void singleWaypointsetting(LatLng latLng,float alt,List<WaypointAction> aActions){
+         int index=findWaypoint(latLng);
+         if(index>=0){
+             waypointList.get(index).altitude=alt;
+             waypointList.get(index).removeAllAction();
+             for(int j=0;j<aActions.size();j++){
+                 waypointList.get(index).addAction(aActions.get(j));
+             }
+         }
     }
 
 }

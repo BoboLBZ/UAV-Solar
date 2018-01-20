@@ -33,7 +33,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change";
-    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/Missions";
+    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/MissionsTest";
     private static BaseProduct mProduct;
     private Handler mHandler;
 
@@ -103,6 +103,8 @@ public class AutoPatrolApplication extends Application {
         File dir=new File(missionDir);
         List<String> missionList =new ArrayList<>();
         if(dir.exists()){
+            if(dir.listFiles() == null)
+                return missionList;
             for(int i=0;i<dir.listFiles().length;i++){
                 File f=dir.listFiles()[i];
                 if(f.isFile()){
