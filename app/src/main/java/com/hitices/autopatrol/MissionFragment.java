@@ -296,7 +296,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         seekBar_speed.setText(String.valueOf(10)+" m/s");
         rg_actionAfterFinished.check(R.id.finishGoHome);
         rg_heading.check(R.id.headingWP);
-        final GridviewAdapter gridviewAdapter=new GridviewAdapter(currentMission.currentGeneralActions,getContext());
+        final GridviewAdapter gridviewAdapter=new GridviewAdapter(actions,getContext());
         gv_missions.setAdapter(gridviewAdapter);
         sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -592,36 +592,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                     break;
             }
         }
-        BaseAdapter myActionsAdapter=new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return actions.size();
-            }
-            @Override
-            public Object getItem(int i) {
-                return actions.get(i);
-            }
-            @Override
-            public long getItemId(int i) {
-                return i;
-            }
-            @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                TextView textView;
-                if(view == null) {
-                    textView = new TextView(getContext());
-                    textView.setLayoutParams(new GridView.LayoutParams(100,30));
-                }else {
-                    textView=(TextView)view;
-                }
-                textView.setIncludeFontPadding(false);
-                textView.setText(actions.get(i).actionType.toString());
-                textView.setTextSize(10);
-//                textView.setText("测试用例");
-                Log.e("rhys", actions.get(i).actionType.toString());
-                return textView;
-            }
-        };
         private void deleteCurrentPoint(){
             if(creatable) {
                 currentMission.removeWaypoint(mMarker.getPosition());
@@ -644,7 +614,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         private List<WaypointActionType> allAction;
         private List<WaypointActionType> selectedAction;
         private LayoutInflater inflater = null;
-        public GridviewAdapter(List<WaypointAction> list, Context context) {
+        GridviewAdapter(List<WaypointAction> list, Context context) {
             this.actions = list;
             inflater = LayoutInflater.from(context);
             initData();

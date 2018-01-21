@@ -218,7 +218,8 @@
             android:layout_height="match_parent"
             android:numColumns="3"
             android:stretchMode="columnWidth"
-            android:choiceMode="multipleChoiceModal">
+            android:choiceMode="multipleChoiceModal"
+            android:scrollbars="none">
         </GridView>
     </LinearLayout>
 

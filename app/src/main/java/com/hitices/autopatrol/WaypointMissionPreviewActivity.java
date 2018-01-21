@@ -1,7 +1,9 @@
 package com.hitices.autopatrol;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +16,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -48,6 +51,16 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
      private WaypointsMission waypointsMission;
      private BaseProduct baseProduct;
      private FlightController mFlightController;
+     private Waypoint currentWaypoint;
+
+     //ui
+      TextView name,aircraft,camera,time,startpoint,seekBar_text;
+    //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
+     SeekBar sb_speed;
+      RadioGroup rg_actionAfterFinished;
+     RadioGroup rg_heading;
+     GridView gv_missions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,32 +69,79 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         Intent intent=getIntent();
         String path=AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
         waypointsMission=readMission(path);
-        baseProduct=AutoPatrolApplication.getProductInstance();
+        //baseProduct=AutoPatrolApplication.getProductInstance();
         initUI();
     }
     private void initUI(){
-        final TextView name,aircraft,camera,time,startpoint;
         name=findViewById(R.id.preview_current_mission_name);
         aircraft=findViewById(R.id.preview_aircraft_name);
         camera=findViewById(R.id.preview_camera);
         time=findViewById(R.id.preview_time);
         startpoint=findViewById(R.id.preview_start_point);
-        final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
-        final SeekBar sb_speed=findViewById(R.id.preview_speed);
-        final  RadioGroup rg_actionAfterFinished =findViewById(R.id.preview_actionAfterFinished);
-        final RadioGroup rg_heading =findViewById(R.id.preview_heading);
-        final GridView gv_missions=findViewById(R.id.preview_gv_action);
+        seekBar_text=findViewById(R.id.preview_seekBar_text);
+        //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
+        sb_speed=findViewById(R.id.preview_speed);
+        rg_actionAfterFinished =findViewById(R.id.preview_actionAfterFinished);
+        rg_heading =findViewById(R.id.preview_heading);
+        gv_missions=findViewById(R.id.preview_gv_action);
+        sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                float tSpeed=((float) i)/100*15;
+                seekBar_text.setText(String.valueOf((int)(tSpeed+0.5))+"m/s");
+                waypointsMission.speed=tSpeed;
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if(i == R.id.finishNone){
+                    waypointsMission.finishedAction=WaypointMissionFinishedAction.NO_ACTION;
+                }else if(i == R.id.finishGoHome){
+                    waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_HOME;
+                }else if (i == R.id.finishAutoLanding){
+                    waypointsMission.finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
+                }else if (i == R.id.finishToFirst){
+                    waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+                }
+            }
+        });
+        rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if(i == R.id.headingNext){
+                    waypointsMission.headingMode=WaypointMissionHeadingMode.AUTO;
+                }else if(i == R.id.headingInitDirec){
+                    waypointsMission.headingMode=WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+                }else if (i == R.id.headingRC){
+                    waypointsMission.headingMode=WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+                }else if (i == R.id.headingWP){
+                    waypointsMission.headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+                }
+            }
+        });
+        gv_missions.setAdapter(new WPGridviewAdapter(this));
+        gv_missions.setOnItemClickListener(onItemClickListener);
+        //update text
         if(waypointsMission != null){
             name.setText("任务名称:"+waypointsMission.missionName);
             time.setText("预计执行时间");
             //convert between float and int
             //rate=waypointsMission.speed/15
             sb_speed.setProgress((int)(waypointsMission.speed/15+0.5));
+            seekBar_text.setText(String.valueOf((int)(waypointsMission.speed+0.5))+"m/s");
             rg_actionAfterFinished.check(getFinishCheckedId(waypointsMission.finishedAction));
             rg_heading.check(getHeadingCheckedId(waypointsMission.headingMode));
-            gv_missions.setAdapter(new WPGridviewAdapter(this));
-            gv_missions.setOnItemClickListener(onItemClickListener);
         }
         else {
             name.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
@@ -150,7 +210,7 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            holder.id.setText(position);
+            holder.id.setText(String.valueOf(position));
             holder.lat.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLatitude()));
             holder.lng.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLongitude()));
             return convertView;
@@ -164,8 +224,110 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
              setResultToToast("click "+String.valueOf(i));
+             currentWaypoint=waypointsMission.waypointList.get(i);
+             showWaypointDetail(i);
         }
     };
+    private void showWaypointDetail(int i){
+        //preview_wp_setting
+        LinearLayout waypointDetail = (LinearLayout)getLayoutInflater().inflate(R.layout.waypoint_preview_waypoint_detail,null);
+        GridView detail=waypointDetail.findViewById(R.id.preview_wp_setting);
+        currentWaypoint=waypointsMission.waypointList.get(i);
+        detail.setAdapter(new WPWaypointGridviewAdapter(currentWaypoint.waypointActions,this));
+        new AlertDialog.Builder(this).setTitle("")
+                .setView(waypointDetail)
+                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                })
+                .create().show();
+    }
+    class WPWaypointGridviewAdapter extends BaseAdapter {
+        private List<WaypointAction> actions;
+        private List<WaypointActionType> allAction;
+        private List<WaypointActionType> selectedAction;
+        private LayoutInflater inflater = null;
+        WPWaypointGridviewAdapter(List<WaypointAction> list, Context context) {
+            this.actions = list;
+            inflater = LayoutInflater.from(context);
+            initData();
+        }
+        @Override
+        public int getCount() {
+            return allAction.size();
+        }
+        @Override
+        public Object getItem(int position) {
+            return allAction.get(position);
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            ViewHolder holder ;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = inflater.inflate(R.layout.gridview_action, null);
+                holder.name = convertView.findViewById(R.id.item_name);
+                holder.cb = convertView.findViewById(R.id.item_cb);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.name.setText(getActionChinese(allAction.get(position)));
+            holder.cb.setId(position);
+            holder.cb.setChecked(isSelected(allAction.get(position)));
+            holder.cb.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CheckBox cb=(CheckBox)view;
+                    int position=cb.getId();
+                    boolean b=cb.isChecked();
+//                    if(b){
+//                        if(!currentWaypoint.waypointActions.contains(allAction.get(position))) {
+////                            currentWaypoint.addAction(new WaypointAction(allAction.get(position),0));
+//                        }
+//                    }else {
+////                        currentWaypoint.removeAction()
+////                        selectedAction.remove(allAction.get(position));
+//                    }
+                }
+            });
+            return convertView;
+        }
+        class ViewHolder{
+            CheckBox cb;
+            TextView name;
+        }
+        private boolean isSelected(WaypointActionType wat) {
+            for(int i=0;i<actions.size();i++){
+                if(actions.get(i).actionType.equals(wat))
+                    return true;
+            }
+            return false;
+        }
+        public List<WaypointActionType> getSelectedAction(){
+            return selectedAction;
+        }
+        private void initData(){
+            allAction=new ArrayList<>();
+            allAction.add(WaypointActionType.CAMERA_FOCUS);
+            allAction.add(WaypointActionType.CAMERA_ZOOM);
+            allAction.add(WaypointActionType.GIMBAL_PITCH);
+            allAction.add(WaypointActionType.START_RECORD);
+            allAction.add(WaypointActionType.STOP_RECORD);
+            allAction.add(WaypointActionType.START_TAKE_PHOTO);
+            allAction.add(WaypointActionType.STAY);
+            allAction.add(WaypointActionType.ROTATE_AIRCRAFT);
+            selectedAction=new ArrayList<>();
+            for(int i=0;i<actions.size();i++){
+                selectedAction.add(actions.get(i).actionType);
+            }
+        }
+    }
     private WaypointsMission readMission(String path){
         try {
             //need test,
@@ -302,5 +464,37 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
     }
     private void setResultToToast(final String msg){
         Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
+    }
+    private String getActionChinese(WaypointActionType action){
+        String chinese="";
+        switch (action){
+            case STAY:
+                chinese="停下";
+                break;
+            case CAMERA_ZOOM:
+                chinese="相机变焦";
+                break;
+            case CAMERA_FOCUS:
+                chinese="相机焦点";
+                break;
+            case GIMBAL_PITCH:
+                chinese="云台调整";
+                break;
+            case START_RECORD:
+                chinese="开始录像";
+                break;
+            case STOP_RECORD:
+                chinese="停止录像";
+                break;
+            case ROTATE_AIRCRAFT:
+                chinese="旋转";
+                break;
+            case START_TAKE_PHOTO:
+                chinese="拍照";
+                break;
+            default:
+                break;
+        }
+        return chinese;
     }
 }

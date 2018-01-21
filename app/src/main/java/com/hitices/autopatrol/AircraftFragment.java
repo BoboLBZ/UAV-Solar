@@ -84,7 +84,7 @@ public class AircraftFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the waypoint_preview_gv_items for this fragment
+        // Inflate the waypoint_preview_waypoint_detail for this fragment
         View view= inflater.inflate(R.layout.fragment_aircraft,container,false);
         tvAircraftType = view.findViewById(R.id.aircraft_type);
         tvCameraType = view.findViewById(R.id.camera_type);
@@ -187,8 +187,10 @@ public class AircraftFragment extends Fragment {
        @Override
        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
            String name=arrayAdapter.getItem(i);
-           if(name.length()>0)
-             waypointsMission=readMission(AutoPatrolApplication.missionDir+"/"+name+".xml");
+           if(name.length()>0) {
+               waypointsMission = readMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+               setResultToToast(waypointsMission.missionName);
+           }
            else setResultToToast("选择任务失败");
        }
 
@@ -202,6 +204,7 @@ public class AircraftFragment extends Fragment {
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 //            if (i > 90 && waypointsMission != null && ISCONNECTED){
             if (i > 90 && waypointsMission != null){
+                //seekBar.setProgress(0);
                 Intent intent=new Intent(getActivity(),WaypointMissionPreviewActivity.class);
                 intent.putExtra("missionName",waypointsMission.missionName);
                 intent.putExtra("missionType","type");
@@ -215,7 +218,7 @@ public class AircraftFragment extends Fragment {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
+            seekBar.setThumb(getResources().getDrawable(R.drawable.ic_flight_takeoff_unpressed));
         }
     };
 

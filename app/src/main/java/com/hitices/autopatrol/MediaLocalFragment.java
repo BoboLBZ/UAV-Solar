@@ -70,7 +70,7 @@ public class MediaLocalFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the waypoint_preview_gv_items for this fragment
+        // Inflate the waypoint_preview_waypoint_detail for this fragment
         View view=inflater.inflate(R.layout.fragment_media_list, container, false);
         gridView=view.findViewById(R.id.imageGrid);
         gridView.setAdapter(new ImageAdapter(getActivity()));
