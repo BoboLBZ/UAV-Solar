@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -40,7 +38,6 @@ import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.sdk.base.BaseProduct;
-import dji.sdk.products.Aircraft;
 
 
 /**
@@ -56,6 +53,7 @@ public class AircraftFragment extends Fragment {
 
     private TextView tvAircraftType;
     private TextView tvCameraType;
+    private boolean ISCONNECTED;
     private SeekBar seekBarBegin;
     private Spinner spinnerMission;
     private ArrayAdapter<String> arrayAdapter;
@@ -68,7 +66,6 @@ public class AircraftFragment extends Fragment {
         AircraftFragment fragment = new AircraftFragment();
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,11 +81,10 @@ public class AircraftFragment extends Fragment {
             fragmentTransaction.commit();
         }
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate the waypoint_preview_gv_items for this fragment
         View view= inflater.inflate(R.layout.fragment_aircraft,container,false);
         tvAircraftType = view.findViewById(R.id.aircraft_type);
         tvCameraType = view.findViewById(R.id.camera_type);
@@ -105,14 +101,6 @@ public class AircraftFragment extends Fragment {
 
         return view;
     }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         IntentFilter filter = new IntentFilter();
@@ -128,7 +116,6 @@ public class AircraftFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
     @Override
     public void onDetach() {
         getContext().unregisterReceiver(mReceiver);
@@ -140,12 +127,10 @@ public class AircraftFragment extends Fragment {
         super.onSaveInstanceState(bundle);
         bundle.putBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN,isHidden());
     }
-
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -168,19 +153,24 @@ public class AircraftFragment extends Fragment {
            // String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
             if (null != mProduct.getModel()) {
                 tvAircraftType.setText("type:" + mProduct.getModel().getDisplayName());
-                if(null != mProduct.getCamera())
-                   tvCameraType.setText("camera:"+mProduct.getCamera().getDisplayName());
+                if(null != mProduct.getCamera()) {
+                    tvCameraType.setText("camera:" + mProduct.getCamera().getDisplayName());
+                    ISCONNECTED=true;
+                }
                 else {
                     tvCameraType.setText(R.string.camera_unknown);
+                    ISCONNECTED=false;
                 }
                 getView().setBackgroundColor(getResources().getColor(R.color.selected));
             } else {
+                ISCONNECTED=false;
                 tvAircraftType.setText(R.string.aircraft_unknown);
                 tvCameraType.setText(R.string.camera_unknown);
                 getView().setBackgroundColor(getResources().getColor(R.color.background));
             }
 
         } else {
+            ISCONNECTED=false;
             setResultToToast("no connection");
             Log.v("connection", "refreshSDK: False");
             tvAircraftType.setText(R.string.aircraft_unknown);
@@ -192,6 +182,7 @@ public class AircraftFragment extends Fragment {
         arrayAdapter.clear();
         arrayAdapter.addAll(AutoPatrolApplication.getMissionList());
     }
+
     AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
        @Override
        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -203,20 +194,23 @@ public class AircraftFragment extends Fragment {
 
        @Override
        public void onNothingSelected(AdapterView<?> adapterView) {
-
+           waypointsMission=null;
        }
    };
     SeekBar.OnSeekBarChangeListener onSeekBarChangeListener=new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-            if (i > 90){
-                Toast.makeText(getContext(),"begin",Toast.LENGTH_LONG).show();
+//            if (i > 90 && waypointsMission != null && ISCONNECTED){
+            if (i > 90 && waypointsMission != null){
+                Intent intent=new Intent(getActivity(),WaypointMissionPreviewActivity.class);
+                intent.putExtra("missionName",waypointsMission.missionName);
+                intent.putExtra("missionType","type");
+                startActivity(intent);
             }
         }
-
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            seekBar.setThumb(getResources().getDrawable(R.drawable.ic_flight_takeoff_pressed));
         }
 
         @Override

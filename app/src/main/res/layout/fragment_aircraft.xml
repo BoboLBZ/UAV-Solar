@@ -49,5 +49,6 @@
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="18dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:thumb="@drawable/ic_flight_takeoff_unpressed" />
 </RelativeLayout>

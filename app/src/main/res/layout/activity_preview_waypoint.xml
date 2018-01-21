@@ -9,84 +9,91 @@
     android:layout_marginRight="10dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/preview_current_mission_name"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Waypoint Configuration"
-        android:layout_gravity="right">
+        android:text="mission name"
+        android:layout_gravity="start">
     </TextView>
     <View
-       android:layout_width="match_parent"
-       android:layout_height="20dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
     <TextView
-        android:id="@+id/setting_mName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mission name:"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-        android:background="@color/pink">
+    android:id="@+id/preview_aircraft_name"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="aircraft name:">
     </TextView>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/dialog_save"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/dialog_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-    </LinearLayout>
     <View
         android:layout_width="match_parent"
-        android:layout_height="20dp"/>
-    <LinearLayout
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
+    <TextView
+        android:id="@+id/preview_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Altitude:">
-        </TextView>
-        <EditText
-            android:id="@+id/altitude"
-            android:layout_width="230dp"
-            android:layout_height="wrap_content">
-        </EditText>
-    </LinearLayout>
+        android:text="camera:">
+    </TextView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
+    <TextView
+        android:id="@+id/preview_start_point"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="point:">
+    </TextView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
+    <TextView
+        android:id="@+id/preview_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="time:">
+    </TextView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Altitude:">-->
+        <!--</TextView>-->
+        <!--<EditText-->
+            <!--android:id="@+id/preview_altitude"-->
+            <!--android:layout_width="230dp"-->
+            <!--android:layout_height="wrap_content">-->
+        <!--</EditText>-->
+    <!--</LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed:"></TextView>
+            android:text="Speed:"/>
 
         <SeekBar
-            android:id="@+id/speed"
+            android:id="@+id/preview_speed"
             style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="200dp"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/seekBar_text"
+            android:id="@+id/preview_seekBar_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -94,11 +101,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -113,28 +116,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/actionAfterFinished"
+            android:id="@+id/preview_actionAfterFinished"
             android:layout_gravity="center_horizontal">
             <RadioButton
-                android:id="@+id/finishNone"
+                android:id="@+id/preview_finishNone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="None"/>
             <RadioButton
-                android:id="@+id/finishGoHome"
+                android:id="@+id/preview_finishGoHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="GoHome"/>
             <RadioButton
-                android:id="@+id/finishAutoLanding"
+                android:id="@+id/preview_finishAutoLanding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="AutoLand"/>
             <RadioButton
-                android:id="@+id/finishToFirst"
+                android:id="@+id/preview_finishToFirst"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
@@ -145,11 +148,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -164,28 +163,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/heading"
+            android:id="@+id/preview_heading"
             android:layout_gravity="center_horizontal">
             <RadioButton
-                android:id="@+id/headingNext"
+                android:id="@+id/preview_headingNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="Auto"/>
             <RadioButton
-                android:id="@+id/headingInitDirec"
+                android:id="@+id/preview_headingInitDirec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="Initial"/>
             <RadioButton
-                android:id="@+id/headingRC"
+                android:id="@+id/preview_headingRC"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
                 android:text="RC Control"/>
             <RadioButton
-                android:id="@+id/headingWP"
+                android:id="@+id/preview_headingWP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="5pt"
@@ -195,31 +194,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
+        android:orientation="horizontal">
         <TextView
+            android:id="@+id/preview_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="General Waypoint Actions:"/>
+            android:text="Waypoints"/>
     </LinearLayout>
-    <LinearLayout
+    <GridView
+        android:id="@+id/preview_gv_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp">
-        <GridView
-            android:id="@+id/gv_general_actions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:numColumns="3"
-            android:stretchMode="columnWidth"
-            android:choiceMode="multipleChoiceModal">
-        </GridView>
-    </LinearLayout>
+        android:numColumns="3"
+        android:stretchMode="columnWidth">
+
+    </GridView>
 
 </LinearLayout>

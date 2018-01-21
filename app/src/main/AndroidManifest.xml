@@ -57,7 +57,9 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="ac562a3df12ec9ae404ac39d8cb30c5e" />
-        <service android:name="com.amap.api.location.APSService"/>
+
+        <service android:name="com.amap.api.location.APSService" />
+
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
             android:theme="@android:style/Theme.Translucent">
@@ -86,6 +88,9 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_show_full_image"
             android:theme="@style/FullscreenTheme">
+
+        </activity>
+        <activity android:name=".WaypointMissionPreviewActivity">
 
         </activity>
     </application>
