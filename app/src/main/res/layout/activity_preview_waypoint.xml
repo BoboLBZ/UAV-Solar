@@ -7,7 +7,10 @@
     android:layout_marginTop="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp">
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/half_black"/>
     <TextView
         android:id="@+id/preview_current_mission_name"
         android:layout_width="match_parent"

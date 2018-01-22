@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -228,7 +229,6 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
              setResultToToast("click "+String.valueOf(i));
-             currentWaypoint=waypointsMission.waypointList.get(i);
              showWaypointDetail(i);
         }
     };
@@ -236,13 +236,22 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         //preview_wp_setting
         LinearLayout waypointDetail = (LinearLayout)getLayoutInflater().inflate(R.layout.waypoint_preview_waypoint_detail,null);
         GridView detail=waypointDetail.findViewById(R.id.preview_wp_setting);
+        final EditText altitude=waypointDetail.findViewById(R.id.preview_wp_altitude);
         currentWaypoint=waypointsMission.waypointList.get(i);
-        detail.setAdapter(new WPWaypointGridviewAdapter(currentWaypoint.waypointActions,this));
+        final WPWaypointGridviewAdapter adapter=new WPWaypointGridviewAdapter(currentWaypoint.waypointActions,this);
+        detail.setAdapter(adapter);
+        altitude.setInputType(InputType.TYPE_CLASS_NUMBER);
+        altitude.setText(String.valueOf(currentWaypoint.altitude));
         new AlertDialog.Builder(this).setTitle("")
                 .setView(waypointDetail)
                 .setPositiveButton("ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        currentWaypoint.altitude=Float.valueOf(altitude.getText().toString());
+                        currentWaypoint.removeAllAction();
+                        for(int j=0;j<adapter.getSelectedAction().size();j++){
+                            currentWaypoint.addAction(new WaypointAction(adapter.getSelectedAction().get(j),j));
+                        }
                     }
                 })
                 .create().show();
@@ -290,14 +299,12 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
                     CheckBox cb=(CheckBox)view;
                     int position=cb.getId();
                     boolean b=cb.isChecked();
-//                    if(b){
-//                        if(!currentWaypoint.waypointActions.contains(allAction.get(position))) {
-////                            currentWaypoint.addAction(new WaypointAction(allAction.get(position),0));
-//                        }
-//                    }else {
-////                        currentWaypoint.removeAction()
-////                        selectedAction.remove(allAction.get(position));
-//                    }
+                    if(b){
+                        if(!selectedAction.contains(allAction.get(position)))
+                            selectedAction.add(allAction.get(position));
+                    }else {
+                        selectedAction.remove(allAction.get(position));
+                    }
                 }
             });
             return convertView;

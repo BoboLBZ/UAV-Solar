@@ -577,8 +577,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         GridView gv_actions;
         Waypoint waypoint;
         Marker mMarker;
-        Button btn_deleteWaypoint;
+        Button btn_deleteWaypoint,btn_save;
         List<WaypointAction> actions;
+        GridviewAdapter gva;
         public void getWaypoint(Marker marker){
             mMarker=marker;
             LatLng latLng=marker.getPosition();
@@ -589,7 +590,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             }else {
                 actions=waypoint.waypointActions;
                 Log.e("rhys","actions nums:"+String.valueOf(actions.size()));
-
             }
         }
         @NonNull
@@ -601,22 +601,19 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             tv_lng=view.findViewById(R.id.waypoint_lng);
             btn_deleteWaypoint=view.findViewById(R.id.deleteWaypoint);
             btn_deleteWaypoint.setOnClickListener(this);
+            btn_save=view.findViewById(R.id.Waypoint_savechange);
+            btn_save.setOnClickListener(this);
             gv_actions=view.findViewById(R.id.waypointActions);
             //init data
-            int index=currentMission.findWaypoint(latLng);
-            if(index >= 0){
-                tv_altitude.setText(String.valueOf(currentMission.altitude));//remain to modify
-                tv_index.setText("编号："+String.valueOf(index));
-                tv_lat.setText("纬度："+String.valueOf(latLng.latitude));
-                tv_lng.setText("经度："+String.valueOf(latLng.longitude));
+            if(waypoint != null){
+                tv_altitude.setText(String.valueOf(waypoint.altitude));//remain to modify
+                //tv_index.setText("编号："+String.valueOf());
+                tv_lat.setText("纬度："+String.valueOf(waypoint.coordinate.getLatitude()));
+                tv_lng.setText("经度："+String.valueOf(waypoint.coordinate.getLongitude()));
             }
             //gv_actions.setAdapter(myActionsAdapter);
-            gv_actions.setAdapter(new GridviewAdapter(actions,getContext()));
-            int lines=(int)(actions.size()/3+0.5);
-            ViewGroup.LayoutParams params=gv_actions.getLayoutParams();
-            params.height=lines*30;
-            gv_actions.setLayoutParams(params);
-            gv_actions.setPadding(0,0,0,0);
+            gva=new GridviewAdapter(actions,getContext());
+            gv_actions.setAdapter(gva);
             return view;
         }
         @Override
@@ -625,6 +622,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             {
                 case R.id.deleteWaypoint:
                     deleteCurrentPoint();
+                    break;
+                case R.id.Waypoint_savechange:
+                    saveChanges();
                     break;
                 default:
                     break;
@@ -639,6 +639,18 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             }
             else
                 setResultToToast("不可删除，请选择修改任务");
+        }
+        private void saveChanges(){
+            if(creatable) {
+                waypoint.altitude=Float.valueOf(tv_altitude.getText().toString());
+                waypoint.removeAllAction();
+                for(int j=0;j<gva.getSelectedAction().size();j++){
+                    waypoint.addAction(new WaypointAction(gva.getSelectedAction().get(j),j));
+                }
+                mMarker.hideInfoWindow();
+            }
+            else
+                setResultToToast("不可修改任务");
         }
         @Override
         public View getInfoWindow(Marker marker){
@@ -759,7 +771,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     AMap.OnInfoWindowClickListener onInfoWindowClickListener=new AMap.OnInfoWindowClickListener() {
         @Override
         public void onInfoWindowClick(Marker marker) {
-
         }
     };
     AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
