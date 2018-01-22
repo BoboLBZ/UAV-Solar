@@ -184,8 +184,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         btn_setting.setOnClickListener(this);
         return view;
     }
-
-
     @Override
     public void onClick(View view){
         menu.collapse();
@@ -284,10 +282,13 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         final TextView tv_wayPointAltitude= wayPointSettings.findViewById(R.id.altitude);
         final TextView seekBar_speed=wayPointSettings.findViewById(R.id.seekBar_text);
         final TextView mName=wayPointSettings.findViewById(R.id.setting_mName);
+        Button mSave=wayPointSettings.findViewById(R.id.dialog_save);
+        Button mDelete=wayPointSettings.findViewById(R.id.dialog_delete);
         GridView gv_missions=wayPointSettings.findViewById(R.id.gv_general_actions);
         SeekBar sb_speed=wayPointSettings.findViewById(R.id.speed);
         RadioGroup rg_actionAfterFinished =wayPointSettings.findViewById(R.id.actionAfterFinished);
         RadioGroup rg_heading =wayPointSettings.findViewById(R.id.heading);
+
         //init
         tv_wayPointAltitude.setText(String.valueOf(50));
         mName.setText(arrayAdapter.getItem(0).toString());
@@ -337,7 +338,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                 }
             }
         });
-        new AlertDialog.Builder(getContext()).setTitle("")
+        final AlertDialog dialog;
+        AlertDialog.Builder builder=new AlertDialog.Builder(getContext());
+        builder .setTitle("")
                 .setView(wayPointSettings)
                 .setPositiveButton("finish", new DialogInterface.OnClickListener() {
                     @Override
@@ -348,16 +351,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                                 gridviewAdapter.getSelectedAction());
                     }
                 })
-                .setNeutralButton("save", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String altitudeStr = tv_wayPointAltitude.getText().toString();
-                        currentMission.genernalWaypointSetting(
-                                Integer.parseInt(nulltoIntgerDefault(altitudeStr)),
-                                gridviewAdapter.getSelectedAction());
-                        saveMission();
-                    }
-                })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -366,8 +359,45 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                         dialogInterface.cancel();
 
                     }
-                })
-                .create().show();
+                });
+        dialog=builder.create();
+        mSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String altitudeStr = tv_wayPointAltitude.getText().toString();
+                currentMission.genernalWaypointSetting(
+                        Integer.parseInt(nulltoIntgerDefault(altitudeStr)),
+                        gridviewAdapter.getSelectedAction());
+                if(saveMission()){
+                    dialog.cancel();
+                }else {
+                    setResultToToast("保存任务失败");
+                }
+            }
+        });
+        mDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(deleteMission()){
+                    arrayAdapter.remove(currentMission.missionName);
+                    currentMission=null;
+                    if(arrayAdapter.getCount()>0)
+                       spinner.setSelection(0,true);
+                    else
+                        spinner.setSelected(false);
+                    sendMissionChange();
+                    dialog.cancel();
+                }else {
+                    setResultToToast("删除任务失败");
+                }
+
+            }
+        });
+//        if(currentMission.FLAG_ISSAVED)
+//            mDelete.setEnabled(true);
+//        else
+//            mDelete.setEnabled(false);
+        dialog.show();
     }
     private boolean saveMission(){
         boolean flag=currentMission.saveMisson();
@@ -381,6 +411,14 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         sendMissionChange();
         //currentMission.readMission(AutoPatrolApplication.missionDir+"/"+currentMission.missionName+".xml");
         return true;
+    }
+    private boolean deleteMission(){
+        File f=new File(AutoPatrolApplication.missionDir+"/"+currentMission.missionName+".xml");
+        if(f.exists()){
+            f.delete();
+            return true;
+        }
+        return false;
     }
     private void addWaypointMission(){
         AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());

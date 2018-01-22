@@ -72,6 +72,10 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         //baseProduct=AutoPatrolApplication.getProductInstance();
         initUI();
     }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+    }
     private void initUI(){
         name=findViewById(R.id.preview_current_mission_name);
         aircraft=findViewById(R.id.preview_aircraft_name);
@@ -84,56 +88,56 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         rg_actionAfterFinished =findViewById(R.id.preview_actionAfterFinished);
         rg_heading =findViewById(R.id.preview_heading);
         gv_missions=findViewById(R.id.preview_gv_action);
-        sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                float tSpeed=((float) i)/100*15;
-                seekBar_text.setText(String.valueOf((int)(tSpeed+0.5))+"m/s");
-                waypointsMission.speed=tSpeed;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-        rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if(i == R.id.finishNone){
-                    waypointsMission.finishedAction=WaypointMissionFinishedAction.NO_ACTION;
-                }else if(i == R.id.finishGoHome){
-                    waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_HOME;
-                }else if (i == R.id.finishAutoLanding){
-                    waypointsMission.finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
-                }else if (i == R.id.finishToFirst){
-                    waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
-                }
-            }
-        });
-        rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if(i == R.id.headingNext){
-                    waypointsMission.headingMode=WaypointMissionHeadingMode.AUTO;
-                }else if(i == R.id.headingInitDirec){
-                    waypointsMission.headingMode=WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
-                }else if (i == R.id.headingRC){
-                    waypointsMission.headingMode=WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
-                }else if (i == R.id.headingWP){
-                    waypointsMission.headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
-                }
-            }
-        });
-        gv_missions.setAdapter(new WPGridviewAdapter(this));
-        gv_missions.setOnItemClickListener(onItemClickListener);
-        //update text
         if(waypointsMission != null){
+            sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    float tSpeed=((float) i)/100*15;
+                    seekBar_text.setText(String.valueOf((int)(tSpeed+0.5))+"m/s");
+                    waypointsMission.speed=tSpeed;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+            rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                    if(i == R.id.finishNone){
+                        waypointsMission.finishedAction=WaypointMissionFinishedAction.NO_ACTION;
+                    }else if(i == R.id.finishGoHome){
+                        waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_HOME;
+                    }else if (i == R.id.finishAutoLanding){
+                        waypointsMission.finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
+                    }else if (i == R.id.finishToFirst){
+                        waypointsMission.finishedAction=WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+                    }
+                }
+            });
+            rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                    if(i == R.id.headingNext){
+                        waypointsMission.headingMode=WaypointMissionHeadingMode.AUTO;
+                    }else if(i == R.id.headingInitDirec){
+                        waypointsMission.headingMode=WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+                    }else if (i == R.id.headingRC){
+                        waypointsMission.headingMode=WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+                    }else if (i == R.id.headingWP){
+                        waypointsMission.headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+                    }
+                }
+            });
+            gv_missions.setAdapter(new WPGridviewAdapter(this));
+            gv_missions.setOnItemClickListener(onItemClickListener);
+            //update text
             name.setText("任务名称:"+waypointsMission.missionName);
             time.setText("预计执行时间");
             //convert between float and int
