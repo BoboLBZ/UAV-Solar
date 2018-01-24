@@ -48,29 +48,23 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 
-public class WaypointMissionPreviewActivity extends AppCompatActivity{
+public class WaypointMissionPreviewActivity extends AppCompatActivity {
      private WaypointsMission waypointsMission;
      private BaseProduct baseProduct;
      private FlightController mFlightController;
      private Waypoint currentWaypoint;
 
-     //ui
-      TextView name,aircraft,camera,time,startpoint,seekBar_text;
-    //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
-     SeekBar sb_speed;
-      RadioGroup rg_actionAfterFinished;
-     RadioGroup rg_heading;
-     GridView gv_missions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_preview_waypoint);
+        setContentView(R.layout.activity_execute);
 
         Intent intent=getIntent();
         String path=AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
         waypointsMission=readMission(path);
-        //baseProduct=AutoPatrolApplication.getProductInstance();
+        baseProduct=AutoPatrolApplication.getProductInstance();
+        showMissionChangeDialog();
         initUI();
     }
     @Override
@@ -78,31 +72,41 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
         super.onDestroy();
     }
     private void initUI(){
-        name=findViewById(R.id.preview_current_mission_name);
-        aircraft=findViewById(R.id.preview_aircraft_name);
-        camera=findViewById(R.id.preview_camera);
-        time=findViewById(R.id.preview_time);
-        startpoint=findViewById(R.id.preview_start_point);
-        seekBar_text=findViewById(R.id.preview_seekBar_text);
+
+    }
+
+    private void showMissionChangeDialog(){
+        LinearLayout wpPreview = (LinearLayout)getLayoutInflater().inflate(R.layout.activity_preview_waypoint,null);
+        //ui
+        final TextView name,aircraft,camera,time,startpoint,seekBar_text;
         //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
-        sb_speed=findViewById(R.id.preview_speed);
-        rg_actionAfterFinished =findViewById(R.id.preview_actionAfterFinished);
-        rg_heading =findViewById(R.id.preview_heading);
-        gv_missions=findViewById(R.id.preview_gv_action);
+        SeekBar sb_speed;
+        RadioGroup rg_actionAfterFinished;
+        RadioGroup rg_heading;
+        GridView gv_missions;
+
+        name=wpPreview.findViewById(R.id.preview_current_mission_name);
+        aircraft=wpPreview.findViewById(R.id.preview_aircraft_name);
+        camera=wpPreview.findViewById(R.id.preview_camera);
+        time=wpPreview.findViewById(R.id.preview_time);
+        startpoint=wpPreview.findViewById(R.id.preview_start_point);
+        seekBar_text=wpPreview.findViewById(R.id.preview_seekBar_text);
+        //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
+        sb_speed=wpPreview.findViewById(R.id.preview_speed);
+        rg_actionAfterFinished =wpPreview.findViewById(R.id.preview_actionAfterFinished);
+        rg_heading =wpPreview.findViewById(R.id.preview_heading);
+        gv_missions=wpPreview.findViewById(R.id.preview_gv_action);
         if(waypointsMission != null){
             sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    float tSpeed=((float) i)/100*15;
+                    float tSpeed=(((float) i)/100)*15;
                     seekBar_text.setText(String.valueOf((int)(tSpeed+0.5))+"m/s");
                     waypointsMission.speed=tSpeed;
                 }
-
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-
                 }
-
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
 
@@ -140,11 +144,12 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
             gv_missions.setOnItemClickListener(onItemClickListener);
             //update text
             name.setText("任务名称:"+waypointsMission.missionName);
-            time.setText("预计执行时间");
+            time.setText("预计执行时间:"+String.valueOf(waypointsMission.speed));
             //convert between float and int
             //rate=waypointsMission.speed/15
-            sb_speed.setProgress((int)(waypointsMission.speed/15+0.5));
+            sb_speed.setProgress((int)(waypointsMission.speed/15*100+0.5));
             seekBar_text.setText(String.valueOf((int)(waypointsMission.speed+0.5))+"m/s");
+
             rg_actionAfterFinished.check(getFinishCheckedId(waypointsMission.finishedAction));
             rg_heading.check(getHeadingCheckedId(waypointsMission.headingMode));
         }
@@ -180,10 +185,31 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
                 startpoint.setText("none");
             }
         }else {
+
             aircraft.setText("飞行器型号:xxx");
             camera.setText("相机型号：xxx");
             startpoint.setText("none");
         }
+
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("")
+                .setView(wpPreview)
+                .setPositiveButton("upload", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+        final AlertDialog dialog=builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
     }
     private class WPGridviewAdapter extends BaseAdapter {
         private LayoutInflater inflater;
@@ -228,7 +254,6 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity{
     AdapterView.OnItemClickListener onItemClickListener=new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-             setResultToToast("click "+String.valueOf(i));
              showWaypointDetail(i);
         }
     };

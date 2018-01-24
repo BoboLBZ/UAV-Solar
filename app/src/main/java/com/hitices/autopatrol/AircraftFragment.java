@@ -204,7 +204,7 @@ public class AircraftFragment extends Fragment {
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 //            if (i > 90 && waypointsMission != null && ISCONNECTED){
             if (i > 90 && waypointsMission != null){
-                //seekBar.setProgress(0);
+                seekBar.setProgress(0);
                 Intent intent=new Intent(getActivity(),WaypointMissionPreviewActivity.class);
                 intent.putExtra("missionName",waypointsMission.missionName);
                 intent.putExtra("missionType","type");

@@ -32,7 +32,7 @@
         android:required="true" />
 
     <application
-        android:name=".AutoPatrolApplication"
+        android:name=".MApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -75,7 +75,6 @@
         <service android:name="dji.sdk.sdkmanager.DJIGlobalService" />
 
         <!-- DJI SDK -->
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -86,11 +85,13 @@
         <activity
             android:name=".ShowFullImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_show_full_image"
             android:theme="@style/FullscreenTheme">
 
         </activity>
         <activity android:name=".WaypointMissionPreviewActivity">
+
+        </activity>
+        <activity android:name=".ExecuteActivity">
 
         </activity>
     </application>
