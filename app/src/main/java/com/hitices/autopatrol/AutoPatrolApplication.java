@@ -97,7 +97,8 @@ public class AutoPatrolApplication extends Application {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "Register Success", Toast.LENGTH_LONG).show();
+                            Log.e("autopatrol","Register Success");
+                            //Toast.makeText(getApplicationContext(), "Register Success", Toast.LENGTH_LONG).show();
                         }
                     });
 

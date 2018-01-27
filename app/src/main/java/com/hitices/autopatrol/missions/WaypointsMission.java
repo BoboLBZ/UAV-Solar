@@ -55,7 +55,8 @@ public class WaypointsMission extends Object {
     public WaypointMissionHeadingMode headingMode;
     public final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
     public List<WaypointAction> currentGeneralActions=new ArrayList<>();
-    public WaypointMission.Builder builder;
+    private  static WaypointMission.Builder builder;
+
     public WaypointsMission(String mName){
         missionName=mName;
         FLAG_ISSAVED=false;
@@ -154,14 +155,17 @@ public class WaypointsMission extends Object {
         if(builder == null) {
             builder=new WaypointMission.Builder();
         }
-        builder.waypointList(waypointList);
-        builder.waypointCount(waypointList.size());
-        builder.autoFlightSpeed(speed);
-        builder.maxFlightSpeed(speed);
-        builder.finishedAction(finishedAction);
-        builder.headingMode(headingMode);
-        builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
-        return builder;
+        if(builder != null) {
+            builder.waypointList(waypointList);
+            builder.waypointCount(waypointList.size());
+            builder.autoFlightSpeed(speed);
+            builder.maxFlightSpeed(speed);
+            builder.finishedAction(finishedAction);
+            builder.headingMode(headingMode);
+            builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
+            return builder;
+        }
+        else return null;
     }
     public int findWaypoint(LatLng latLng){
         Waypoint waypoint=waypoints.get(latLng);

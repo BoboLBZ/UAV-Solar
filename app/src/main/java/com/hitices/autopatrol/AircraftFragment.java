@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,12 +33,17 @@ import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import dji.common.error.DJIError;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
+import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
+import dji.common.useraccount.UserAccountState;
+import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.useraccount.UserAccountManager;
 
 
 /**
@@ -54,7 +60,7 @@ public class AircraftFragment extends Fragment {
     private TextView tvAircraftType;
     private TextView tvCameraType;
     private boolean ISCONNECTED;
-    private SeekBar seekBarBegin;
+    private ImageButton take_off;
     private Spinner spinnerMission;
     private ArrayAdapter<String> arrayAdapter;
     private OnFragmentInteractionListener mListener;
@@ -89,15 +95,23 @@ public class AircraftFragment extends Fragment {
         tvAircraftType = view.findViewById(R.id.aircraft_type);
         tvCameraType = view.findViewById(R.id.camera_type);
         spinnerMission = view.findViewById(R.id.missionSelected);
-        seekBarBegin =view.findViewById(R.id.seekBar_begin);
+        take_off=view.findViewById(R.id.btn_take_off);
+        take_off.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ( waypointsMission != null){
+                    Intent intent=new Intent(getActivity(),WaypointMissionPreviewActivity.class);
+                    intent.putExtra("missionName",waypointsMission.missionName);
+                    intent.putExtra("missionType","type");
+                    startActivity(intent);
+                }
+            }
+        });
+
         arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item,AutoPatrolApplication.getMissionList());
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMission.setAdapter(arrayAdapter);
         spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
-
-        seekBarBegin.setOnSeekBarChangeListener(onSeekBarChangeListener);
-        seekBarBegin.setMax(100);
-        seekBarBegin.setProgress(0);
 
         return view;
     }
@@ -123,6 +137,11 @@ public class AircraftFragment extends Fragment {
         mListener = null;
     }
     @Override
+    public void onResume(){
+        super.onResume();
+
+    }
+    @Override
     public void onSaveInstanceState(Bundle bundle){
         super.onSaveInstanceState(bundle);
         bundle.putBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN,isHidden());
@@ -135,8 +154,10 @@ public class AircraftFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE))
-               refreshSDKRelativeUI();
+            if(intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
+                refreshSDKRelativeUI();
+                loginAccount();
+            }
             else if(intent.getAction().equals("MISSION_ITEMS_CHANGE"))
                 refreshSpinner();
         }
@@ -199,28 +220,6 @@ public class AircraftFragment extends Fragment {
            waypointsMission=null;
        }
    };
-    SeekBar.OnSeekBarChangeListener onSeekBarChangeListener=new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-//            if (i > 90 && waypointsMission != null && ISCONNECTED){
-            if (i > 90 && waypointsMission != null){
-                seekBar.setProgress(0);
-                Intent intent=new Intent(getActivity(),WaypointMissionPreviewActivity.class);
-                intent.putExtra("missionName",waypointsMission.missionName);
-                intent.putExtra("missionType","type");
-                startActivity(intent);
-            }
-        }
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            seekBar.setThumb(getResources().getDrawable(R.drawable.ic_flight_takeoff_pressed));
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            seekBar.setThumb(getResources().getDrawable(R.drawable.ic_flight_takeoff_unpressed));
-        }
-    };
 
     public WaypointsMission readMission(String path){
         try {
@@ -333,5 +332,19 @@ public class AircraftFragment extends Fragment {
         else if( WaypointActionType.START_TAKE_PHOTO.toString().equals(s))
             return WaypointActionType.START_TAKE_PHOTO;
         else return null;
+    }
+    private void loginAccount(){
+        UserAccountManager.getInstance().logIntoDJIUserAccount(getContext(),
+                new CommonCallbacks.CompletionCallbackWith<UserAccountState>(){
+                    @Override
+                    public void onSuccess(final UserAccountState userAccountState) {
+                       setResultToToast("Login Success");
+                    }
+                    @Override
+                    public void onFailure(DJIError error) {
+                        setResultToToast("Login Error:"
+                                + error.getDescription());
+                    }
+                });
     }
 }

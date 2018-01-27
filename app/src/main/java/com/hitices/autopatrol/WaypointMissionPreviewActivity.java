@@ -3,6 +3,10 @@ package com.hitices.autopatrol;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +15,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -23,7 +29,16 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMapOptions;
+import com.amap.api.maps2d.CameraUpdate;
+import com.amap.api.maps2d.CameraUpdateFactory;
+import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.UiSettings;
+import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.maps2d.model.Marker;
+import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
@@ -38,43 +53,200 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
+import dji.common.mission.waypoint.WaypointMission;
+import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
+import dji.common.mission.waypoint.WaypointMissionExecutionEvent;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
+import dji.common.mission.waypoint.WaypointMissionUploadEvent;
+import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
+import dji.sdk.mission.waypoint.WaypointMissionOperator;
+import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.DJISDKManager;
 
 public class WaypointMissionPreviewActivity extends AppCompatActivity {
      private WaypointsMission waypointsMission;
-     private BaseProduct baseProduct;
+     public static WaypointMission.Builder builder;
      private FlightController mFlightController;
      private Waypoint currentWaypoint;
+     private WaypointMissionOperator insatnce;
+     private MapView mapView;
+     private AMap aMap;
+     private Marker droneMarker;
+     private LatLng droneLocation;
 
-
+     private  Button button;
+     private Button retest;
+     private Button start;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_execute);
-
+//        setContentView(R.layout.activity_execute);
+        setContentView(R.layout.layout_test);
         Intent intent=getIntent();
         String path=AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
         waypointsMission=readMission(path);
-        baseProduct=AutoPatrolApplication.getProductInstance();
-        showMissionChangeDialog();
+
         initUI();
+        initMapView(savedInstanceState);
+        addListener();
+        showMissionChangeDialog();
     }
     @Override
     protected void onDestroy(){
         super.onDestroy();
+//        if(getRequestedOrientation()== ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+//            WaypointMissionPreviewActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        removeListener();
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        initFlightController();
     }
     private void initUI(){
+       button=findViewById(R.id.execute_button);
+        retest=findViewById(R.id.execute_retest);
+        start=findViewById(R.id.execute_start);
+       button.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               uploadMission();
+           }
+       });
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startMission();
+            }
+        });
+        retest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopMission();
+            }
+        });
+    }
+    private void initMapView(Bundle savedInstanceState){
+        mapView=findViewById(R.id.execute_mapview);
+        mapView.onCreate(savedInstanceState);
+        if(aMap == null){
+            aMap=mapView.getMap();
+        }
+        UiSettings settings=aMap.getUiSettings();
+        settings.setZoomControlsEnabled(false);
+        //markWaypoint();
+    }
+    private void initFlightController() {
+        BaseProduct product = AutoPatrolApplication.getProductInstance();
+        if (product != null && product.isConnected()) {
+            if (product instanceof Aircraft) {
+                mFlightController = ((Aircraft) product).getFlightController();
+            }
+        }
+        if (mFlightController != null) {
+
+            mFlightController.setStateCallback(
+                    new FlightControllerState.Callback() {
+                        @Override
+                        public void onUpdate(FlightControllerState
+                                                     djiFlightControllerCurrentState) {
+                            droneLocation=new LatLng(djiFlightControllerCurrentState.getAircraftLocation().getLatitude(),
+                                    djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
+                            updateDroneLocation(droneLocation);
+                        }
+                    });
+            setResultToToast("in flight control");
+        }
 
     }
+    private void markWaypoint(){
+        for(int i=0;i<waypointsMission.waypointList.size();i++){
+            MarkerOptions markerOptions =new MarkerOptions();
+            LatLng ll=new LatLng(waypointsMission.waypointList.get(i).coordinate.getLatitude(),
+                    waypointsMission.waypointList.get(i).coordinate.getLongitude());
+            markerOptions.position(ll);
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            aMap.addMarker(markerOptions);
+            aMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
+            cameraUpdate(ll);
+            aMap.addMarker(markerOptions);
+        }
+    }
+    private void updateDroneLocation(LatLng latLng){
+            final MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_location_marker)));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (droneMarker != null) {
+                        droneMarker.remove();
+                    }
+                        droneMarker = aMap.addMarker(markerOptions);
+                }
+            });
 
+    }
+    private void cameraUpdate(LatLng pos){
+//        LatLng pos =new LatLng(droneLocationLat,droneLocationLng);
+        float zoomLevel = (float)16.0;
+        CameraUpdate cameraupdate =CameraUpdateFactory.newLatLngZoom(pos,zoomLevel);
+        aMap.moveCamera(cameraupdate);
+    }
+
+    private WaypointMissionOperator getWaypointMissionOperator() {
+        if (insatnce == null) {
+            insatnce = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
+        }
+        if(insatnce == null)
+        {
+            setResultToToast("waypointMissionOperator is null");
+        }
+        return insatnce;
+    }
+    //Add Listener for WaypointMissionOperator
+    private void addListener() {
+        if (getWaypointMissionOperator() != null) {
+            getWaypointMissionOperator().addListener(eventNotificationListener);
+            setResultToToast("add listener");
+        }
+    }
+    private void removeListener() {
+
+        if (getWaypointMissionOperator() != null) {
+            getWaypointMissionOperator().removeListener(eventNotificationListener);
+            setResultToToast("remove listener");
+        }
+    }
+    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
+        @Override
+        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
+        }
+        @Override
+        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
+        }
+        @Override
+        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
+        }
+        @Override
+        public void onExecutionStart() {
+        }
+        @Override
+        public void onExecutionFinish(@Nullable final DJIError error) {
+            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+        }
+    };
     private void showMissionChangeDialog(){
         LinearLayout wpPreview = (LinearLayout)getLayoutInflater().inflate(R.layout.activity_preview_waypoint,null);
         //ui
@@ -156,41 +328,23 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
         else {
             name.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
         }
-        if (null != baseProduct && baseProduct.isConnected()) {
-            if (null != baseProduct.getModel()) {
-                aircraft.setText("飞行器型号:" + baseProduct.getModel().getDisplayName());
-                if(null != baseProduct.getCamera()) {
-                    camera.setText("相机型号:" + baseProduct.getCamera().getDisplayName());
-                }
-                else {
-                    camera.setText("相机型号：xxx");
-                }
-                mFlightController=  ((Aircraft)baseProduct).getFlightController();
-                if (mFlightController != null) {
-                    mFlightController.setStateCallback(
-                            new FlightControllerState.Callback() {
-                                @Override
-                                public void onUpdate(FlightControllerState
-                                                             djiFlightControllerCurrentState) {
-                                    double Lat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
-                                    double Lng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
-                                    startpoint.setText(" ["+ String.valueOf(Lat)+","+ String.valueOf(Lng)+"] ");
-                                }
-                            });
-                }else
-                    startpoint.setText("none");
-            } else {
-                aircraft.setText("飞行器型号:xxx");
-                camera.setText("相机型号：xxx");
-                startpoint.setText("none");
-            }
+        Aircraft myAircraft=AutoPatrolApplication.getAircraftInstance();
+        Camera myCamera=AutoPatrolApplication.getCameraInstance();
+        if(myAircraft != null){
+            aircraft.setText("飞行器型号:" + myAircraft.getModel().getDisplayName());
         }else {
-
             aircraft.setText("飞行器型号:xxx");
-            camera.setText("相机型号：xxx");
-            startpoint.setText("none");
         }
-
+        if(myCamera != null){
+            camera.setText("相机型号:" + myCamera.getDisplayName());
+        }else {
+            camera.setText("相机型号：xxx");
+        }
+        if(droneLocation != null) {
+            startpoint.setText(" [" + String.valueOf(droneLocation.latitude) + "," + String.valueOf(droneLocation.longitude) + "] ");
+        }else {
+            startpoint.setText("null");
+        }
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("")
                 .setView(wpPreview)
@@ -207,9 +361,83 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         dialog.dismiss();
+                        missionProcessing();
                     }
                 });
+        Window window=dialog.getWindow();
+        //window.getDecorView().setPadding(0,0,0,0);
+        WindowManager.LayoutParams params=window.getAttributes();
+        params.width=WindowManager.LayoutParams.MATCH_PARENT;
+        params.height=WindowManager.LayoutParams.MATCH_PARENT;
+        window.setAttributes(params);
+    }
+    private void missionProcessing(){
+        markWaypoint();
+        loadMission();
+//        uploadMission();
+//        startMission();
+//        new Handler().postDelayed(new Runnable(){
+//            public void run() {
+//                loadMission();
+//            }
+//        }, 10000);
+//        new Handler().postDelayed(new Runnable(){
+//            public void run() {
+//                uploadMission();
+//            }
+//        }, 3000);
+//        new Handler().postDelayed(new Runnable(){
+//            public void run() {
+//                startMission();
+//            }
+//        }, 3000);
+    }
+    private void loadMission(){
+            setResultToToast("on load");
+            builder = waypointsMission.getMissionBuilder();
+            if(builder != null) {
+                DJIError error = getWaypointMissionOperator().loadMission(builder.build());
+                if (error == null) {
+                    setResultToToast("load success");
+                } else {
+                    setResultToToast("load mission failed:" + error.getDescription());
+                }
+            } else {
+                setResultToToast("builder is null");
+            }
 
+    }
+    private void uploadMission(){
+        setResultToToast("on upload");
+        getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError error2) {
+                if (error2 == null) {
+                    setResultToToast("Mission upload successfully!");
+                } else {
+                    setResultToToast("Mission upload failed, error: " + error2.getDescription() + " retrying...");
+                    getWaypointMissionOperator().retryUploadMission(null);
+                }
+            }
+        });
+    }
+    private void startMission(){
+        setResultToToast("on start");
+        getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError error3) {
+                setResultToToast("Mission Start: " + (error3 == null ? "Successfully" : error3.getDescription()));
+            }
+        });
+    }
+    private void stopMission(){
+        setResultToToast("on stop");
+        getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError error3) {
+                setResultToToast("Mission Stop: " + (error3 == null ? "Successfully" : error3.getDescription()));
+            }
+        });
     }
     private class WPGridviewAdapter extends BaseAdapter {
         private LayoutInflater inflater;
@@ -500,6 +728,11 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
     }
     private void setResultToToast(final String msg){
         Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
     }
     private String getActionChinese(WaypointActionType action){
         String chinese="";

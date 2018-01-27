@@ -88,10 +88,8 @@
             android:theme="@style/FullscreenTheme">
 
         </activity>
-        <activity android:name=".WaypointMissionPreviewActivity">
-
-        </activity>
-        <activity android:name=".ExecuteActivity">
+        <activity android:name=".WaypointMissionPreviewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
 
         </activity>
     </application>
