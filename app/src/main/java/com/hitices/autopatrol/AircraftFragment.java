@@ -209,8 +209,8 @@ public class AircraftFragment extends Fragment {
        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
            String name=arrayAdapter.getItem(i);
            if(name.length()>0) {
-               waypointsMission = readMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
-               setResultToToast(waypointsMission.missionName);
+//               waypointsMission = readMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+//               setResultToToast(waypointsMission.missionName);
            }
            else setResultToToast("选择任务失败");
        }

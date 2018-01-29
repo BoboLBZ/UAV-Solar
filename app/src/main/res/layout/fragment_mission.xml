@@ -14,7 +14,7 @@
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:spinnerMode="dropdown"
-        android:background="@color/colorAccent"
+        android:background="@color/half_black"
         android:theme="@android:style/Theme.Holo.Light">
     </Spinner>
     <ImageButton
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="10dp"
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonColorPressed="@color/white_pressed"
         fab:fab_addButtonPlusIconColor="@color/half_black"

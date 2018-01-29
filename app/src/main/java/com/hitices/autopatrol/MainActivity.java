@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
         rbAircraft=findViewById(R.id.aircraft);
         rbMedia=findViewById(R.id.media);
         rbMission=findViewById(R.id.mission);
-        setFirstView(R.id.aircraft);
+        setFirstView(R.id.mission);
     }
     private void checkAndRequestPermissions() {
         // Check for permissions

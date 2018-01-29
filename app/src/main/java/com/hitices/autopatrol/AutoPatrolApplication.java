@@ -34,7 +34,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change";
-    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/MissionsTest";
+    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";
     private static BaseProduct mProduct;
     private Handler mHandler;
     private Application instance;

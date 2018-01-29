@@ -43,14 +43,14 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
  * Created by Rhys on 2018/1/11.
  */
 
-public class WaypointsMission extends Object {
-    public String missionName;
+public class WaypointsMission extends BaseMission {
+    //public String missionName;
     public Date date;
     //mission
     public List<Waypoint> waypointList=new ArrayList();
     public float altitude;
     public float speed;
-    public boolean FLAG_ISSAVED;
+
     public WaypointMissionFinishedAction finishedAction;
     public WaypointMissionHeadingMode headingMode;
     public final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
@@ -59,6 +59,7 @@ public class WaypointsMission extends Object {
 
     public WaypointsMission(String mName){
         missionName=mName;
+        missionType=MissionType.WaypointMission;
         FLAG_ISSAVED=false;
         date=new Date();
         altitude=50.0f;
@@ -69,7 +70,8 @@ public class WaypointsMission extends Object {
         currentGeneralActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,0));
         builder=new WaypointMission.Builder();
     }
-    public boolean saveMisson(){
+    @Override
+    public boolean saveMission(){
 //        Log.e("rhys","in save class");
         File dir=new File(AutoPatrolApplication.missionDir);
         if(!dir.exists()){
@@ -84,7 +86,7 @@ public class WaypointsMission extends Object {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             // root elements
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("mission");
+            Element rootElement = doc.createElement("WaypointsMission");
             doc.appendChild(rootElement);
             //general parameter
             Element eName=doc.createElement("missionName");

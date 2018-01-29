@@ -198,8 +198,7 @@
         android:numColumns="3"
         android:horizontalSpacing="3dp"
         android:verticalSpacing="3dp"
-        android:scrollbars="none">
-    </GridView>
+        android:scrollbars="none"/>
     </LinearLayout>
 
 </LinearLayout>

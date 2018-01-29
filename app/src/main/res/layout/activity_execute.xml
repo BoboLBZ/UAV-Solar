@@ -19,8 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
     <FrameLayout
-        android:layout_width="160dp"
-        android:layout_height="90dp"
+        android:layout_width="180dp"
+        android:layout_height="100dp"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="50dp"
         android:layout_alignParentBottom="true"
@@ -160,23 +160,32 @@
 
 
     <!--Take off and return home buttons on left -->
-    <!--<LinearLayout-->
-        <!--android:layout_width="40dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_marginStart="12dp"-->
-        <!--android:orientation="vertical">-->
+    <LinearLayout
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="2dp"
+        android:orientation="vertical">
 
-        <!--<dji.ui.widget.TakeOffWidget-->
-            <!--android:layout_width="40dp"-->
-            <!--android:layout_height="40dp"-->
-            <!--android:layout_marginBottom="12dp"/>-->
-
-        <!--<dji.ui.widget.ReturnHomeWidget-->
-            <!--android:layout_width="40dp"-->
-            <!--android:layout_height="40dp"-->
-            <!--android:layout_marginTop="12dp"/>-->
-    <!--</LinearLayout>-->
+        <ImageButton
+            android:id="@+id/execute_uploadMission"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_mission_upload"
+            android:layout_marginBottom="2dp"/>
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/execute_startMission"
+            android:src="@drawable/ic_flight_takeoff_unpressed"
+            android:layout_marginBottom="2dp"/>
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/execute_stopMission"
+            android:src="@drawable/ic_mission_stop"
+            android:layout_marginBottom="2dp"/>
+    </LinearLayout>
 
 
     <dji.ui.widget.controls.CameraControlsWidget

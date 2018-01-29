@@ -1,5 +1,6 @@
 package com.hitices.autopatrol;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
@@ -73,7 +75,7 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
-public class WaypointMissionPreviewActivity extends AppCompatActivity {
+public class WaypointMissionPreviewActivity extends Activity implements View.OnClickListener {
      private WaypointsMission waypointsMission;
      public static WaypointMission.Builder builder;
      private FlightController mFlightController;
@@ -83,20 +85,18 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
      private AMap aMap;
      private Marker droneMarker;
      private LatLng droneLocation;
-
-     private  Button button;
-     private Button retest;
-     private Button start;
+     private ImageButton uplaod,start,stop;
+     private Button button, retest, sstart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_execute);
-        setContentView(R.layout.layout_test);
+        setContentView(R.layout.activity_execute);
+     //   setContentView(R.layout.layout_test);
         Intent intent=getIntent();
         String path=AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
         waypointsMission=readMission(path);
 
-        initUI();
+        //initUI();
         initMapView(savedInstanceState);
         addListener();
         showMissionChangeDialog();
@@ -116,14 +116,14 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
     private void initUI(){
        button=findViewById(R.id.execute_button);
         retest=findViewById(R.id.execute_retest);
-        start=findViewById(R.id.execute_start);
+        sstart=findViewById(R.id.execute_start);
        button.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
                uploadMission();
            }
        });
-        start.setOnClickListener(new View.OnClickListener() {
+        sstart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startMission();
@@ -136,6 +136,14 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
             }
         });
     }
+    private void initUi2(){
+        uplaod=findViewById(R.id.execute_uploadMission);
+        stop=findViewById(R.id.execute_stopMission);
+        start=findViewById(R.id.execute_startMission);
+        uplaod.setOnClickListener(this);
+        start.setOnClickListener(this);
+        stop.setOnClickListener(this);
+    }
     private void initMapView(Bundle savedInstanceState){
         mapView=findViewById(R.id.execute_mapview);
         mapView.onCreate(savedInstanceState);
@@ -144,7 +152,6 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
         }
         UiSettings settings=aMap.getUiSettings();
         settings.setZoomControlsEnabled(false);
-        //markWaypoint();
     }
     private void initFlightController() {
         BaseProduct product = AutoPatrolApplication.getProductInstance();
@@ -169,6 +176,21 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
         }
 
     }
+    @Override
+    public void onClick(View view){
+        switch (view.getId()){
+            case R.id.execute_uploadMission:
+                uploadMission();
+                break;
+            case R.id.execute_startMission:
+                startMission();
+                break;
+            case R.id.execute_stopMission:
+                stopMission();
+                break;
+        }
+    }
+
     private void markWaypoint(){
         for(int i=0;i<waypointsMission.waypointList.size();i++){
             MarkerOptions markerOptions =new MarkerOptions();
@@ -509,7 +531,7 @@ public class WaypointMissionPreviewActivity extends AppCompatActivity {
                 })
                 .create().show();
     }
-    class WPWaypointGridviewAdapter extends BaseAdapter {
+    private class WPWaypointGridviewAdapter extends BaseAdapter {
         private List<WaypointAction> actions;
         private List<WaypointActionType> allAction;
         private List<WaypointActionType> selectedAction;
