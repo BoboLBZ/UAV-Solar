@@ -55,6 +55,7 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.missions.BaseMission;
 import com.hitices.autopatrol.missions.MissionType;
 import com.hitices.autopatrol.missions.PolygonMission;
+import com.hitices.autopatrol.missions.PolygonScenario;
 import com.hitices.autopatrol.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
@@ -533,19 +534,142 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     private void showPolygonSettingDialog(){
         LinearLayout settingView=(LinearLayout)getLayoutInflater().inflate(R.layout.dialog_polygon_setting,null);
         TextView mName=settingView.findViewById(R.id.polygon_setting_mName);
+        Button mSave=settingView.findViewById(R.id.polygon_setting_save);
+        Button mDelete=settingView.findViewById(R.id.polygon_setting_delete);
+        final EditText mAltitude=settingView.findViewById(R.id.polygon_setting_altitude);
+        SeekBar mSpeed=settingView.findViewById(R.id.polygon_setting_speed);
+        final SeekBar mHorRate=settingView.findViewById(R.id.polygon_setting_horizontal_rate);
+        SeekBar mVerRate=settingView.findViewById(R.id.polygon_setting_vertical_rate);
+        final TextView mSpeedText=settingView.findViewById(R.id.polygon_setting_speed_text);
+        final TextView mHorRateText=settingView.findViewById(R.id.polygon_setting_horizontal_rate_text);
+        final TextView mVerRateText=settingView.findViewById(R.id.polygon_setting_vertical_rate_text);
+        RadioGroup mScenario=settingView.findViewById(R.id.polygon_setting_scenario);
         GridView Vertexs=settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
         mName.setText(getCurrentPolygonMission().missionName);
+        mAltitude.setInputType(InputType.TYPE_CLASS_NUMBER);
+        mAltitude.setText(String.valueOf(getCurrentPolygonMission().getAltitude()));
+        mSpeed.setProgress((int)(getCurrentPolygonMission().getSpeed()/15*100+0.5));
+        mSpeedText.setText(String.valueOf((int)(getCurrentPolygonMission().getSpeed()+0.5))+"m/s");
+        mHorRate.setProgress(getCurrentPolygonMission().getHorizontalOverlapRate());
+        mHorRateText.setText(String.valueOf(getCurrentPolygonMission().getHorizontalOverlapRate()));
+        mVerRate.setProgress(getCurrentPolygonMission().getVerticalOverlapRate());
+        mVerRateText.setText(String.valueOf(getCurrentPolygonMission().getVerticalOverlapRate()));
+        mScenario.check(R.id.polygon_setting_scenario_A);
+
+        mSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                float tSpeed=(((float) i)/100)*15;
+                mSpeedText.setText(String.valueOf((int)(tSpeed+0.5))+"m/s");
+                getCurrentPolygonMission().setSpeed(tSpeed);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mHorRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mHorRateText.setText(String.valueOf(i));
+                getCurrentPolygonMission().setHorizontalOverlapRate(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mVerRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mVerRateText.setText(String.valueOf(i));
+                getCurrentPolygonMission().setVerticalOverlapRate(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mScenario.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                switch (i){
+                    case R.id.polygon_setting_scenario_A:
+                        getCurrentPolygonMission().setScenario(PolygonScenario.TYPEA);
+                        break;
+                    case R.id.polygon_setting_scenario_B:
+                        getCurrentPolygonMission().setScenario(PolygonScenario.TYPEB);
+                        break;
+                }
+            }
+        });
         Vertexs.setAdapter(new PSGridviewAdapter(getContext()));
+        //dialog
         AlertDialog.Builder builder=new AlertDialog.Builder(getContext());
         builder.setView(settingView);
         builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                getCurrentPolygonMission().saveMission();
+                String altitudeStr = mAltitude.getText().toString();
+                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
             }
         });
-        AlertDialog alertDialog=builder.create();
+        builder.setNeutralButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        final  AlertDialog alertDialog=builder.create();
+        mSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String altitudeStr = mAltitude.getText().toString();
+                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
+                if(saveMission()){
+                    alertDialog.cancel();
+                }else {
+                    setResultToToast("保存任务失败");
+                }
+            }
+        });
+        mDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(deleteMission()){
+                    arrayAdapter.remove(getCurrentWaypointsMission().missionName);
+                    currentMission=null;
+                    if(arrayAdapter.getCount()>0)
+                        spinner.setSelection(0,true);
+                    else
+                        spinner.setSelected(false);
+                    sendMissionChange();
+                    alertDialog.cancel();
+                }else {
+                    setResultToToast("删除任务失败");
+                }
+
+            }
+        });
         alertDialog.show();
     }
     private boolean saveMission(){
@@ -719,9 +843,37 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         }
     }
     public void readPolygonMission(Document doc,PolygonMission newPolygonMission){
-        NodeList nodes=doc.getElementsByTagName("Vertexs");
-        Node node=nodes.item(0);
+        NodeList nodes=doc.getElementsByTagName("speed");
+        if(nodes.item(0) != null){
+            newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
+        }
+        nodes=doc.getElementsByTagName("speed");
+        if(nodes.item(0) != null){
+            newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
+        }
+        nodes=doc.getElementsByTagName("altitude");
+        if(nodes.item(0) != null){
+            newPolygonMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
+        }
+        nodes=doc.getElementsByTagName("scenario");
+        if(nodes.item(0) != null){
+            String s=nodes.item(0).getTextContent();
+            if(s.equals(PolygonScenario.TYPEA.name()))
+                newPolygonMission.setScenario(PolygonScenario.TYPEA);
+            else if(s.equals(PolygonScenario.TYPEB.name()))
+                newPolygonMission.setScenario(PolygonScenario.TYPEB);
+        }
+        nodes=doc.getElementsByTagName("horizontalOverlapRate");
+        if(nodes.item(0) != null){
+            newPolygonMission.setHorizontalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+        }
+        nodes=doc.getElementsByTagName("verticalOverlapRate");
+        if(nodes.item(0) != null){
+            newPolygonMission.setVerticalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+        }
 
+        nodes=doc.getElementsByTagName("Vertexs");
+        Node node=nodes.item(0);
         NodeList nVertexList = ((Element)node).getElementsByTagName("vertex");
         for (int temp = 0; temp < nVertexList.getLength(); temp++) {
             Node nNode = nVertexList.item(temp);

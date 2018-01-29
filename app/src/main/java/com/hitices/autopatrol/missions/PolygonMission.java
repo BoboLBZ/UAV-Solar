@@ -22,7 +22,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import dji.common.mission.waypoint.Waypoint;
 
 /**
  * Created by Rhys on 2018/1/11.
@@ -30,9 +29,17 @@ import dji.common.mission.waypoint.Waypoint;
 
 public class PolygonMission extends BaseMission {
     private List<LatLng> vertexs=new ArrayList<>();
+    private PolygonScenario scenario;
+    private float altitude,speed;
+    private int horizontalOverlapRate,verticalOverlapRate;
     public PolygonMission(String name){
         missionName =name;
         missionType=MissionType.PolygonMission;
+        scenario=PolygonScenario.TYPEA;
+        altitude= 40.0f;
+        speed=10f;
+        horizontalOverlapRate=70;
+        verticalOverlapRate=70;
         FLAG_ISSAVED=false;
     }
     @Override
@@ -57,18 +64,27 @@ public class PolygonMission extends BaseMission {
             eName.appendChild(doc.createTextNode(missionName));
             rootElement.appendChild(eName);
 
-//            Element eSpeed=doc.createElement("speed");
-//            eSpeed.appendChild(doc.createTextNode(String.valueOf(speed)));
-//            rootElement.appendChild(eSpeed);
-//
-//            Element eFinishedAction=doc.createElement("finishedAction");
-//            eFinishedAction.appendChild(doc.createTextNode(finishedAction.name()));
-//            rootElement.appendChild(eFinishedAction);
-//
-//            Element eHeadingMode=doc.createElement("headingMode");
-//            eHeadingMode.appendChild(doc.createTextNode(headingMode.name()));
-//            rootElement.appendChild(eHeadingMode);
-//            // waypoint elements
+            Element eSpeed=doc.createElement("speed");
+            eSpeed.appendChild(doc.createTextNode(String.valueOf(speed)));
+            rootElement.appendChild(eSpeed);
+
+            Element eAltitude=doc.createElement("altitude");
+            eAltitude.appendChild(doc.createTextNode(String.valueOf(altitude)));
+            rootElement.appendChild(eAltitude);
+
+            Element eScenario=doc.createElement("scenario");
+            eScenario.appendChild(doc.createTextNode(scenario.name()));
+            rootElement.appendChild(eScenario);
+
+            Element eHorRate=doc.createElement("horizontalOverlapRate");
+            eHorRate.appendChild(doc.createTextNode(String.valueOf(horizontalOverlapRate)));
+            rootElement.appendChild(eHorRate);
+
+            Element eVerRate=doc.createElement("verticalOverlapRate");
+            eVerRate.appendChild(doc.createTextNode(String.valueOf(verticalOverlapRate)));
+            rootElement.appendChild(eVerRate);
+
+            // waypoint elements
             Element eVertexs = doc.createElement("Vertexs");
             eVertexs.setAttribute("nums",String.valueOf(vertexs.size()));
             rootElement.appendChild(eVertexs);
@@ -105,6 +121,36 @@ public class PolygonMission extends BaseMission {
             return false;
         }
         return true;
+    }
+    public PolygonScenario getScenario(){
+        return scenario;
+    }
+    public void setScenario(PolygonScenario scenario){
+        this.scenario=scenario;
+    }
+    public float getSpeed(){
+        return speed;
+    }
+    public void setSpeed(float value){
+        this.speed=value;
+    }
+    public float getAltitude(){
+        return altitude;
+    }
+    public void setAltitude(float value){
+        this.altitude=value;
+    }
+    public int getHorizontalOverlapRate(){
+        return horizontalOverlapRate;
+    }
+    public void setHorizontalOverlapRate(int value){
+        this.horizontalOverlapRate=value;
+    }
+    public int getVerticalOverlapRate(){
+        return verticalOverlapRate;
+    }
+    public void setVerticalOverlapRate(int value){
+        this.verticalOverlapRate=value;
     }
     public List<LatLng> getVertexs(){
         return vertexs;
