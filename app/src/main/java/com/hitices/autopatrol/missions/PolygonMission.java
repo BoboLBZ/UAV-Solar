@@ -25,14 +25,18 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * Created by Rhys on 2018/1/11.
+ * email: bozliu@outlook.com
+ * 区域任务类
+ *
  */
 
 public class PolygonMission extends BaseMission {
-    private List<LatLng> vertexs=new ArrayList<>();
-    private PolygonScenario scenario;
-    private float altitude,speed;
-    private int horizontalOverlapRate,verticalOverlapRate;
+    private List<LatLng> vertexs=new ArrayList<>();  //polygon 定点集合
+    private PolygonScenario scenario;  //任务场景
+    private float altitude,speed;   //飞行高度和速度
+    private int horizontalOverlapRate,verticalOverlapRate; //重叠率，horizontal 指主航线上的照片重叠率，vertical指主航线间的重叠率
     public PolygonMission(String name){
+        //使用默认参数，后续根据类型做不同初始化
         missionName =name;
         missionType=MissionType.PolygonMission;
         scenario=PolygonScenario.TYPEA;
@@ -44,6 +48,7 @@ public class PolygonMission extends BaseMission {
     }
     @Override
     public boolean saveMission(){
+        //保存任务到xml文件
         File dir=new File(AutoPatrolApplication.missionDir);
         if(!dir.exists()){
             if(!dir.mkdirs()){
@@ -55,7 +60,7 @@ public class PolygonMission extends BaseMission {
         try{
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            // root elements
+            // root elements 表示任务类型，读取时判断
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement("PolygonMission");
             doc.appendChild(rootElement);
@@ -84,7 +89,7 @@ public class PolygonMission extends BaseMission {
             eVerRate.appendChild(doc.createTextNode(String.valueOf(verticalOverlapRate)));
             rootElement.appendChild(eVerRate);
 
-            // waypoint elements
+            // vertex elements
             Element eVertexs = doc.createElement("Vertexs");
             eVertexs.setAttribute("nums",String.valueOf(vertexs.size()));
             rootElement.appendChild(eVertexs);
@@ -107,9 +112,9 @@ public class PolygonMission extends BaseMission {
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(AutoPatrolApplication.missionDir+"/"+missionName+".xml"));
-            StreamResult result1 = new StreamResult(System.out);
+            StreamResult result1 = new StreamResult(System.out); //for test
             transformer.transform(source, result);
-            transformer.transform(source, result1);
+            transformer.transform(source, result1); //for test
             FLAG_ISSAVED=true;
         }catch (ParserConfigurationException pce) {
             pce.printStackTrace();
@@ -156,9 +161,11 @@ public class PolygonMission extends BaseMission {
         return vertexs;
     }
     public void addVertex(LatLng latLng){
+        //添加顶点
         vertexs.add(latLng);
     }
     public void setVertexs(List<LatLng> vs){
+        //修改Vertexs，
         vertexs.clear();
         vertexs=vs;
     }

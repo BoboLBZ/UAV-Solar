@@ -53,6 +53,10 @@ import dji.sdk.useraccount.UserAccountManager;
  * to handle interaction events.
  * Use the {@link AircraftFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * create by Rhys
+ * email: bozliu@outlook.com
+ * 显示飞行器的连接情况
  */
 public class AircraftFragment extends Fragment {
     private static final String AIRCRAFT_STATE_SAVE_IS_HIDDEN="AIRCRAFT_STATE_SAVE_IS_HIDDEN";

@@ -3,6 +3,7 @@ package com.hitices.autopatrol;
 /**
  * Created by Rhys on 2018/1/24.
  * email: bozliu@outlook.com
+ * 我也不知道这个类是干什么的，DJI SDK升级到4.4.2后官方demo这样用的
  */
 import android.app.Application;
 import android.content.Context;

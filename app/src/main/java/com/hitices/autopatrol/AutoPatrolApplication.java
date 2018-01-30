@@ -29,15 +29,18 @@ import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 /**
- * Created by Administrator on 2017/12/26.
+ * Created by Rhys on 2017/12/26.
+ * Email: bozliu@outllok.com
+ * 主程序类，主要是DJI SDK的初始化和一些公用函数
  */
 
 public class AutoPatrolApplication extends Application {
-    public static final String FLAG_CONNECTION_CHANGE = "connection_change";
-    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";
-    private static BaseProduct mProduct;
+    public static final String FLAG_CONNECTION_CHANGE = "connection_change"; //用于通知飞行器连接状态的变化
+    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";  //默认任务保存位置
+    private static BaseProduct mProduct; //产品
     private Handler mHandler;
     private Application instance;
+    //处理DJI SDK相关
     private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback;
     private BaseProduct.BaseProductListener mDJIBaseProductListener;
     private BaseComponent.ComponentListener mDJIComponentListener;
@@ -188,6 +191,7 @@ public class AutoPatrolApplication extends Application {
                 (null != AutoPatrolApplication.getProductInstance().getCamera().getPlaybackManager());
     }
     public static List<String> getMissionList(){
+        //获取默认文件夹内的所有任务名称
         File dir=new File(missionDir);
         List<String> missionList =new ArrayList<>();
         if(dir.exists()){

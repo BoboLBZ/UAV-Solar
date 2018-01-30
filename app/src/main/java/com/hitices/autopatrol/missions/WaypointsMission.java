@@ -41,21 +41,23 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
  * Created by Rhys on 2018/1/11.
+ * email: bozliu@outlook.com
+ * 航点任务类
  */
 
 public class WaypointsMission extends BaseMission {
     //public String missionName;
-    public Date date;
+    public Date date; //创建时间，还没启用
     //mission
-    public List<Waypoint> waypointList=new ArrayList();
-    public float altitude;
-    public float speed;
+    public List<Waypoint> waypointList=new ArrayList();  // 航点集合
+    public float altitude; //通用高度
+    public float speed; //飞行速度
 
-    public WaypointMissionFinishedAction finishedAction;
-    public WaypointMissionHeadingMode headingMode;
-    public final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>();
-    public List<WaypointAction> currentGeneralActions=new ArrayList<>();
-    private  static WaypointMission.Builder builder;
+    public WaypointMissionFinishedAction finishedAction; //任务结束动作
+    public WaypointMissionHeadingMode headingMode; //飞行器朝向
+    public final Map<LatLng,Waypoint> waypoints=new ConcurrentHashMap<>(); //map，坐标与航点的对应，方便查找
+    public List<WaypointAction> currentGeneralActions=new ArrayList<>(); //航点通用动作
+    private  static WaypointMission.Builder builder; //任务builder，DJI SDK提供
 
     public WaypointsMission(String mName){
         missionName=mName;
@@ -154,6 +156,7 @@ public class WaypointsMission extends BaseMission {
         return true;
     }
     public WaypointMission.Builder getMissionBuilder(){
+        //任务执行前调用
         if(builder == null) {
             builder=new WaypointMission.Builder();
         }
@@ -170,6 +173,7 @@ public class WaypointsMission extends BaseMission {
         else return null;
     }
     public int findWaypoint(LatLng latLng){
+        //返回航点索引
         Waypoint waypoint=waypoints.get(latLng);
         return waypointList.indexOf(waypoint);
     }
@@ -177,7 +181,7 @@ public class WaypointsMission extends BaseMission {
         return waypointList.get(findWaypoint(latLng));
     }
     public void addWaypointList(LatLng latLng){
-        //use default values
+        //添加航点，使用系统默认参数
         Waypoint waypoint=new Waypoint(latLng.latitude,latLng.longitude,altitude);
         for(int i=0;i<currentGeneralActions.size();i++)
             waypoint.addAction(currentGeneralActions.get(i));
@@ -185,12 +189,13 @@ public class WaypointsMission extends BaseMission {
         waypoints.put(latLng,waypoint);
     }
     public void removeWaypoint(LatLng latLng){
+        //删除航点
         int i=findWaypoint(latLng);
         waypointList.remove(i);
         waypoints.remove(latLng);
     }
     public void genernalWaypointSetting(float alt,List<WaypointActionType> selectedType){
-        //general setting,used to all waypoints
+        //通用航点设置，主要修改高度和航点动作
         //altitude,waypoint actions
         currentGeneralActions.clear();
         for(int i = 0;i<selectedType.size();i++){
@@ -205,6 +210,7 @@ public class WaypointsMission extends BaseMission {
         }
     }
     public void singleWaypointsetting(LatLng latLng,float alt,List<WaypointAction> aActions){
+        //对单个航点设置
          int index=findWaypoint(latLng);
          if(index>=0){
              waypointList.get(index).altitude=alt;

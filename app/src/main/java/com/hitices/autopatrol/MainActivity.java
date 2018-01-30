@@ -11,7 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RadioButton;
@@ -28,6 +27,11 @@ import dji.log.DJILog;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+/**
+ * Created by Rhys
+ * email: bozliu@outlook.com
+ * 主activity，控制三个fragment的显示逻辑，应用权限申请
+ */
 public class MainActivity extends AppCompatActivity
                           implements RadioGroup.OnCheckedChangeListener ,
                                         AircraftFragment.OnFragmentInteractionListener,
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity
                                         MediaLocalFragment.OnFragmentInteractionListener,
                                         MediaSDFragment.OnFragmentInteractionListener{
     //radio
-    private RadioGroup tabBar;
+    private RadioGroup tabBar; //通过radio button的方式控制fragment的显示
     private RadioButton rbMission,rbAircraft,rbMedia;
     private FragmentManager fragmentManager;
     private AircraftFragment fAircraft;
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     //back
     private long mExitTime=0;
     private int position;
+    //权限列表
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
             android.Manifest.permission.VIBRATE,
             android.Manifest.permission.INTERNET,
@@ -149,6 +154,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void setFirstView(int id){
+        //设置默认显示的fragment
         switch (id){
             case R.id.aircraft:
                 rbAircraft.setSelected(true);
@@ -189,11 +195,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void colorUnselected(){
+        //重置button颜色
         rbAircraft.setTextColor(getResources().getColor(R.color.unselected));
         rbMission.setTextColor(getResources().getColor(R.color.unselected));
         rbMedia.setTextColor(getResources().getColor(R.color.unselected));
     }
     private void fragmentSelected(int checkId){
+        //设置显示fragment
         position = checkId;
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         hideAllFragments(fragmentTransaction);
