@@ -149,7 +149,7 @@ public class AntColonyAlgorithm {
             }
            iter++;
         }
-        return rawWaypoints;
+        return sortedWaypoints;
     }
     public static <T extends Comparable<T>> int findMinIndex(final List<T> xs) {
         int minIndex;
