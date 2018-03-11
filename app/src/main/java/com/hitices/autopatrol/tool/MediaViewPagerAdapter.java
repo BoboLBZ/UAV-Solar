@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.tool;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

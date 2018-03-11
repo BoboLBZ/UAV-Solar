@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.fragment;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,6 +52,8 @@ import com.amap.api.maps2d.model.Polyline;
 import com.amap.api.maps2d.model.PolylineOptions;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.hitices.autopatrol.AutoPatrolApplication;
+import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.missions.BaseMission;
 import com.hitices.autopatrol.missions.MissionType;
 import com.hitices.autopatrol.missions.PolygonMission;

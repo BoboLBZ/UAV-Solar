@@ -24,6 +24,7 @@ import dji.common.error.DJISDKError;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
+import dji.sdk.gimbal.Gimbal;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -172,6 +173,11 @@ public class AutoPatrolApplication extends Application {
         }
 
         return camera;
+    }
+    public static synchronized Gimbal getGimbalInstance(){
+        if (getProductInstance() == null) return null;
+
+        return getProductInstance().getGimbal();
     }
     public static boolean isAircraftConnected() {
         return getProductInstance() != null && getProductInstance() instanceof Aircraft;

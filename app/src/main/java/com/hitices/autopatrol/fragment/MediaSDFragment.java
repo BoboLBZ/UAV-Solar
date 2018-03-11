@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.fragment;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +14,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.hitices.autopatrol.AutoPatrolApplication;
+import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.activity.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.hitices.autopatrol.MainActivity">
+    tools:context="com.hitices.autopatrol.activity.MainActivity">
     <RadioGroup
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"

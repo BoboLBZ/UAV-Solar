@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.hitices.autopatrol.MediaSDFragment">
+    tools:context="com.hitices.autopatrol.fragment.MediaSDFragment">
     <ImageView
         android:id="@+id/imageView_sd"
         android:layout_width="match_parent"

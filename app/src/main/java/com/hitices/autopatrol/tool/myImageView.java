@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.tool;
 
 import android.app.Activity;
 import android.content.Context;

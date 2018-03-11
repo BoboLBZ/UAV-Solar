@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -41,6 +42,10 @@ import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.maps2d.model.PolylineOptions;
+import com.hitices.autopatrol.AutoPatrolApplication;
+import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
 import com.hitices.autopatrol.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
@@ -55,8 +60,12 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
+import dji.common.gimbal.GimbalMode;
+import dji.common.gimbal.Rotation;
+import dji.common.gimbal.RotationMode;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
@@ -75,7 +84,7 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
-public class WaypointMissionPreviewActivity extends Activity implements View.OnClickListener {
+public class WaypointMissionExecuteActivity extends Activity implements View.OnClickListener {
      private WaypointsMission waypointsMission;
      public static WaypointMission.Builder builder;
      private FlightController mFlightController;
@@ -86,26 +95,26 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
      private Marker droneMarker;
      private LatLng droneLocation;
      private ImageButton uplaod,start,stop;
-     private Button button, retest, sstart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_execute);
      //   setContentView(R.layout.layout_test);
         Intent intent=getIntent();
-        String path=AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
+        String path= AutoPatrolApplication.missionDir+"/"+intent.getStringExtra("missionName")+".xml";
         waypointsMission=readMission(path);
 
-        //initUI();
+        initUI();
         initMapView(savedInstanceState);
         addListener();
+        initFlightController();
         showMissionChangeDialog();
     }
     @Override
     protected void onDestroy(){
         super.onDestroy();
 //        if(getRequestedOrientation()== ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-//            WaypointMissionPreviewActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//            WaypointMissionExecuteActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         removeListener();
     }
     @Override
@@ -114,29 +123,6 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
         initFlightController();
     }
     private void initUI(){
-       button=findViewById(R.id.execute_button);
-        retest=findViewById(R.id.execute_retest);
-        sstart=findViewById(R.id.execute_start);
-       button.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               uploadMission();
-           }
-       });
-        sstart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startMission();
-            }
-        });
-        retest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                stopMission();
-            }
-        });
-    }
-    private void initUi2(){
         uplaod=findViewById(R.id.execute_uploadMission);
         stop=findViewById(R.id.execute_stopMission);
         start=findViewById(R.id.execute_startMission);
@@ -192,10 +178,12 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
     }
 
     private void markWaypoint(){
+        List<LatLng> lines=new ArrayList<>();
         for(int i=0;i<waypointsMission.waypointList.size();i++){
             MarkerOptions markerOptions =new MarkerOptions();
             LatLng ll=new LatLng(waypointsMission.waypointList.get(i).coordinate.getLatitude(),
                     waypointsMission.waypointList.get(i).coordinate.getLongitude());
+            lines.add(ll);
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             aMap.addMarker(markerOptions);
@@ -203,6 +191,7 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
             cameraUpdate(ll);
             aMap.addMarker(markerOptions);
         }
+        aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(255,1,1,1)));
     }
     private void updateDroneLocation(LatLng latLng){
             final MarkerOptions markerOptions = new MarkerOptions();
@@ -266,9 +255,38 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
         }
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+//            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+
         }
     };
+    private void setCameraMode(){
+        if(AutoPatrolApplication.getCameraInstance() != null){
+            //AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.);
+        }
+        if(AutoPatrolApplication.getGimbalInstance() != null){
+            //AutoPatrolApplication.getGimbalInstance().setPitchRangeExtensionEnabled(true);
+            AutoPatrolApplication.getGimbalInstance().setMode(GimbalMode.FPV, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+
+                }
+            });
+            Rotation.Builder b=new Rotation.Builder();
+            b.mode(RotationMode.ABSOLUTE_ANGLE);
+            b.pitch(-90f);
+            AutoPatrolApplication.getGimbalInstance().rotate(b.build(), new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError == null) {
+                        Log.i("rhys", "rotateGimbal success");
+                    } else {
+                        Log.i("rhys", "rotateGimbal error " + djiError.getDescription());
+                    }
+                }
+            });
+//            System.out.println
+        }
+    }
     private void showMissionChangeDialog(){
         LinearLayout wpPreview = (LinearLayout)getLayoutInflater().inflate(R.layout.activity_preview_waypoint,null);
         //ui
@@ -393,9 +411,27 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
         params.height=WindowManager.LayoutParams.MATCH_PARENT;
         window.setAttributes(params);
     }
+    private void sortingWaypoints(){
+        if(waypointsMission != null){
+            if(droneLocation == null)
+            {
+                droneLocation=new LatLng(waypointsMission.waypointList.get(0).coordinate.getLatitude(),
+                        waypointsMission.waypointList.get(0).coordinate.getLongitude());
+            }
+            AntColonyAlgorithm antColonyAlgorithm=new AntColonyAlgorithm(waypointsMission.waypointList,droneLocation);
+            List<Integer> sortedIndex=antColonyAlgorithm.getSortedWaypoints();
+            List<Waypoint> newWaypointList=new ArrayList<>();
+            for(int i=0;i<sortedIndex.size();i++){
+                newWaypointList.add(waypointsMission.waypointList.get(i));
+            }
+            waypointsMission.waypointList=newWaypointList;
+        }
+    }
     private void missionProcessing(){
+        sortingWaypoints();
         markWaypoint();
         loadMission();
+        setCameraMode();
 //        uploadMission();
 //        startMission();
 //        new Handler().postDelayed(new Runnable(){
@@ -416,6 +452,7 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
     }
     private void loadMission(){
             setResultToToast("on load");
+            waypointsMission.addWaypointList(droneLocation);
             builder = waypointsMission.getMissionBuilder();
             if(builder != null) {
                 DJIError error = getWaypointMissionOperator().loadMission(builder.build());
@@ -461,6 +498,7 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
             }
         });
     }
+
     private class WPGridviewAdapter extends BaseAdapter {
         private LayoutInflater inflater;
         WPGridviewAdapter(Context context){
@@ -707,6 +745,7 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
             return WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         }
     }
+    @Nullable
     private WaypointActionType getAction(String s){
         if( WaypointActionType.STAY.toString().equals(s))
             return WaypointActionType.STAY;
@@ -749,10 +788,10 @@ public class WaypointMissionPreviewActivity extends Activity implements View.OnC
             return R.id.preview_headingNext;
     }
     private void setResultToToast(final String msg){
-        Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
             }
         });
     }

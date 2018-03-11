@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.fragment;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+import com.hitices.autopatrol.tool.MediaViewPagerAdapter;
+import com.hitices.autopatrol.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;

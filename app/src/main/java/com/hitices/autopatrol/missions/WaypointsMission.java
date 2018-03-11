@@ -66,7 +66,7 @@ public class WaypointsMission extends BaseMission {
         date=new Date();
         altitude=50.0f;
         speed=10.0f;
-        finishedAction=WaypointMissionFinishedAction.GO_HOME;
+        finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
         headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         //init actions
         currentGeneralActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,0));

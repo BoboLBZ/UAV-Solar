@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.activity;
 
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -17,6 +17,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.hitices.autopatrol.fragment.AircraftFragment;
+import com.hitices.autopatrol.fragment.MediaFragment;
+import com.hitices.autopatrol.fragment.MediaLocalFragment;
+import com.hitices.autopatrol.fragment.MediaSDFragment;
+import com.hitices.autopatrol.fragment.MissionFragment;
+import com.hitices.autopatrol.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,11 +41,11 @@ import dji.sdk.sdkmanager.DJISDKManager;
  */
 public class MainActivity extends AppCompatActivity
                           implements RadioGroup.OnCheckedChangeListener ,
-                                        AircraftFragment.OnFragmentInteractionListener,
-                                        MissionFragment.OnFragmentInteractionListener,
-                                        MediaFragment.OnFragmentInteractionListener,
-                                        MediaLocalFragment.OnFragmentInteractionListener,
-                                        MediaSDFragment.OnFragmentInteractionListener{
+        AircraftFragment.OnFragmentInteractionListener,
+        MissionFragment.OnFragmentInteractionListener,
+        MediaFragment.OnFragmentInteractionListener,
+        MediaLocalFragment.OnFragmentInteractionListener,
+        MediaSDFragment.OnFragmentInteractionListener {
     //radio
     private RadioGroup tabBar; //通过radio button的方式控制fragment的显示
     private RadioButton rbMission,rbAircraft,rbMedia;

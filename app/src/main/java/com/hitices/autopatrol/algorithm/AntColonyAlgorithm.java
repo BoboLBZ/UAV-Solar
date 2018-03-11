@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 
+import dji.common.mission.waypoint.Waypoint;
+
 /**
  * Created by Rhys on 2018/3/6.
  * email: bozliu@outlook.com
@@ -16,7 +18,7 @@ import java.util.Random;
 
 public class AntColonyAlgorithm {
     private List<LatLng> rawWaypoints=new ArrayList<>();
-    private List<LatLng> sortedWaypoints=new ArrayList<>();
+    private List<Integer> sortedWaypointsIndex=new ArrayList<>();
     /*init param*/
     private int antNum= 30; //
     final float alpha = 1; //信息素重要程度
@@ -27,12 +29,16 @@ public class AntColonyAlgorithm {
     private int unchangedTimes=0;
     private double minLength=0;
     private Random r=new Random();
-    AntColonyAlgorithm(List<LatLng> points){
-        this.rawWaypoints=points;
+    public AntColonyAlgorithm(List<Waypoint> points,LatLng planePoint){
+        rawWaypoints.add(planePoint);
+        for(int i=0;i<points.size();i++){
+            rawWaypoints.add(new LatLng(points.get(i).coordinate.getLatitude(),points.get(i).coordinate.getLongitude()));
+        }
     }
-    public List<LatLng> getSortedWaypoints(){
+    public List<Integer> getSortedWaypoints(){
         int iter=1;
         int pointsNum=rawWaypoints.size();
+        antNum=pointsNum*2;
         int[][] table=new int[antNum][pointsNum]; //存放路径，
         double[][] Tau=new double[pointsNum][pointsNum]; //信息素矩阵
         double[][] Heu=new double[pointsNum][pointsNum]; //启发函数矩阵
@@ -106,8 +112,9 @@ public class AntColonyAlgorithm {
             //选择最短路径记录下来
             int minLengthIndex=findMinIndex(length);
             double min=length.get(minLengthIndex);
-            for(int i=0;i<pointsNum;i++){
-                sortedWaypoints.add(i,rawWaypoints.get(table[minLengthIndex][i]));
+            sortedWaypointsIndex.clear();
+            for(int i=1;i<pointsNum;i++){
+                sortedWaypointsIndex.add(i-1,table[minLengthIndex][i]-1); //去掉起点，对应索引-1
             }
             //提前结束（超过10次最短路径不发生变化）
             if (iter == 1){
@@ -149,7 +156,7 @@ public class AntColonyAlgorithm {
             }
            iter++;
         }
-        return sortedWaypoints;
+        return sortedWaypointsIndex;
     }
     public static <T extends Comparable<T>> int findMinIndex(final List<T> xs) {
         int minIndex;

@@ -1,4 +1,4 @@
-package com.hitices.autopatrol;
+package com.hitices.autopatrol.activity;
 
 import android.annotation.SuppressLint;
 import android.support.v7.app.ActionBar;
@@ -12,6 +12,7 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.hitices.autopatrol.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class ShowFullImageActivity extends AppCompatActivity {

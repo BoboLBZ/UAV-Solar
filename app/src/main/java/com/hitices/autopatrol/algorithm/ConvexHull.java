@@ -1,8 +1,5 @@
 package com.hitices.autopatrol.algorithm;
 
-
-import com.amap.api.maps2d.model.LatLng;
-
 import java.util.List;
 
 /**
@@ -16,17 +13,16 @@ public class ConvexHull {
     private final int N;//数据个数
     private int D[]; // 数组索引，双向表
 
-    public ConvexHull(List<LatLng> pList) {
+    public ConvexHull(List<Point> pList) {
         this.pointArray = new Point[pList.size()];
         N = pList.size();
         int k = 0;
-        for (LatLng latLng : pList) {
-            Point p=new Point(latLng.longitude,latLng.latitude);
+        for (Point p : pList) {
             pointArray[k++] = p;
         }
         D = new int[2 * N];
     }
-    public LatLng[] getTubaoPoint() {
+    public Point[] getTubaoPoint() {
         // 获得最小的Y，作为P0点
         double minY = pointArray[0].getY();
         int j = 0;
@@ -102,15 +98,16 @@ public class ConvexHull {
 //                    + pointArray[D[i]].getY());
             resultPoints[index++] = pointArray[D[i]];
         }
+        resultPoints[index]=resultPoints[0];
         //convert Point to Latlng
-        LatLng[] result=new LatLng[resultPoints.length+1];
-        for(int k=0;k<resultPoints.length;k++){
-            LatLng latLng=new LatLng(resultPoints[k].getY(),resultPoints[k].getX());
-            result[k]=latLng;
-        }
-        LatLng latLng=new LatLng(resultPoints[0].getY(),resultPoints[0].getX());
-        result[resultPoints.length]=latLng;
-        return result;
+//        LatLng[] result=new LatLng[resultPoints.length+1];
+//        for(int k=0;k<resultPoints.length;k++){
+//            LatLng latLng=new LatLng(resultPoints[k].getY(),resultPoints[k].getX());
+//            result[k]=latLng;
+//        }
+//        LatLng latLng=new LatLng(resultPoints[0].getY(),resultPoints[0].getX());
+//        result[resultPoints.length]=latLng;
+        return resultPoints;
     }
 
     /**

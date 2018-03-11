@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context="com.hitices.autopatrol.activity.WaypointMissionExecuteActivity">
+    tools:context="com.hitices.autopatrol.activity.PolygonMissionEcecuteActivity">
 
     <dji.ui.widget.FPVWidget
         android:layout_width="match_parent"
@@ -22,11 +22,11 @@
         android:layout_width="300dp"
         android:layout_height="200dp"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="91dp"
         android:layout_alignParentBottom="true"
         android:background="@color/debug_2">
         <com.amap.api.maps2d.MapView
-            android:id="@+id/execute_mapview"
+            android:id="@+id/execute_mapview_pm"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </FrameLayout>
@@ -168,7 +168,7 @@
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/execute_uploadMission"
+            android:id="@+id/execute_uploadMission_pm"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_mission_upload"
@@ -176,13 +176,13 @@
         <ImageButton
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:id="@+id/execute_startMission"
+            android:id="@+id/execute_startMission_pm"
             android:src="@drawable/ic_flight_takeoff_unpressed"
             android:layout_marginBottom="2dp"/>
         <ImageButton
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:id="@+id/execute_stopMission"
+            android:id="@+id/execute_stopMission_pm"
             android:src="@drawable/ic_mission_stop"
             android:layout_marginBottom="2dp"/>
     </LinearLayout>

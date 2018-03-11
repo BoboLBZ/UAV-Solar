@@ -75,7 +75,7 @@
         <service android:name="dji.sdk.sdkmanager.DJIGlobalService" />
 
         <!-- DJI SDK -->
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -83,15 +83,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ShowFullImageActivity"
+            android:name=".activity.ShowFullImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/FullscreenTheme">
-
-        </activity>
-        <activity android:name=".WaypointMissionPreviewActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-
-        </activity>
+            android:theme="@style/FullscreenTheme"></activity>
+        <activity
+            android:name=".activity.WaypointMissionExecuteActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"></activity>
+        <activity android:name=".activity.PolygonMissionEcecuteActivity"></activity>
     </application>
 
 </manifest>
