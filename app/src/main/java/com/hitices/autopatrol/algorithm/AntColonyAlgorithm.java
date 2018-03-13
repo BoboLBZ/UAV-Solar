@@ -2,6 +2,7 @@ package com.hitices.autopatrol.algorithm;
 
 import android.content.DialogInterface;
 
+import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.model.LatLng;
 
 import java.util.ArrayList;
@@ -50,7 +51,9 @@ public class AntColonyAlgorithm {
                 if(i != j){
                     LatLng one=rawWaypoints.get(i);
                     LatLng two=rawWaypoints.get(j);
-                    Distance[i][j]=Math.sqrt(Math.pow(one.latitude-two.latitude,2)+Math.pow(one.longitude-two.longitude,2));
+                    //Distance[i][j]=Math.sqrt(Math.pow(one.latitude-two.latitude,2)+Math.pow(one.longitude-two.longitude,2));
+                    //use aAap function to calculate distance
+                    Distance[i][j]= AMapUtils.calculateLineDistance(one,two);
                     Heu[i][j]=1/Distance[i][j];
                 }else {
                     Distance[i][j]=0;

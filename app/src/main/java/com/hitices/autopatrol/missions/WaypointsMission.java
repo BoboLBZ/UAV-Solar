@@ -99,6 +99,10 @@ public class WaypointsMission extends BaseMission {
             eSpeed.appendChild(doc.createTextNode(String.valueOf(speed)));
             rootElement.appendChild(eSpeed);
 
+            Element eAlt=doc.createElement("altitude");
+            eAlt.appendChild(doc.createTextNode(String.valueOf(altitude)));
+            rootElement.appendChild(eAlt);
+
             Element eFinishedAction=doc.createElement("finishedAction");
             eFinishedAction.appendChild(doc.createTextNode(finishedAction.name()));
             rootElement.appendChild(eFinishedAction);
@@ -208,6 +212,7 @@ public class WaypointsMission extends BaseMission {
                 waypointList.get(i).addAction(new WaypointAction(selectedType.get(j),j));
             }
         }
+        this.altitude=alt;
     }
     public void singleWaypointsetting(LatLng latLng,float alt,List<WaypointAction> aActions){
         //对单个航点设置

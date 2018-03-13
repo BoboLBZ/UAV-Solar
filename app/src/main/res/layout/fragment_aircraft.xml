@@ -43,14 +43,6 @@
         android:theme="@android:style/Theme.Holo.Light">
     </Spinner>
 
-    <SeekBar
-        android:id="@+id/seekBar_begin"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="18dp"
-        android:layout_centerHorizontal="true"
-        android:thumb="@drawable/ic_flight_takeoff_unpressed" />
     <ImageButton
         android:id="@+id/btn_take_off"
         android:layout_width="wrap_content"

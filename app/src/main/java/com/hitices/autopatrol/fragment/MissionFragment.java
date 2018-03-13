@@ -69,7 +69,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.StatementEvent;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -78,8 +77,6 @@ import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMissionFinishedAction;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
-import dji.sdk.mission.waypoint.WaypointMissionOperator;
-import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MissionFragment extends Fragment implements View.OnClickListener{
     private OnFragmentInteractionListener mListener;
@@ -104,8 +101,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     private Polygon polygon;
     private Marker startPoint;
 
-    //location
-    private AMapLocationClient mlocationClient;
     //info window
     private boolean flag_isShow=false;
     private Marker currentMarker;
@@ -241,7 +236,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         settings.setZoomControlsEnabled(false);
         //use gps location
         AMapLocationClientOption mLocationOption  = new AMapLocationClientOption();
-        mlocationClient = new AMapLocationClient(getContext());
+        AMapLocationClient mlocationClient = new AMapLocationClient(getContext());
         mlocationClient.setLocationListener(aMapLocationListener);
         mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
         mLocationOption.setInterval(2000);
@@ -259,6 +254,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(onItemSelectedListener);
     }
+
     private WaypointsMission getCurrentWaypointsMission(){
         if(currentMission.missionType == MissionType.WaypointMission)
             return (WaypointsMission)currentMission;
@@ -269,73 +265,46 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             return (PolygonMission)currentMission;
         else return null;
     }
-    private void markWaypoint(LatLng latLng){
-        if(currentMarker != null)
-            currentMarker.hideInfoWindow();
-        //amap about
-        if(creatable){
-            MarkerOptions markerOptions =new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-            markerOptions.draggable(true);
-            markerOptions.title("waypoint");
-            aMap.addMarker(markerOptions);
-            Marker marker =aMap.addMarker(markerOptions);
-            mMarkers.add(marker);
-         }else {
-            setResultToToast("请选择修改任务");
-        }
-    }
-    private void setWaypointList(LatLng latLng){
-        //dji mission about
-        //直接加到class里
-        if(creatable && getCurrentWaypointsMission() != null){
-            getCurrentWaypointsMission().addWaypointList(latLng);
-        }
-    }
-    private void drawPolygon(LatLng latLng){
-        getCurrentPolygonMission().addVertex(latLng);
-        if(polyline != null){
-            polyline.remove();
-        }
-        if(polygon != null)
-            polygon.remove();
-        if(startPoint != null)
-            startPoint.remove();
-        PolylineOptions options=new PolylineOptions().addAll(getCurrentPolygonMission().getVertexs());
-        if(getCurrentPolygonMission().getVertexs().size()>0)
-            options.add(getCurrentPolygonMission().getVertexs().get(0));
-        polyline=aMap.addPolyline(options);
-        polygon=aMap.addPolygon(new PolygonOptions().addAll(getCurrentPolygonMission().getVertexs())
-                                                    .fillColor(getResources().getColor(R.color.fillColor)));
-        if(getCurrentPolygonMission().getVertexs().size()==1)
-            drawStartPoint(getCurrentPolygonMission().getVertexs().get(0));
 
+    //general
+    public BaseMission readBaseMission(String path){
+        try {
+            //need test,
+            File file = new File(path);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+//            //root
+            doc.getDocumentElement().normalize();
+            String type=doc.getDocumentElement().getNodeName();
+            System.out.println("Root element :" + type);
+            //name
+            BaseMission newMission;
+
+            NodeList nodes=doc.getElementsByTagName("missionName");
+            if(nodes.item(0) == null){
+                return null;
+            }else {
+                if(type.equals("PolygonMission"))
+                {
+                    newMission=new PolygonMission(nodes.item(0).getTextContent());
+                    readPolygonMission(doc,(PolygonMission)newMission);
+                }else if(type.equals("WaypointsMission")){
+                    newMission=new WaypointsMission(nodes.item(0).getTextContent());
+                    readWaypointsMission(doc,(WaypointsMission)newMission);
+                }else {
+                    return null;
+                }
+            }
+            newMission.FLAG_ISSAVED=true;
+            return newMission;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-    private void drawStartPoint(LatLng latLng){
-        MarkerOptions markerOptions =new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        markerOptions.title("startPoint");
-        aMap.addMarker(markerOptions);
-        startPoint =aMap.addMarker(markerOptions);
-    }
-    private void backPolygonVertex(){
-//        int size=mVertexs.size();
-//        if(size>0){
-//            mVertexs.remove(size-1);
-//        }
-//        if(polyline != null){
-//            polyline.remove();
-//        }
-//        if(polygon != null)
-//            polygon.remove();
-//        PolylineOptions options=new PolylineOptions().addAll(mVertexs);
-//        if(mVertexs.size()>0)
-//            options.add(mVertexs.get(0));
-//        polyline=aMap.addPolyline(options);
-//        polygon=aMap.addPolygon(new PolygonOptions().addAll(mVertexs)
-//                .fillColor(getResources().getColor(R.color.pink_pressed)));
+    private void importMission(){
+        //注意修改lastSelectedMissionName的值
     }
     private void refreshMapView(){
         for(int i=0;i<mMarkers.size();i++) {
@@ -347,7 +316,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         if(polyline != null)
             polyline.remove();
         if(startPoint!= null)
-            startPoint.remove();
+            startPoint.destroy();
         mMarkers.clear();
         if(aMap == null)
             initMapView();
@@ -369,20 +338,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                 cameraUpdate(ll);
                 Marker marker = aMap.addMarker(markerOptions);
                 mMarkers.add(marker);
-//                for (int i = 0; i < currentWaypointsMission.waypointList.size(); i++) {
-//                MarkerOptions markerOptions = new MarkerOptions();
-//                LatLng ll = new LatLng(currentWaypointsMission.waypointList.get(i).coordinate.getLatitude(),
-//                        currentWaypointsMission.waypointList.get(i).coordinate.getLongitude());
-//                markerOptions.position(ll);
-//                System.out.println("\nnewtest" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
-//                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//                markerOptions.draggable(true);
-//                markerOptions.title("waypoint");
-//                aMap.addMarker(markerOptions);
-//                aMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
-//                cameraUpdate(ll);
-//                Marker marker = aMap.addMarker(markerOptions);
-//                mMarkers.add(marker);
             }
         }else if(currentMission.missionType == MissionType.PolygonMission){
             //polygon mission,draw polygon
@@ -413,6 +368,96 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         CameraUpdate cameraupdate =CameraUpdateFactory.newLatLngZoom(pos,zoomLevel);
         aMap.moveCamera(cameraupdate);
     }
+    private boolean saveMission(){
+        boolean flag=currentMission.saveMission();
+        //update mission list
+        if(!flag){
+            setResultToToast("can't save current mission");
+            return false;
+        }
+        setResultToToast("success");
+        creatable=false;
+        sendMissionChange();
+        //currentWaypointsMission.readMission(AutoPatrolApplication.missionDir+"/"+currentWaypointsMission.missionName+".xml");
+        return true;
+    }
+    private boolean deleteMission(){
+        File f=new File(AutoPatrolApplication.missionDir+"/"+currentMission.missionName+".xml");
+        if(f.exists()){
+            f.delete();
+            return true;
+        }
+        return false;
+    }
+    //waypoint mission about
+    private void addWaypointMission(){
+        AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());
+        adBuilder.setTitle("请输入航点任务名称");
+        final EditText input=new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        input.selectAll();
+        input.setFocusable(true);
+        input.setFocusableInTouchMode(true);
+        input.requestFocus();
+        adBuilder.setView(input);
+        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {}
+        });
+        final AlertDialog alertDialog= adBuilder.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String text=input.getText().toString().trim();
+                        if(text.length()>0) {
+                            arrayAdapter.insert(text, 0);
+                            spinner.setSelection(0,true);
+                            currentMission = new WaypointsMission(arrayAdapter.getItem(0).toString());
+                            lastSelectedMissionName=getCurrentWaypointsMission().missionName;
+                            creatable = true;
+                            alertDialog.dismiss();
+                            refreshMapView();
+                        }else {
+                            setResultToToast("任务名不能为空");
+                        }
+                    }
+                });
+
+        alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+    private void markWaypoint(LatLng latLng){
+        if(currentMarker != null)
+            currentMarker.hideInfoWindow();
+        //amap about
+        if(creatable){
+            MarkerOptions markerOptions =new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            markerOptions.draggable(true);
+            markerOptions.title("waypoint");
+            aMap.addMarker(markerOptions);
+            Marker marker =aMap.addMarker(markerOptions);
+            mMarkers.add(marker);
+         }else {
+            setResultToToast("请选择修改任务");
+        }
+    }
+    private void setWaypointList(LatLng latLng){
+        //dji mission about
+        //直接加到class里
+        if(creatable && getCurrentWaypointsMission() != null){
+            getCurrentWaypointsMission().addWaypointList(latLng);
+        }
+    }
     private void showWaypointsSettingDialog(){
         final List<WaypointAction> actions=getCurrentWaypointsMission().currentGeneralActions;
         LinearLayout wayPointSettings = (LinearLayout)getLayoutInflater().inflate(R.layout.dialog_waypointsetting,null);
@@ -428,7 +473,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
 
         //init
         tv_wayPointAltitude.setText(String.valueOf(50));
-       // mName.setText(arrayAdapter.getItem(0).toString());
+        // mName.setText(arrayAdapter.getItem(0).toString());
         mName.setText(getCurrentWaypointsMission().missionName);
         sb_speed.setMax(15);
         sb_speed.setProgress(10);
@@ -517,10 +562,13 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(View view) {
                 if(deleteMission()){
-                    arrayAdapter.remove(getCurrentWaypointsMission().missionName);
+                    arrayAdapter.remove(currentMission.missionName);
                     currentMission=null;
-                    if(arrayAdapter.getCount()>0)
-                       spinner.setSelection(0,true);
+                    if(arrayAdapter.getCount()>0) {
+                        spinner.setSelection(0, true);
+                        // refreshMapView();
+                    }
+
                     else
                         spinner.setSelected(false);
                     sendMissionChange();
@@ -532,6 +580,161 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             }
         });
         dialog.show();
+    }
+    public void readWaypointsMission(Document doc,WaypointsMission newWaypointsMission){
+        try {
+            NodeList nodes=doc.getElementsByTagName("speed");
+            if(nodes.item(0) != null){
+                newWaypointsMission.speed=Float.parseFloat(nodes.item(0).getTextContent());
+            }
+            //general altitude
+            nodes=doc.getElementsByTagName("altitude");
+            if(nodes.item(0) != null){
+                newWaypointsMission.altitude=Float.parseFloat(nodes.item(0).getTextContent());
+            }
+            //finishedAction
+            nodes=doc.getElementsByTagName("finishedAction");
+            if(nodes.item(0) != null){
+                newWaypointsMission.finishedAction=getFinishedAction(nodes.item(0).getTextContent());
+            }
+            //headingMode
+            nodes=doc.getElementsByTagName("headingMode");
+            if(nodes.item(0) != null){
+                newWaypointsMission.headingMode=getHeadingMode(nodes.item(0).getTextContent());
+            }
+            //Waypoints
+            nodes=doc.getElementsByTagName("Waypoints");
+            Node node=nodes.item(0);
+            //single waypoint
+            NodeList nWaypointList = ((Element)node).getElementsByTagName("waypoint");
+            for (int temp = 0; temp < nWaypointList.getLength(); temp++) {
+                Node nNode = nWaypointList.item(temp);
+                System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    LatLng ll=new LatLng(
+                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
+                    Waypoint w=new Waypoint(
+                            ll.latitude,ll.longitude,
+                            Float.parseFloat(eElement.getElementsByTagName("altitude").item(0).getTextContent()));
+                    NodeList eActions=eElement.getElementsByTagName("actions");
+                    for(int j=0;j<eActions.getLength();j++){
+                        Node n=eActions.item(j);
+                        if(n.getNodeType() == Node.ELEMENT_NODE) {
+                            Element e=(Element)n;
+                            NodeList t=e.getChildNodes();
+                            for(int k=0;k<t.getLength();k++){
+                                WaypointActionType type=getAction(t.item(k).getNodeName());
+                                w.addAction(new WaypointAction(type,k));
+                            }
+                        }
+                    }
+                    newWaypointsMission.waypointList.add(w);
+                    newWaypointsMission.waypoints.put(ll,w);
+                    System.out.println("\nlat and lng" + String.valueOf(ll.latitude)+" : "+String.valueOf(ll.longitude));
+                }
+            }
+            newWaypointsMission.FLAG_ISSAVED=true;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    //polygon mission about
+    private void addPolygonMoission(){
+        AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());
+        adBuilder.setTitle("请输入区域任务名称");
+        final EditText input=new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        input.selectAll();
+        input.setFocusable(true);
+        input.setFocusableInTouchMode(true);
+        input.requestFocus();
+        adBuilder.setView(input);
+        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {}
+        });
+        final AlertDialog alertDialog= adBuilder.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String text=input.getText().toString().trim();
+                        if(text.length()>0) {
+                            arrayAdapter.insert(text, 0);
+                            spinner.setSelection(0,true);
+                            currentMission=new PolygonMission(arrayAdapter.getItem(0).toString());
+                            lastSelectedMissionName=currentMission.missionName;
+                            creatable = true;
+                            alertDialog.dismiss();
+                            refreshMapView();
+                        }else {
+                            setResultToToast("任务名不能为空");
+                        }
+                    }
+                });
+
+        alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+    }
+    private void drawPolygon(LatLng latLng){
+        getCurrentPolygonMission().addVertex(latLng);
+        if(polyline != null){
+            polyline.remove();
+        }
+        if(polygon != null)
+            polygon.remove();
+        if(startPoint != null)
+            startPoint.remove();
+        PolylineOptions options=new PolylineOptions().addAll(getCurrentPolygonMission().getVertexs());
+        if(getCurrentPolygonMission().getVertexs().size()>0)
+            options.add(getCurrentPolygonMission().getVertexs().get(0));
+        polyline=aMap.addPolyline(options);
+        polygon=aMap.addPolygon(new PolygonOptions().addAll(getCurrentPolygonMission().getVertexs())
+                                                    .fillColor(getResources().getColor(R.color.fillColor)));
+        if(getCurrentPolygonMission().getVertexs().size()==1)
+            drawStartPoint(getCurrentPolygonMission().getVertexs().get(0));
+        else {
+            destroyStartPoint();
+        }
+
+    }
+    private void drawStartPoint(LatLng latLng){
+        MarkerOptions markerOptions =new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.title("startPoint");
+        aMap.addMarker(markerOptions);
+        startPoint =aMap.addMarker(markerOptions);
+    }
+    private void destroyStartPoint(){
+       if(startPoint != null)
+           startPoint.destroy();
+    }
+    private void backPolygonVertex(){
+//        int size=mVertexs.size();
+//        if(size>0){
+//            mVertexs.remove(size-1);
+//        }
+//        if(polyline != null){
+//            polyline.remove();
+//        }
+//        if(polygon != null)
+//            polygon.remove();
+//        PolylineOptions options=new PolylineOptions().addAll(mVertexs);
+//        if(mVertexs.size()>0)
+//            options.add(mVertexs.get(0));
+//        polyline=aMap.addPolyline(options);
+//        polygon=aMap.addPolygon(new PolygonOptions().addAll(mVertexs)
+//                .fillColor(getResources().getColor(R.color.pink_pressed)));
     }
     private void showPolygonSettingDialog(){
         LinearLayout settingView=(LinearLayout)getLayoutInflater().inflate(R.layout.dialog_polygon_setting,null);
@@ -658,7 +861,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(View view) {
                 if(deleteMission()){
-                    arrayAdapter.remove(getCurrentWaypointsMission().missionName);
+                    arrayAdapter.remove(currentMission.missionName);
                     currentMission=null;
                     if(arrayAdapter.getCount()>0)
                         spinner.setSelection(0,true);
@@ -673,176 +876,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             }
         });
         alertDialog.show();
-    }
-    private boolean saveMission(){
-        boolean flag=currentMission.saveMission();
-        //update mission list
-        if(!flag){
-            setResultToToast("can't save current mission");
-            return false;
-        }
-        setResultToToast("success");
-        creatable=false;
-        sendMissionChange();
-        //currentWaypointsMission.readMission(AutoPatrolApplication.missionDir+"/"+currentWaypointsMission.missionName+".xml");
-        return true;
-    }
-    private boolean deleteMission(){
-        File f=new File(AutoPatrolApplication.missionDir+"/"+getCurrentWaypointsMission().missionName+".xml");
-        if(f.exists()){
-            f.delete();
-            return true;
-        }
-        return false;
-    }
-    private void addWaypointMission(){
-        AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());
-        adBuilder.setTitle("请输入航点任务名称");
-        final EditText input=new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
-        input.selectAll();
-        input.setFocusable(true);
-        input.setFocusableInTouchMode(true);
-        input.requestFocus();
-        adBuilder.setView(input);
-        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {}
-        });
-        final AlertDialog alertDialog= adBuilder.create();
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String text=input.getText().toString().trim();
-                        if(text.length()>0) {
-                            arrayAdapter.insert(text, 0);
-                            spinner.setSelection(0,true);
-                            currentMission = new WaypointsMission(arrayAdapter.getItem(0).toString());
-                            lastSelectedMissionName=getCurrentWaypointsMission().missionName;
-                            creatable = true;
-                            alertDialog.dismiss();
-                            refreshMapView();
-                        }else {
-                            setResultToToast("任务名不能为空");
-                        }
-                    }
-                });
-
-        alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-    }
-    private void addPolygonMoission(){
-        AlertDialog.Builder adBuilder=new AlertDialog.Builder(getContext());
-        adBuilder.setTitle("请输入区域任务名称");
-        final EditText input=new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
-        input.selectAll();
-        input.setFocusable(true);
-        input.setFocusableInTouchMode(true);
-        input.requestFocus();
-        adBuilder.setView(input);
-        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {}
-        });
-        final AlertDialog alertDialog= adBuilder.create();
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String text=input.getText().toString().trim();
-                        if(text.length()>0) {
-                            arrayAdapter.insert(text, 0);
-                            spinner.setSelection(0,true);
-//                            currentWaypointsMission = new WaypointsMission(arrayAdapter.getItem(0).toString());
-//                            lastSelectedMissionName=currentWaypointsMission.missionName;
-                            currentMission=new PolygonMission(arrayAdapter.getItem(0).toString());
-                            //BaseMission bs=currentPolygonMission;
-                            creatable = true;
-                            alertDialog.dismiss();
-                            refreshMapView();
-                        }else {
-                            setResultToToast("任务名不能为空");
-                        }
-                    }
-                });
-
-        alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-    }
-    private void importMission(){
-        //注意修改lastSelectedMissionName的值
-    }
-
-
-    public void readWaypointsMission(Document doc,WaypointsMission newWaypointsMission){
-        try {
-            NodeList nodes=doc.getElementsByTagName("speed");
-            if(nodes.item(0) != null){
-                newWaypointsMission.speed=Float.parseFloat(nodes.item(0).getTextContent());
-            }
-            //finishedAction
-            nodes=doc.getElementsByTagName("finishedAction");
-            if(nodes.item(0) != null){
-                newWaypointsMission.finishedAction=getFinishedAction(nodes.item(0).getTextContent());
-            }
-            //headingMode
-            nodes=doc.getElementsByTagName("headingMode");
-            if(nodes.item(0) != null){
-                newWaypointsMission.headingMode=getHeadingMode(nodes.item(0).getTextContent());
-            }
-            //Waypoints
-            nodes=doc.getElementsByTagName("Waypoints");
-            Node node=nodes.item(0);
-            //single waypoint
-            NodeList nWaypointList = ((Element)node).getElementsByTagName("waypoint");
-            for (int temp = 0; temp < nWaypointList.getLength(); temp++) {
-                Node nNode = nWaypointList.item(temp);
-                System.out.println("\nCurrent Element :" + nNode.getNodeName());
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    LatLng ll=new LatLng(
-                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
-                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
-                    Waypoint w=new Waypoint(
-                            ll.latitude,ll.longitude,
-                            Float.parseFloat(eElement.getElementsByTagName("altitude").item(0).getTextContent()));
-                    NodeList eActions=eElement.getElementsByTagName("actions");
-                    for(int j=0;j<eActions.getLength();j++){
-                        Node n=eActions.item(j);
-                        if(n.getNodeType() == Node.ELEMENT_NODE) {
-                            Element e=(Element)n;
-                            NodeList t=e.getChildNodes();
-                            for(int k=0;k<t.getLength();k++){
-                                WaypointActionType type=getAction(t.item(k).getNodeName());
-                                w.addAction(new WaypointAction(type,k));
-                            }
-                        }
-                    }
-                    newWaypointsMission.waypointList.add(w);
-                    newWaypointsMission.waypoints.put(ll,w);
-                    System.out.println("\nlat and lng" + String.valueOf(ll.latitude)+" : "+String.valueOf(ll.longitude));
-                }
-            }
-            newWaypointsMission.FLAG_ISSAVED=true;
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     public void readPolygonMission(Document doc,PolygonMission newPolygonMission){
         NodeList nodes=doc.getElementsByTagName("speed");
@@ -891,44 +924,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         }
         newPolygonMission.FLAG_ISSAVED=true;
     }
-    public BaseMission readBaseMission(String path){
-        try {
-            //need test,
-            File file = new File(path);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(file);
-//            //root
-            doc.getDocumentElement().normalize();
-            String type=doc.getDocumentElement().getNodeName();
-            System.out.println("Root element :" + type);
-            //name
-            BaseMission newMission;
-
-            NodeList nodes=doc.getElementsByTagName("missionName");
-            if(nodes.item(0) == null){
-                return null;
-            }else {
-                if(type.equals("PolygonMission"))
-                {
-                    newMission=new PolygonMission(nodes.item(0).getTextContent());
-                    readPolygonMission(doc,(PolygonMission)newMission);
-                }else if(type.equals("WaypointsMission")){
-                    newMission=new WaypointsMission(nodes.item(0).getTextContent());
-                    readWaypointsMission(doc,(WaypointsMission)newMission);
-                }else {
-                    return null;
-                }
-            }
-            newMission.FLAG_ISSAVED=true;
-            return newMission;
-        }catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
+    //adapter about
     private class myInfoWindowAdapter implements AMap.InfoWindowAdapter,View.OnClickListener{
         @Override
         public View getInfoContents(Marker marker){
@@ -1148,7 +1144,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
 
     }
 
-
+    //listener
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
@@ -1308,6 +1304,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             }
         }
     };
+    //tool function
     private void setResultToToast(final String msg){
         Toast.makeText(getActivity(),msg,Toast.LENGTH_LONG).show();
     }

@@ -4,15 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.hitices.autopatrol.activity.MissionReportActivity">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:layout_gravity="center">
         <TextView
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="mission name:"/>
+            android:text="@string/mission_report_name"/>
         <TextView
             android:id="@+id/report_mission_name"
             android:layout_width="wrap_content"
@@ -20,21 +22,45 @@
 
     </LinearLayout>
     <view
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="3dp"
         android:background="@color/gray_divider_line"/>
     <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="horizontal">
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/mission_report_type"/>
+    <TextView
+        android:id="@+id/report_mission_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="horizontal">
         <TextView
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="mission name:"/>
+            android:text="@string/mission_report_photo"/>
         <TextView
-            android:id="@+id/report_mission_type"
+            android:id="@+id/report_mission_photo_nums"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/mission_report_tips"/>
     </LinearLayout>
 </LinearLayout>

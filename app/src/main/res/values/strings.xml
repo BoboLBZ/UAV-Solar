@@ -18,5 +18,11 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="title_activity_play_video">PlayVideo</string>
+    <!--mission report begin-->
+    <string name="mission_report_name">任务名称:</string>
+    <string name="mission_report_type">任务类型:</string>
+    <string name="mission_report_photo">照片张数:</string>
+    <string name="mission_report_tips">提示:待无人机停稳后关闭无人机电源，取出相机SD卡，进行后续操作</string>
+    <!--mission report end-->
 
 </resources>

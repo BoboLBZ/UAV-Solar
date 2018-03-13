@@ -83,6 +83,7 @@ import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
+import dji.ui.widget.TakeOffWidget;
 
 public class WaypointMissionExecuteActivity extends Activity implements View.OnClickListener {
      private WaypointsMission waypointsMission;
@@ -256,9 +257,19 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
 //            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-
+//              if(error ==null){
+//                  openReportActivity();
+//              }
         }
     };
+    private void openReportActivity(){
+        //photoNums
+        Intent intent= new Intent(this,MissionReportActivity.class);
+        intent.putExtra("name",waypointsMission.missionName);
+        intent.putExtra("type",waypointsMission.missionType);
+        intent.putExtra("photoNums",String.valueOf(0));
+        startActivity(intent);
+    }
     private void setCameraMode(){
         if(AutoPatrolApplication.getCameraInstance() != null){
             //AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.);
@@ -422,7 +433,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             List<Integer> sortedIndex=antColonyAlgorithm.getSortedWaypoints();
             List<Waypoint> newWaypointList=new ArrayList<>();
             for(int i=0;i<sortedIndex.size();i++){
-                newWaypointList.add(waypointsMission.waypointList.get(i));
+                newWaypointList.add(waypointsMission.waypointList.get(sortedIndex.get(i)));
             }
             waypointsMission.waypointList=newWaypointList;
         }
@@ -497,6 +508,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 setResultToToast("Mission Stop: " + (error3 == null ? "Successfully" : error3.getDescription()));
             }
         });
+    }
+
+    private void test(){
+//        TakeOffWidget widget=findViewById()
     }
 
     private class WPGridviewAdapter extends BaseAdapter {
@@ -672,6 +687,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             nodes=doc.getElementsByTagName("speed");
             if(nodes.item(0) != null){
                 newMission.speed=Float.parseFloat(nodes.item(0).getTextContent());
+            }
+            nodes=doc.getElementsByTagName("altitude");
+            if(nodes.item(0) != null){
+                newMission.altitude=Float.parseFloat(nodes.item(0).getTextContent());
             }
             //finishedAction
             nodes=doc.getElementsByTagName("finishedAction");
