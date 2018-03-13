@@ -370,6 +370,7 @@ public class MediaSDFragment extends Fragment {
         }
     };
     private void setResultToToast(final String result) {
+
         Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
     }
 }

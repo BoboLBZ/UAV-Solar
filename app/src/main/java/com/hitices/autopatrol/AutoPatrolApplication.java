@@ -38,6 +38,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change"; //用于通知飞行器连接状态的变化
     public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";  //默认任务保存位置
+    public static final String photoDir=Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
     private static BaseProduct mProduct; //产品
     private Handler mHandler;
     private Application instance;

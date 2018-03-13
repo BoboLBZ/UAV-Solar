@@ -21,6 +21,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.ShowFullImageActivity;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -31,6 +32,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListe
 import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -253,32 +255,54 @@ public class MediaLocalFragment extends Fragment {
     }
     private void getLocalImageUrls(){
         imageurls=new ArrayList<>();
-        Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String[] projImage = { MediaStore.Images.Media._ID
-                , MediaStore.Images.Media.DATA
-                ,MediaStore.Images.Media.SIZE
-                ,MediaStore.Images.Media.DISPLAY_NAME};
-        Cursor mCursor = getActivity().getContentResolver().query(
-                mImageUri,
-                projImage,
-                MediaStore.Images.Media.MIME_TYPE + "=? or "
-                        + MediaStore.Images.Media.MIME_TYPE + "=?",
-                new String[]{"image/jpeg", "image/png"},
-                MediaStore.Images.Media.DATE_MODIFIED+" desc");
-        if(mCursor != null){
-            while(mCursor.moveToNext()){
-                String path = "file://"+ mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-//                String s=new File(path).getParentFile().getAbsolutePath();
-                Log.e("image",path);
-                imageurls.add(path);
+        //test
+        File f = new File(AutoPatrolApplication.photoDir);
+        if (!f.exists()) {//判断路径是否存在
+            if(!f.mkdirs()){
+                return ;
             }
-            mCursor.close();
         }
+        File[] files = f.listFiles();
+        if(files==null){//判断权限
+            return ;
+        }
+        for (File _file : files) {//遍历目录
+            if(_file.isFile()){
+                if( _file.getName().endsWith("jpg") ||_file.getName().endsWith("png") ){
+                imageurls.add("file://"+_file.getAbsolutePath());//获取文件路径
+                 }
+            }
+        }
+        //test
+//        Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+//        Uri mImageUri =Uri.parse(AutoPatrolApplication.photoDir+"/11.jpg");
+//        System.out.println("uri:" + mImageUri);
+//        String[] projImage = { MediaStore.Images.Media._ID
+//                , MediaStore.Images.Media.DATA
+//                ,MediaStore.Images.Media.SIZE
+//                ,MediaStore.Images.Media.DISPLAY_NAME};
+//        Cursor mCursor = getActivity().getContentResolver().query(
+//                mImageUri,
+//                projImage,
+//                MediaStore.Images.Media.MIME_TYPE + "=? or "
+//                        + MediaStore.Images.Media.MIME_TYPE + "=?",
+//                new String[]{"image/jpeg", "image/png"},
+//                MediaStore.Images.Media.DATE_MODIFIED+" desc");
+//        if(mCursor != null){
+//            while(mCursor.moveToNext()){
+//                String path = "file://"+ mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+////                String s=new File(path).getParentFile().getAbsolutePath();
+//                Log.e("image",path);
+//                imageurls.add(path);
+//            }
+//            mCursor.close();
+//        }
 //        Toast.makeText(getActivity(),String.valueOf(urls.size()),Toast.LENGTH_LONG).show();
     }
     private  void getLocalVideoUrls(){
         videourls=new ArrayList<>();
         Uri mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        System.out.println("video uri:" + mImageUri);
         String[] projImage = { MediaStore.Video.Thumbnails._ID
                 , MediaStore.Video.Thumbnails.DATA
                 ,MediaStore.Video.Media.DURATION
