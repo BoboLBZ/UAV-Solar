@@ -58,7 +58,7 @@ public class FullCoveragePathPlanningAlgorithm {
                     temp=temp+width;
                 }
                 //处理最后剩余部分超过一半宽度的问题
-                if(temp > distance[i-1] && temp-distance[i-1]<width/2){
+                if(temp > distance[i-1] && temp-distance[i-1]< width/2){
                     temp=temp-width/2;
                     temp=temp+(distance[i-1]-temp)/2;
                 }
@@ -68,8 +68,8 @@ public class FullCoveragePathPlanningAlgorithm {
                         double A2=points[j].getY()-points[j-1].getY(); //y2-y1
                         double B2=points[j-1].getX()-points[j].getX(); //x1-x2
                         double C2=points[j].getX()*points[j-1].getY()-points[j-1].getX()*points[j].getY();//x2*y1-x1*y2
-                        double py=(C2*A-tempC*A2)/(A2*B-A*B2); //lat
-                        double px=(C2*B-tempC*B2)/(A*B2-A2*B); //lng
+                        double py=(C2*A-tempC*A2)/(A2*B-A*B2);
+                        double px=(C2*B-tempC*B2)/(A*B2-A2*B);
                         if(isOntheLine(points[j-1],points[j],px,py)){
                             nums=nums+1;
                             singleLineWaypoints.add(new Point(px,py));
@@ -154,7 +154,7 @@ public class FullCoveragePathPlanningAlgorithm {
         List<Point> old =getSortedPoints();
         for (int i = 0; i <old.size() ; i=i+2) {
              Point start=old.get(i);
-            templist.add(start);
+             templist.add(start);
              if(i+1 < old.size()){
                  Point end=old.get(i+1);
                  double dis=getDistance(start,end);
@@ -165,12 +165,17 @@ public class FullCoveragePathPlanningAlgorithm {
                      templist.add(new Point(start.getX()+interval*cos,start.getY()+interval*sin));
                      interval+=width;
                  }
+                 templist.add(end);
              }
+
         }
         return convert.PointToLatlng(templist);
     }
     public List<LatLng> getPlanningWaypoints(){
           return convert.PointToLatlng(getSortedPoints());
+    }
+    private void handleRedundantPoint(){
+        
     }
     private boolean isOntheLine(Point start,Point end,double x,double y){
         if(doubleEqules(start.getX(),end.getX())){

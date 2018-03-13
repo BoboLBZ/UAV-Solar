@@ -366,22 +366,15 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
     }
     private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
         @Override
-        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
-        }
+        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {}
         @Override
-        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
-        }
+        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {}
         @Override
-        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
-        }
+        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {}
         @Override
-        public void onExecutionStart() {
-            setResultToToast("mission start");
-        }
+        public void onExecutionStart() {}
         @Override
-        public void onExecutionFinish(@Nullable final DJIError error) {
-            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-        }
+        public void onExecutionFinish(@Nullable final DJIError error) {}
     };
     private PolygonMission readMission(String path){
         try {

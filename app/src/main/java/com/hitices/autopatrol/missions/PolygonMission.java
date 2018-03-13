@@ -52,7 +52,7 @@ public class PolygonMission extends BaseMission {
         missionName =name;
         missionType=MissionType.PolygonMission;
         scenario=PolygonScenario.TYPEA;
-        altitude= 30.0f;
+        altitude= 15.0f;
         speed=10f;
         horizontalOverlapRate=70;
         verticalOverlapRate=70;
@@ -203,8 +203,10 @@ public class PolygonMission extends BaseMission {
         List<Waypoint> waypointList=new ArrayList<>();
         //顶点，宽度，速度，航点时间，起点
         FullCoveragePathPlanningAlgorithm algorithm=
-                new FullCoveragePathPlanningAlgorithm(vertexs,20,speed,0,startPoint);
-        List<LatLng> points=algorithm.getPlanningWaypoints();
+                new FullCoveragePathPlanningAlgorithm(vertexs,15,speed,0,startPoint);
+
+//        List<LatLng> points=algorithm.getPlanningWaypoints();
+        List<LatLng> points=algorithm.getShotWaypoints(); //add waypoint in main line to take photo
         //need to set special waypoint action
         for(int i=0;i<points.size();i++){
             Waypoint waypoint=new Waypoint(points.get(i).latitude,points.get(i).longitude,altitude);

@@ -166,7 +166,15 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="2dp"
         android:orientation="vertical">
+        <dji.ui.widget.TakeOffWidget
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="12dp"/>
 
+        <dji.ui.widget.ReturnHomeWidget
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"/>
         <ImageButton
             android:id="@+id/execute_uploadMission_pm"
             android:layout_width="40dp"
@@ -186,7 +194,6 @@
             android:src="@drawable/ic_mission_stop"
             android:layout_marginBottom="2dp"/>
     </LinearLayout>
-
 
     <dji.ui.widget.controls.CameraControlsWidget
         android:id="@+id/CameraCapturePanel"

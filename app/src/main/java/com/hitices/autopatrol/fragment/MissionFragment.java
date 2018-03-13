@@ -1287,6 +1287,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             if (amapLocation != null) {
               if (amapLocation.getErrorCode() == 0) {
 //
+
                    LatLng harbin = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
 //                    LatLng harbin = new LatLng(126.640692,45.748065);
                     MarkerOptions markerOptions=  new MarkerOptions();
