@@ -90,6 +90,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     private MapView mapView;
     private Spinner spinner;
     private ArrayAdapter<String> arrayAdapter;
+    private LatLng locationLatlng;
     //mission
     private BaseMission currentMission;
     private boolean creatable;
@@ -234,6 +235,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         }
         UiSettings settings=aMap.getUiSettings();
         settings.setZoomControlsEnabled(false);
+
         //use gps location
         AMapLocationClientOption mLocationOption  = new AMapLocationClientOption();
         AMapLocationClient mlocationClient = new AMapLocationClient(getContext());
@@ -243,6 +245,11 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         mlocationClient.setLocationOption(mLocationOption);
         mlocationClient.startLocation();
 
+        //first zoom update
+        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(mlocationClient.getLastKnownLocation().getLatitude(),
+                        mlocationClient.getLastKnownLocation().getLongitude()),
+                18f));
         //info
         aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
         myInfoWindowAdapter myInfoWindowAdapter=new myInfoWindowAdapter();
@@ -335,7 +342,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                 markerOptions.title("waypoint");
                 aMap.addMarker(markerOptions);
                 aMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
-                cameraUpdate(ll);
+                cameraUpdate(ll,aMap.getCameraPosition().zoom);
                 Marker marker = aMap.addMarker(markerOptions);
                 mMarkers.add(marker);
             }
@@ -347,8 +354,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             polyline=aMap.addPolyline(options);
             polygon=aMap.addPolygon(new PolygonOptions().addAll(getCurrentPolygonMission().getVertexs())
                     .fillColor(getResources().getColor(R.color.fillColor)));
-        }
 
+        }
+        cameraUpdate(locationLatlng,18f);
     }
     private void refreshSpinnerColor(){
         switch (currentMission.missionType){
@@ -362,11 +370,10 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                 break;
         }
     }
-    private void cameraUpdate(LatLng pos){
-//        LatLng pos =new LatLng(droneLocationLat,droneLocationLng);
-        float zoomLevel = (float)18.0;
+    private void cameraUpdate(LatLng pos,float zoomLevel){
         CameraUpdate cameraupdate =CameraUpdateFactory.newLatLngZoom(pos,zoomLevel);
         aMap.moveCamera(cameraupdate);
+
     }
     private boolean saveMission(){
         boolean flag=currentMission.saveMission();
@@ -437,7 +444,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     private void markWaypoint(LatLng latLng){
         if(currentMarker != null)
             currentMarker.hideInfoWindow();
-        //amap about
         if(creatable){
             MarkerOptions markerOptions =new MarkerOptions();
             markerOptions.position(latLng);
@@ -458,7 +464,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             getCurrentWaypointsMission().addWaypointList(latLng);
         }
     }
-    private void showWaypointsSettingDialog(){
+    private void showWaypointsSettingDialog() {
         final List<WaypointAction> actions=getCurrentWaypointsMission().currentGeneralActions;
         LinearLayout wayPointSettings = (LinearLayout)getLayoutInflater().inflate(R.layout.dialog_waypointsetting,null);
         final TextView tv_wayPointAltitude= wayPointSettings.findViewById(R.id.altitude);
@@ -471,15 +477,16 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         RadioGroup rg_actionAfterFinished =wayPointSettings.findViewById(R.id.actionAfterFinished);
         RadioGroup rg_heading =wayPointSettings.findViewById(R.id.heading);
 
-        //init
-        tv_wayPointAltitude.setText(String.valueOf(50));
-        // mName.setText(arrayAdapter.getItem(0).toString());
+        //init,use waypoint mission value
+        tv_wayPointAltitude.setText(String.valueOf(getCurrentWaypointsMission().altitude));
         mName.setText(getCurrentWaypointsMission().missionName);
         sb_speed.setMax(15);
         sb_speed.setProgress(10);
-        seekBar_speed.setText(String.valueOf(10)+" m/s");
-        rg_actionAfterFinished.check(R.id.finishGoHome);
+        seekBar_speed.setText(String.valueOf(getCurrentWaypointsMission().speed)+" m/s");
+
+        rg_actionAfterFinished.check(R.id.finishAutoLanding);
         rg_heading.check(R.id.headingWP);
+
         final GridviewAdapter gridviewAdapter=new GridviewAdapter(actions,getContext());
         gv_missions.setAdapter(gridviewAdapter);
         sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -566,9 +573,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
                     currentMission=null;
                     if(arrayAdapter.getCount()>0) {
                         spinner.setSelection(0, true);
-                        // refreshMapView();
                     }
-
                     else
                         spinner.setSelected(false);
                     sendMissionChange();
@@ -1283,18 +1288,15 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
             if (amapLocation != null) {
               if (amapLocation.getErrorCode() == 0) {
 //
-
-                   LatLng harbin = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
+                   locationLatlng  = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
 //                    LatLng harbin = new LatLng(126.640692,45.748065);
                     MarkerOptions markerOptions=  new MarkerOptions();
-                    markerOptions.position(harbin);
+                    markerOptions.position(locationLatlng);
                     markerOptions.title("marker");
                     markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_location_marker)));
                     if(location != null)
                         location.destroy();
                     location=aMap.addMarker(markerOptions);
-                    aMap.moveCamera(CameraUpdateFactory.newLatLng(harbin));
-                    cameraUpdate(harbin);
                 } else {
                     //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
                     Log.e("AmapError","location Error, ErrCode:"
@@ -1306,7 +1308,11 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
     };
     //tool function
     private void setResultToToast(final String msg){
-        Toast.makeText(getActivity(),msg,Toast.LENGTH_LONG).show();
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     boolean isInteger(String str){
         try{

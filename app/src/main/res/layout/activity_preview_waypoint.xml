@@ -62,6 +62,16 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/half_black"/>
+    <TextView
+        android:id="@+id/preview_altitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="altitude:">
+    </TextView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/half_black"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

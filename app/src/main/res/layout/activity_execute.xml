@@ -169,12 +169,7 @@
         <dji.ui.widget.TakeOffWidget
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginBottom="12dp"/>
-
-        <dji.ui.widget.ReturnHomeWidget
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginBottom="2dp"/>
         <ImageButton
             android:id="@+id/execute_uploadMission"
             android:layout_width="40dp"
@@ -192,6 +187,10 @@
             android:layout_height="40dp"
             android:id="@+id/execute_stopMission"
             android:src="@drawable/ic_mission_stop"
+            android:layout_marginBottom="2dp"/>
+        <dji.ui.widget.ReturnHomeWidget
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginBottom="2dp"/>
     </LinearLayout>
 

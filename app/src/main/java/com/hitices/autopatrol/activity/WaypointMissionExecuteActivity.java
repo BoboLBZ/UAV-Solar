@@ -188,9 +188,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             aMap.addMarker(markerOptions);
-            aMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
             cameraUpdate(ll);
-            aMap.addMarker(markerOptions);
         }
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(255,1,1,1)));
     }
@@ -301,7 +299,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     private void showMissionChangeDialog(){
         LinearLayout wpPreview = (LinearLayout)getLayoutInflater().inflate(R.layout.activity_preview_waypoint,null);
         //ui
-        final TextView name,aircraft,camera,time,startpoint,seekBar_text;
+        final TextView name,aircraft,camera,time,startpoint,seekBar_text,altitude;
         //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
         SeekBar sb_speed;
         RadioGroup rg_actionAfterFinished;
@@ -313,6 +311,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         camera=wpPreview.findViewById(R.id.preview_camera);
         time=wpPreview.findViewById(R.id.preview_time);
         startpoint=wpPreview.findViewById(R.id.preview_start_point);
+        altitude=wpPreview.findViewById(R.id.preview_altitude);
         seekBar_text=wpPreview.findViewById(R.id.preview_seekBar_text);
         //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
         sb_speed=wpPreview.findViewById(R.id.preview_speed);
@@ -367,7 +366,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             gv_missions.setOnItemClickListener(onItemClickListener);
             //update text
             name.setText("任务名称:"+waypointsMission.missionName);
-            time.setText("预计执行时间:"+String.valueOf(waypointsMission.speed));
+            time.setText("速度:"+String.valueOf(waypointsMission.speed));
+            altitude.setText("默认高度:"+String.valueOf(waypointsMission.altitude+" m"));
             //convert between float and int
             //rate=waypointsMission.speed/15
             sb_speed.setProgress((int)(waypointsMission.speed/15*100+0.5));
@@ -392,7 +392,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             camera.setText("相机型号：xxx");
         }
         if(droneLocation != null) {
-            startpoint.setText(" [" + String.valueOf(droneLocation.latitude) + "," + String.valueOf(droneLocation.longitude) + "] ");
+            startpoint.setText("无人机坐标 [" + String.valueOf(droneLocation.latitude) + "," + String.valueOf(droneLocation.longitude) + "] ");
         }else {
             startpoint.setText("null");
         }
@@ -422,6 +422,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         params.height=WindowManager.LayoutParams.MATCH_PARENT;
         window.setAttributes(params);
     }
+
     private void sortingWaypoints(){
         if(waypointsMission != null){
             if(droneLocation == null)
@@ -669,14 +670,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     }
     private WaypointsMission readMission(String path){
         try {
-            //need test,
             File file = new File(path);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
-//            //root
-//            doc.getDocumentElement().normalize();
-//            System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
             //name
             NodeList nodes=doc.getElementsByTagName("missionName");
             if(nodes.item(0) == null){

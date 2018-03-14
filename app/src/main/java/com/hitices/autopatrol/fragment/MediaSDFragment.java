@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.MainActivity;
@@ -47,6 +48,8 @@ public class MediaSDFragment extends Fragment {
     private MediaManager.FileListState currentFileListState = MediaManager.FileListState.UNKNOWN;
     private FetchMediaTaskScheduler scheduler;
 
+    private FloatingActionButton refresh;
+
     public MediaSDFragment() {
         // Required empty public constructor
     }
@@ -72,11 +75,18 @@ public class MediaSDFragment extends Fragment {
         // Inflate the waypoint_preview_waypoint_detail for this fragment
         View view=inflater.inflate(R.layout.fragment_media_sd, container, false);
         listView=view.findViewById(R.id.imageList);
-
-        LinearLayoutManager layoutManager=new LinearLayoutManager(getActivity(), OrientationHelper.VERTICAL,false);
-        listView.setLayoutManager(layoutManager);
         mListAdapter = new FileListAdapter();
         listView.setAdapter(mListAdapter);
+        LinearLayoutManager layoutManager=new LinearLayoutManager(getActivity(), OrientationHelper.VERTICAL,false);
+        listView.setLayoutManager(layoutManager);
+
+        refresh=view.findViewById(R.id.media_sd_refresh);
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFileList();
+            }
+        });
         return view;
     }
 
@@ -103,7 +113,7 @@ public class MediaSDFragment extends Fragment {
         mListener = null;
     }
     @Override
-    public void onDestroy() {
+    public void onDestroyView() {
         lastClickView = null;
         if (mMediaManager != null) {
             mMediaManager.stop(null);
@@ -127,12 +137,132 @@ public class MediaSDFragment extends Fragment {
         if (mediaFileList != null) {
             mediaFileList.clear();
         }
-        super.onDestroy();
+        super.onDestroyView();
     }
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+    private void initMediaManager() {
+        if (AutoPatrolApplication.getProductInstance() == null) {
+            mediaFileList.clear();
+            mListAdapter.notifyDataSetChanged();
+            DJILog.e(TAG, "Product disconnected");
+        } else {
+            if (null != AutoPatrolApplication.getCameraInstance() && AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
+                mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
+                if (null != mMediaManager) {
+                    mMediaManager.addUpdateFileListStateListener(this.updateFileListStateListener);
+                    mMediaManager.addMediaUpdatedVideoPlaybackStateListener(this.updatedVideoPlaybackStateListener);
+                    AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.MEDIA_DOWNLOAD, new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError error) {
+                            if (error == null) {
+                                DJILog.e(TAG, "Set cameraMode success");
+//                                showProgressDialog();
+                                getFileList();
+                            } else {
+                                setResultToToast("Set cameraMode failed");
+                            }
+                        }
+                    });
+                    if (mMediaManager.isVideoPlaybackSupported()) {
+                        DJILog.e(TAG, "Camera support video playback!");
+                    } else {
+                        setResultToToast("Camera does not support video playback!");
+                    }
+                    scheduler = mMediaManager.getScheduler();
+                }
+
+            } else if (null != AutoPatrolApplication.getCameraInstance()
+                    && !AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
+                setResultToToast("Media Download Mode not Supported");
+            }
+        }
+    }
+
+
+    private void getFileList() {
+        if(AutoPatrolApplication.getCameraInstance() == null){
+            setResultToToast("this is no camera connect");
+            return;
+        }
+        mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
+        if (mMediaManager != null) {
+
+            if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)){
+                DJILog.e(TAG, "Media Manager is busy.");
+            }else{
+                mMediaManager.refreshFileList(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (null == error) {
+//                            hideProgressDialog();
+
+                            //Reset data
+                            if (currentFileListState != MediaManager.FileListState.INCOMPLETE) {
+                                mediaFileList.clear();
+                                lastClickViewIndex = -1;
+                                lastClickView = null;
+                            }
+
+                            mediaFileList = mMediaManager.getFileListSnapshot();
+                            Collections.sort(mediaFileList, new Comparator<MediaFile>() {
+                                @Override
+                                public int compare(MediaFile lhs, MediaFile rhs) {
+                                    if (lhs.getTimeCreated() < rhs.getTimeCreated()) {
+                                        return 1;
+                                    } else if (lhs.getTimeCreated() > rhs.getTimeCreated()) {
+                                        return -1;
+                                    }
+                                    return 0;
+                                }
+                            });
+                            scheduler.resume(new CommonCallbacks.CompletionCallback() {
+                                @Override
+                                public void onResult(DJIError error) {
+                                    if (error == null) {
+                                        getThumbnails();
+                                        getPreviews();
+                                    }
+                                }
+                            });
+                        } else {
+//                            hideProgressDialog();
+                            setResultToToast("Get Media File List Failed:" + error.getDescription());
+                        }
+                    }
+                });
+            }
+        }
+    }
+    private void getThumbnails() {
+        if (mediaFileList.size() <= 0) {
+            setResultToToast("No File info for downloading thumbnails");
+            return;
+        }
+        for (int i = 0; i < mediaFileList.size(); i++) {
+            getThumbnailByIndex(i);
+        }
+    }
+    private void getPreviews() {
+        if (mediaFileList.size() <= 0) {
+            setResultToToast("No File info for downloading previews");
+            return;
+        }
+        for (int i = 0; i < mediaFileList.size(); i++) {
+            getPreviewByIndex(i);
+        }
+    }
+    private void getThumbnailByIndex(final int index) {
+        FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.THUMBNAIL, taskCallback);
+        scheduler.moveTaskToEnd(task);
+    }
+    private void getPreviewByIndex(final int index) {
+        FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.PREVIEW, taskCallback);
+        scheduler.moveTaskToEnd(task);
+    }
+
     private class ItemHolder extends RecyclerView.ViewHolder {
         ImageView thumbnail_img;
         TextView file_name;
@@ -193,125 +323,6 @@ public class MediaSDFragment extends Fragment {
             }
         }
     }
-    private void initMediaManager() {
-        if (AutoPatrolApplication.getProductInstance() == null) {
-            mediaFileList.clear();
-            mListAdapter.notifyDataSetChanged();
-            DJILog.e(TAG, "Product disconnected");
-            return;
-        } else {
-            if (null != AutoPatrolApplication.getCameraInstance() && AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
-                mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
-                if (null != mMediaManager) {
-                    mMediaManager.addUpdateFileListStateListener(this.updateFileListStateListener);
-                    mMediaManager.addMediaUpdatedVideoPlaybackStateListener(this.updatedVideoPlaybackStateListener);
-                    AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.MEDIA_DOWNLOAD, new CommonCallbacks.CompletionCallback() {
-                        @Override
-                        public void onResult(DJIError error) {
-                            if (error == null) {
-                                DJILog.e(TAG, "Set cameraMode success");
-//                                showProgressDialog();
-                                getFileList();
-                            } else {
-                                setResultToToast("Set cameraMode failed");
-                            }
-                        }
-                    });
-                    if (mMediaManager.isVideoPlaybackSupported()) {
-                        DJILog.e(TAG, "Camera support video playback!");
-                    } else {
-                        setResultToToast("Camera does not support video playback!");
-                    }
-                    scheduler = mMediaManager.getScheduler();
-                }
-
-            } else if (null != AutoPatrolApplication.getCameraInstance()
-                    && !AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
-                setResultToToast("Media Download Mode not Supported");
-            }
-        }
-        return;
-    }
-    private void getFileList() {
-        mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
-        if (mMediaManager != null) {
-
-            if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)){
-                DJILog.e(TAG, "Media Manager is busy.");
-            }else{
-                mMediaManager.refreshFileList(new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (null == error) {
-//                            hideProgressDialog();
-
-                            //Reset data
-                            if (currentFileListState != MediaManager.FileListState.INCOMPLETE) {
-                                mediaFileList.clear();
-                                lastClickViewIndex = -1;
-                                lastClickView = null;
-                            }
-
-                            mediaFileList = mMediaManager.getFileListSnapshot();
-                            Collections.sort(mediaFileList, new Comparator<MediaFile>() {
-                                @Override
-                                public int compare(MediaFile lhs, MediaFile rhs) {
-                                    if (lhs.getTimeCreated() < rhs.getTimeCreated()) {
-                                        return 1;
-                                    } else if (lhs.getTimeCreated() > rhs.getTimeCreated()) {
-                                        return -1;
-                                    }
-                                    return 0;
-                                }
-                            });
-                            scheduler.resume(new CommonCallbacks.CompletionCallback() {
-                                @Override
-                                public void onResult(DJIError error) {
-                                    if (error == null) {
-                                        getThumbnails();
-                                        getPreviews();
-                                    }
-                                }
-                            });
-                        } else {
-//                            hideProgressDialog();
-                            setResultToToast("Get Media File List Failed:" + error.getDescription());
-                        }
-                    }
-                });
-            }
-        } else {
-            setResultToToast("this is no camera connect");
-        }
-    }
-    private void getThumbnails() {
-        if (mediaFileList.size() <= 0) {
-            setResultToToast("No File info for downloading thumbnails");
-            return;
-        }
-        for (int i = 0; i < mediaFileList.size(); i++) {
-            getThumbnailByIndex(i);
-        }
-    }
-
-    private void getPreviews() {
-        if (mediaFileList.size() <= 0) {
-            setResultToToast("No File info for downloading previews");
-            return;
-        }
-        for (int i = 0; i < mediaFileList.size(); i++) {
-            getPreviewByIndex(i);
-        }
-    }
-    private void getThumbnailByIndex(final int index) {
-        FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.THUMBNAIL, taskCallback);
-        scheduler.moveTaskToEnd(task);
-    }
-
-    private void getPreviewByIndex(final int index) {
-        FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.PREVIEW, taskCallback);
-        scheduler.moveTaskToEnd(task);
-    }
     private FetchMediaTask.Callback taskCallback = new FetchMediaTask.Callback() {
         @Override
         public void onUpdate(MediaFile file, FetchMediaTaskContent option, DJIError error) {
@@ -361,16 +372,20 @@ public class MediaSDFragment extends Fragment {
 
             MediaFile selectedMedia = (MediaFile )v.getTag();
             final Bitmap previewImage = selectedMedia.getPreview();
-//            runOnUiThread(new Runnable() {
-//                public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
 //                    mDisplayImageView.setVisibility(View.VISIBLE);
 //                    mDisplayImageView.setImageBitmap(previewImage);
-//                }
-//            });
+                }
+            });
         }
     };
     private void setResultToToast(final String result) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
     }
 }

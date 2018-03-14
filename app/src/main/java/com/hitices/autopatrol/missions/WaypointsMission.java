@@ -64,8 +64,8 @@ public class WaypointsMission extends BaseMission {
         missionType=MissionType.WaypointMission;
         FLAG_ISSAVED=false;
         date=new Date();
-        altitude=50.0f;
-        speed=10.0f;
+        altitude=5f;
+        speed=3f;
         finishedAction=WaypointMissionFinishedAction.AUTO_LAND;
         headingMode=WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         //init actions

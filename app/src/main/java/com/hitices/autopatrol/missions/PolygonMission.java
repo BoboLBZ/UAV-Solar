@@ -52,8 +52,8 @@ public class PolygonMission extends BaseMission {
         missionName =name;
         missionType=MissionType.PolygonMission;
         scenario=PolygonScenario.TYPEA;
-        altitude= 15.0f;
-        speed=10f;
+        altitude= 5.0f;
+        speed=3f;
         horizontalOverlapRate=70;
         verticalOverlapRate=70;
         FLAG_ISSAVED=false;

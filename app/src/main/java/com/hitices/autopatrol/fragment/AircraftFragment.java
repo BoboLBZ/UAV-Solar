@@ -166,7 +166,11 @@ public class AircraftFragment extends Fragment {
         }
     };
     private void setResultToToast(final String result) {
-        Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private void refreshSDKRelativeUI() {
         BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
