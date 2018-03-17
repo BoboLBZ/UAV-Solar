@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -52,6 +53,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
+import dji.common.gimbal.GimbalMode;
+import dji.common.gimbal.Rotation;
+import dji.common.gimbal.RotationMode;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
 import dji.common.mission.waypoint.WaypointMissionExecutionEvent;
@@ -314,20 +318,33 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
         });
     }
     private void setCameraMode(){
-        if(AutoPatrolApplication.getCameraInstance() != null){
-            AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
+        if(AutoPatrolApplication.getGimbalInstance() != null) {
+            AutoPatrolApplication.getGimbalInstance().setMode(GimbalMode.FPV, new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError djiError) {
 
                 }
             });
-//            AutoPatrolApplication.getCameraInstance().setShootPhotoMode(SettingsDefinitions.ShootPhotoMode.);
+            Rotation.Builder b = new Rotation.Builder();
+            b.mode(RotationMode.ABSOLUTE_ANGLE);
+            b.pitch(-90f);
+            AutoPatrolApplication.getGimbalInstance().rotate(b.build(), new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError == null) {
+                        Log.i("rhys", "rotateGimbal success");
+                    } else {
+                        Log.i("rhys", "rotateGimbal error " + djiError.getDescription());
+                    }
+                }
+            });
         }
     }
 
     private void drawSwapLines(){
         aMap.addPolygon(new PolygonOptions().addAll(polygonMission.getVertexs()).fillColor(getResources().getColor(R.color.fillColor)));
         List<LatLng> points=new ArrayList<>();
+        points.add(droneLocation);
         for(int i=0;i<polygonMission.waypointList.size();i++) {
             points.add(new LatLng(polygonMission.waypointList.get(i).coordinate.getLatitude(),
                     polygonMission.waypointList.get(i).coordinate.getLongitude()));

@@ -241,7 +241,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener{
         AMapLocationClient mlocationClient = new AMapLocationClient(getContext());
         mlocationClient.setLocationListener(aMapLocationListener);
         mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-        mLocationOption.setInterval(2000);
+        mLocationOption.setInterval(1000);
         mlocationClient.setLocationOption(mLocationOption);
         mlocationClient.startLocation();
 

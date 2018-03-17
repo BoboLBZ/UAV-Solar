@@ -32,6 +32,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMapOptions;
 import com.amap.api.maps2d.CameraUpdate;
@@ -94,7 +98,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
      private MapView mapView;
      private AMap aMap;
      private Marker droneMarker;
-     private LatLng droneLocation;
+     private LatLng droneLocation,locationLatlng;
+    private Marker location;//photo location
      private ImageButton uplaod,start,stop;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +144,15 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         }
         UiSettings settings=aMap.getUiSettings();
         settings.setZoomControlsEnabled(false);
+
+        //use gps location
+        AMapLocationClientOption mLocationOption  = new AMapLocationClientOption();
+        AMapLocationClient mlocationClient = new AMapLocationClient(this);
+        mlocationClient.setLocationListener(aMapLocationListener);
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+        mLocationOption.setInterval(1000);
+        mlocationClient.setLocationOption(mLocationOption);
+        mlocationClient.startLocation();
     }
     private void initFlightController() {
         BaseProduct product = AutoPatrolApplication.getProductInstance();
@@ -180,6 +194,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
     private void markWaypoint(){
         List<LatLng> lines=new ArrayList<>();
+        //lines.add(droneLocation);
         for(int i=0;i<waypointsMission.waypointList.size();i++){
             MarkerOptions markerOptions =new MarkerOptions();
             LatLng ll=new LatLng(waypointsMission.waypointList.get(i).coordinate.getLatitude(),
@@ -190,6 +205,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             aMap.addMarker(markerOptions);
             cameraUpdate(ll);
         }
+        //lines.add(droneLocation);
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(255,1,1,1)));
     }
     private void updateDroneLocation(LatLng latLng){
@@ -269,15 +285,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         startActivity(intent);
     }
     private void setCameraMode(){
-        if(AutoPatrolApplication.getCameraInstance() != null){
-            //AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.);
-        }
         if(AutoPatrolApplication.getGimbalInstance() != null){
-            //AutoPatrolApplication.getGimbalInstance().setPitchRangeExtensionEnabled(true);
             AutoPatrolApplication.getGimbalInstance().setMode(GimbalMode.FPV, new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError djiError) {
-
                 }
             });
             Rotation.Builder b=new Rotation.Builder();
@@ -293,7 +304,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                     }
                 }
             });
-//            System.out.println
         }
     }
     private void showMissionChangeDialog(){
@@ -441,8 +451,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     }
     private void missionProcessing(){
         sortingWaypoints();
-        markWaypoint();
         loadMission();
+        markWaypoint();
         setCameraMode();
 //        uploadMission();
 //        startMission();
@@ -464,7 +474,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     }
     private void loadMission(){
             setResultToToast("on load");
-            waypointsMission.addWaypointList(droneLocation);
+            //以无人机位置作为返航点
+            //waypointsMission.addWaypointList(droneLocation);
+            //以当前人的位置作返航点
+            if(locationLatlng != null)
+                waypointsMission.addWaypointList(locationLatlng);
             builder = waypointsMission.getMissionBuilder();
             if(builder != null) {
                 DJIError error = getWaypointMissionOperator().loadMission(builder.build());
@@ -843,4 +857,28 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         }
         return chinese;
     }
+    AMapLocationListener aMapLocationListener=new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+//
+                    locationLatlng  = new LatLng(amapLocation.getLatitude(),amapLocation.getLongitude());
+//                    LatLng harbin = new LatLng(126.640692,45.748065);
+                    MarkerOptions markerOptions=  new MarkerOptions();
+                    markerOptions.position(locationLatlng);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                    if(location != null)
+                        location.destroy();
+                    location=aMap.addMarker(markerOptions);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError","location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
 }
