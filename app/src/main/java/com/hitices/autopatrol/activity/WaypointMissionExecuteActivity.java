@@ -89,6 +89,11 @@ import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.ui.widget.TakeOffWidget;
 
+/**
+ * WaypointMissionExecuteActivity 用于执行waypoint类型任务
+ * created by Rhys
+ *
+ */
 public class WaypointMissionExecuteActivity extends Activity implements View.OnClickListener {
      private WaypointsMission waypointsMission;
      public static WaypointMission.Builder builder;
@@ -128,6 +133,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         super.onResume();
         initFlightController();
     }
+
     private void initUI(){
         uplaod=findViewById(R.id.execute_uploadMission);
         stop=findViewById(R.id.execute_stopMission);
@@ -136,6 +142,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
     }
+
+    /**
+     * 初始化 mapview，amap，
+     * 高德地图使用相关设置
+     * 使用GPS定位
+     * @param savedInstanceState
+     */
     private void initMapView(Bundle savedInstanceState){
         mapView=findViewById(R.id.execute_mapview);
         mapView.onCreate(savedInstanceState);
@@ -154,6 +167,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         mlocationClient.setLocationOption(mLocationOption);
         mlocationClient.startLocation();
     }
+
+    /**
+     * 初始化FlightController，
+     * 可获取飞行器相关状态
+     */
     private void initFlightController() {
         BaseProduct product = AutoPatrolApplication.getProductInstance();
         if (product != null && product.isConnected()) {
@@ -192,6 +210,9 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         }
     }
 
+    /**
+     * 在地图上标记航线
+     */
     private void markWaypoint(){
         List<LatLng> lines=new ArrayList<>();
         //lines.add(droneLocation);
@@ -208,6 +229,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         //lines.add(droneLocation);
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(255,1,1,1)));
     }
+
+    /**
+     * 动态更新飞行器位置
+     * @param latLng
+     */
     private void updateDroneLocation(LatLng latLng){
             final MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
@@ -224,6 +250,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             });
 
     }
+
+    /**
+     * 更改地图缩放程度和地图中心点
+     * @param pos
+     */
     private void cameraUpdate(LatLng pos){
 //        LatLng pos =new LatLng(droneLocationLat,droneLocationLng);
         float zoomLevel = (float)16.0;
@@ -241,13 +272,19 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         }
         return insatnce;
     }
-    //Add Listener for WaypointMissionOperator
+
+    /**
+     * Add Listener for WaypointMissionOperator
+     */
     private void addListener() {
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().addListener(eventNotificationListener);
             setResultToToast("add listener");
         }
     }
+    /**
+     * remove Listener for WaypointMissionOperator
+     */
     private void removeListener() {
 
         if (getWaypointMissionOperator() != null) {
@@ -255,6 +292,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             setResultToToast("remove listener");
         }
     }
+
+    /**
+     * WaypointMissionOperatorListener
+     */
     private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
         @Override
         public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
@@ -276,6 +317,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 //              }
         }
     };
+
+    /**
+     * 在任务执行完成后打开新的activity，显示执行结果
+     */
     private void openReportActivity(){
         //photoNums
         Intent intent= new Intent(this,MissionReportActivity.class);
@@ -284,6 +329,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         intent.putExtra("photoNums",String.valueOf(0));
         startActivity(intent);
     }
+
+    /**
+     * 调整云台，让相机竖直向下
+     */
     private void setCameraMode(){
         if(AutoPatrolApplication.getGimbalInstance() != null){
             AutoPatrolApplication.getGimbalInstance().setMode(GimbalMode.FPV, new CommonCallbacks.CompletionCallback() {
@@ -306,6 +355,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             });
         }
     }
+
+    /**
+     * 任务概览，可修改部分参数
+     * 显示飞行器类型，相机类型，当前坐标，
+     * 高度、速度、任务执行完成动作、机头朝向等
+     * 显示航点，航点部分参数支持修改
+     */
     private void showMissionChangeDialog(){
         LinearLayout wpPreview = (LinearLayout)getLayoutInflater().inflate(R.layout.activity_preview_waypoint,null);
         //ui
@@ -433,6 +489,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         window.setAttributes(params);
     }
 
+    /**
+     * 调用蚁群算法对航点排序
+     * 需使用无人机当前位置，影响算法
+     */
     private void sortingWaypoints(){
         if(waypointsMission != null){
             if(droneLocation == null)
@@ -449,29 +509,24 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             waypointsMission.waypointList=newWaypointList;
         }
     }
+
+    /**
+     * 确认任务后的操作流程
+     * 排序
+     * load mission
+     * 在地图标记航线
+     */
     private void missionProcessing(){
         sortingWaypoints();
         loadMission();
         markWaypoint();
         setCameraMode();
-//        uploadMission();
-//        startMission();
-//        new Handler().postDelayed(new Runnable(){
-//            public void run() {
-//                loadMission();
-//            }
-//        }, 10000);
-//        new Handler().postDelayed(new Runnable(){
-//            public void run() {
-//                uploadMission();
-//            }
-//        }, 3000);
-//        new Handler().postDelayed(new Runnable(){
-//            public void run() {
-//                startMission();
-//            }
-//        }, 3000);
     }
+
+    /**
+     * loadMission
+     * 航点任务执行流程第一步
+     */
     private void loadMission(){
             setResultToToast("on load");
             //以无人机位置作为返航点
@@ -492,6 +547,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             }
 
     }
+    /**
+     * uploadMission
+     * 航点任务执行流程第二步
+     * 上传任务到飞机
+     */
     private void uploadMission(){
         setResultToToast("on upload");
         getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
@@ -506,6 +566,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             }
         });
     }
+
+    /**
+     * 任务开始执行
+     */
     private void startMission(){
         setResultToToast("on start");
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
@@ -515,6 +579,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             }
         });
     }
+    /**
+     * 任务暂停
+     * 目前没什么卵用，没找到解决方案
+     */
     private void stopMission(){
         setResultToToast("on stop");
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
@@ -575,6 +643,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
              showWaypointDetail(i);
         }
     };
+
+    /**
+     * 显示航点具体信息，不支持修改
+     * @param i
+     */
     private void showWaypointDetail(int i){
         //preview_wp_setting
         LinearLayout waypointDetail = (LinearLayout)getLayoutInflater().inflate(R.layout.waypoint_preview_waypoint_detail,null);
@@ -682,6 +755,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             }
         }
     }
+
+    /**
+     * readMission
+     * 从文件中导入任务
+     * @param path
+     * @return
+     */
     private WaypointsMission readMission(String path){
         try {
             File file = new File(path);
@@ -753,6 +833,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             return null;
         }
     }
+
+    /**
+     * 工具类函数
+     * 完成动作的字符串与相关类的对应关系
+     * @param s
+     * @return
+     */
     private WaypointMissionFinishedAction getFinishedAction(String s){
         if(s.equals(WaypointMissionFinishedAction.AUTO_LAND.toString())){
             return WaypointMissionFinishedAction.AUTO_LAND;
@@ -764,6 +851,12 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             return WaypointMissionFinishedAction.NO_ACTION;
         }
     }
+    /**
+     * 工具类函数
+     * 航向的字符串与相关类的对应关系
+     * @param s
+     * @return
+     */
     private WaypointMissionHeadingMode getHeadingMode(String s){
         if(s.equals(WaypointMissionHeadingMode.AUTO.toString())){
             return WaypointMissionHeadingMode.AUTO;
@@ -775,6 +868,12 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             return WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         }
     }
+    /**
+     * 工具类函数
+     * 航点动作字符串与动作类的对应关系
+     * @param s
+     * @return
+     */
     @Nullable
     private WaypointActionType getAction(String s){
         if( WaypointActionType.STAY.toString().equals(s))

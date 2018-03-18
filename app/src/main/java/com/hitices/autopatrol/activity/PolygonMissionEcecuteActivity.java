@@ -12,10 +12,8 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,10 +31,8 @@ import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.missions.BaseMission;
 import com.hitices.autopatrol.missions.PolygonMission;
 import com.hitices.autopatrol.missions.PolygonScenario;
-import com.hitices.autopatrol.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,7 +46,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.gimbal.GimbalMode;
@@ -59,8 +54,6 @@ import dji.common.gimbal.RotationMode;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
 import dji.common.mission.waypoint.WaypointMissionExecutionEvent;
-import dji.common.mission.waypoint.WaypointMissionFinishedAction;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.common.mission.waypoint.WaypointMissionUploadEvent;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
@@ -71,6 +64,11 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+/**
+ * PolygonMissionEcecuteActivity
+ * 执行区域任务
+ * 根据区域，应用全覆盖路径规划算法后等到航点
+ */
 public class PolygonMissionEcecuteActivity extends AppCompatActivity {
     private PolygonMission polygonMission;
     public static WaypointMission.Builder builder;
