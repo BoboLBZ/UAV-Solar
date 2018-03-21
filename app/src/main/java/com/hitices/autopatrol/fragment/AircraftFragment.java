@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -63,6 +65,7 @@ public class AircraftFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private String missionName;
     private String missionType;
+    private GestureDetector gestureDetector;
     public AircraftFragment() {
         // Required empty public constructor
     }
@@ -116,6 +119,7 @@ public class AircraftFragment extends Fragment {
         spinnerMission.setAdapter(arrayAdapter);
         spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
 
+        gestureDetector=new GestureDetector(getActivity(),new myGestureListener());
         return view;
     }
     @Override
@@ -272,5 +276,17 @@ public class AircraftFragment extends Fragment {
                                 + error.getDescription());
                     }
                 });
+    }
+    private class myGestureListener extends GestureDetector.SimpleOnGestureListener{
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if((e1.getY() - e2.getY() > 100 && Math.abs(velocityY) > 10))
+                refreshSDKRelativeUI();
+            return false;
+        }
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
     }
 }

@@ -11,10 +11,22 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Public\\ap_keystore.jks')
+            storePassword 'liubozhou'
+            keyAlias 'key_ap'
+            keyPassword 'liubozhou'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
     packagingOptions {
@@ -28,6 +40,7 @@ android {
         doNotStrip "*/*/libUpgradeVerify.so"
         doNotStrip "*/*/libFR.so"
     }
+
 }
 
 dependencies {
