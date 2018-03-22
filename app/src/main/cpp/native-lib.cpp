@@ -11,7 +11,7 @@ using namespace cv;
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_hitices_autopatrol_activity_MainActivity_stringFromJNI(
+Java_com_hitices_autopatrol_activity_AppMainActivity_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     Mat mat = imread("");

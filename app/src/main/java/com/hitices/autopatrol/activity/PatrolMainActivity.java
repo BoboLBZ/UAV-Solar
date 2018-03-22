@@ -41,29 +41,13 @@ import dji.sdk.sdkmanager.DJISDKManager;
  * email: bozliu@outlook.com
  * 主activity，控制三个fragment的显示逻辑，应用权限申请
  */
-public class MainActivity extends AppCompatActivity
+public class PatrolMainActivity extends AppCompatActivity
         implements RadioGroup.OnCheckedChangeListener,
         AircraftFragment.OnFragmentInteractionListener,
         MissionFragment.OnFragmentInteractionListener,
         MediaFragment.OnFragmentInteractionListener,
         MediaLocalFragment.OnFragmentInteractionListener,
         MediaSDFragment.OnFragmentInteractionListener {
-
-    // opencv
-    static {
-        if (!OpenCVLoader.initDebug()) {
-            Log.d("MainActivity", "OpenCV not loaded");
-        } else {
-            Log.d("MainActivity", "OpenCV loaded！");
-        }
-        System.loadLibrary("native-lib");
-    }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
 
     //权限列表
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
@@ -99,12 +83,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkAndRequestPermissions();
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_patrol_main);
         //fragment
         fragmentManager = getSupportFragmentManager();
         initUI();
-
-        Log.d("MainActivity", stringFromJNI());
     }
 
     public void initUI() {
@@ -294,10 +276,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setResultToToast(final String msg) {
-        MainActivity.this.runOnUiThread(new Runnable() {
+        PatrolMainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                Toast.makeText(PatrolMainActivity.this, msg, Toast.LENGTH_LONG).show();
             }
         });
     }

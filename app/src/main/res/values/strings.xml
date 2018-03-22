@@ -25,4 +25,7 @@
     <string name="mission_report_tips">提示:待无人机停稳后关闭无人机电源，取出相机SD卡，进行后续操作</string>
     <!--mission report end-->
 
+    <string name="app_func1">执行巡检任务</string>
+    <string name="app_func2">巡检结果分析</string>
+
 </resources>

@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.activity.MainActivity;
+import com.hitices.autopatrol.activity.PatrolMainActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,7 @@ import dji.sdk.camera.MediaFile;
 import dji.sdk.camera.MediaManager;
 
 public class MediaSDFragment extends Fragment {
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = PatrolMainActivity.class.getName();
     private OnFragmentInteractionListener mListener;
 
     private RecyclerView listView;
