@@ -9,8 +9,8 @@ import java.util.List;
  */
 
 public class ConvexHull {
-    private Point[] pointArray;//坐标数组
     private final int N;//数据个数
+    private Point[] pointArray;//坐标数组
     private int D[]; // 数组索引，双向表
 
     public ConvexHull(List<Point> pList) {

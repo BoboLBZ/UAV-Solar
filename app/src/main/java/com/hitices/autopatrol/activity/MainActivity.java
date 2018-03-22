@@ -46,16 +46,6 @@ public class MainActivity extends AppCompatActivity
         MediaFragment.OnFragmentInteractionListener,
         MediaLocalFragment.OnFragmentInteractionListener,
         MediaSDFragment.OnFragmentInteractionListener {
-    //radio
-    private RadioGroup tabBar; //通过radio button的方式控制fragment的显示
-    private RadioButton rbMission, rbAircraft, rbMedia;
-    private FragmentManager fragmentManager;
-    private AircraftFragment fAircraft;
-    private MediaFragment fMedia;
-    private MissionFragment fMission;
-    //back
-    private long mExitTime = 0;
-    private int position;
     //权限列表
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
             android.Manifest.permission.VIBRATE,
@@ -72,9 +62,19 @@ public class MainActivity extends AppCompatActivity
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.READ_PHONE_STATE,
     };
+    private static final int REQUEST_PERMISSION_CODE = 12345;
+    //radio
+    private RadioGroup tabBar; //通过radio button的方式控制fragment的显示
+    private RadioButton rbMission, rbAircraft, rbMedia;
+    private FragmentManager fragmentManager;
+    private AircraftFragment fAircraft;
+    private MediaFragment fMedia;
+    private MissionFragment fMission;
+    //back
+    private long mExitTime = 0;
+    private int position;
     private List<String> missingPermission = new ArrayList<>();
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
-    private static final int REQUEST_PERMISSION_CODE = 12345;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

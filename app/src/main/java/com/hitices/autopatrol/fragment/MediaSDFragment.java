@@ -49,6 +49,60 @@ public class MediaSDFragment extends Fragment {
     private FetchMediaTaskScheduler scheduler;
 
     private FloatingActionButton refresh;
+    private FetchMediaTask.Callback taskCallback = new FetchMediaTask.Callback() {
+        @Override
+        public void onUpdate(MediaFile file, FetchMediaTaskContent option, DJIError error) {
+            if (null == error) {
+                if (option == FetchMediaTaskContent.PREVIEW) {
+                    mListAdapter.notifyDataSetChanged();
+                }
+                if (option == FetchMediaTaskContent.THUMBNAIL) {
+                    mListAdapter.notifyDataSetChanged();
+                }
+            } else {
+                DJILog.e(TAG, "Fetch Media Task Failed" + error.getDescription());
+            }
+        }
+    };
+    private MediaManager.FileListStateListener updateFileListStateListener = new MediaManager.FileListStateListener() {
+        @Override
+        public void onFileListStateChange(MediaManager.FileListState state) {
+            currentFileListState = state;
+        }
+    };
+    private MediaManager.VideoPlaybackStateListener updatedVideoPlaybackStateListener =
+            new MediaManager.VideoPlaybackStateListener() {
+                @Override
+                public void onUpdate(MediaManager.VideoPlaybackState videoPlaybackState) {
+//                    updateStatusTextView(videoPlaybackState);
+                }
+            };
+    private View.OnClickListener itemViewOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            lastClickViewIndex = (int) (v.getTag());
+
+            if (lastClickView != null && lastClickView != v) {
+                lastClickView.setSelected(false);
+            }
+            v.setSelected(true);
+            lastClickView = v;
+        }
+    };
+    private View.OnClickListener ImgOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            MediaFile selectedMedia = (MediaFile) v.getTag();
+            final Bitmap previewImage = selectedMedia.getPreview();
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+//                    mDisplayImageView.setVisibility(View.VISIBLE);
+//                    mDisplayImageView.setImageBitmap(previewImage);
+                }
+            });
+        }
+    };
 
     public MediaSDFragment() {
         // Required empty public constructor
@@ -145,11 +199,6 @@ public class MediaSDFragment extends Fragment {
         super.onDestroyView();
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
     private void initMediaManager() {
         if (AutoPatrolApplication.getProductInstance() == null) {
             mediaFileList.clear();
@@ -187,7 +236,6 @@ public class MediaSDFragment extends Fragment {
             }
         }
     }
-
 
     private void getFileList() {
         if (AutoPatrolApplication.getCameraInstance() == null) {
@@ -274,6 +322,19 @@ public class MediaSDFragment extends Fragment {
         scheduler.moveTaskToEnd(task);
     }
 
+    private void setResultToToast(final String result) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
     private class ItemHolder extends RecyclerView.ViewHolder {
         ImageView thumbnail_img;
         TextView file_name;
@@ -334,72 +395,5 @@ public class MediaSDFragment extends Fragment {
 
             }
         }
-    }
-
-    private FetchMediaTask.Callback taskCallback = new FetchMediaTask.Callback() {
-        @Override
-        public void onUpdate(MediaFile file, FetchMediaTaskContent option, DJIError error) {
-            if (null == error) {
-                if (option == FetchMediaTaskContent.PREVIEW) {
-                    mListAdapter.notifyDataSetChanged();
-                }
-                if (option == FetchMediaTaskContent.THUMBNAIL) {
-                    mListAdapter.notifyDataSetChanged();
-                }
-            } else {
-                DJILog.e(TAG, "Fetch Media Task Failed" + error.getDescription());
-            }
-        }
-    };
-
-    private MediaManager.FileListStateListener updateFileListStateListener = new MediaManager.FileListStateListener() {
-        @Override
-        public void onFileListStateChange(MediaManager.FileListState state) {
-            currentFileListState = state;
-        }
-    };
-
-    private MediaManager.VideoPlaybackStateListener updatedVideoPlaybackStateListener =
-            new MediaManager.VideoPlaybackStateListener() {
-                @Override
-                public void onUpdate(MediaManager.VideoPlaybackState videoPlaybackState) {
-//                    updateStatusTextView(videoPlaybackState);
-                }
-            };
-    private View.OnClickListener itemViewOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            lastClickViewIndex = (int) (v.getTag());
-
-            if (lastClickView != null && lastClickView != v) {
-                lastClickView.setSelected(false);
-            }
-            v.setSelected(true);
-            lastClickView = v;
-        }
-    };
-
-    private View.OnClickListener ImgOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            MediaFile selectedMedia = (MediaFile) v.getTag();
-            final Bitmap previewImage = selectedMedia.getPreview();
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-//                    mDisplayImageView.setVisibility(View.VISIBLE);
-//                    mDisplayImageView.setImageBitmap(previewImage);
-                }
-            });
-        }
-    };
-
-    private void setResultToToast(final String result) {
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
 }

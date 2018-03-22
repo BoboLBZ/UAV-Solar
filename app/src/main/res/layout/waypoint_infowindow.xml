@@ -23,15 +23,15 @@
                 android:id="@+id/deleteWaypoint"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="删除" />
+                android:text="删除"
+                android:textSize="13sp" />
 
             <Button
                 android:id="@+id/Waypoint_savechange"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="保存" />
+                android:text="保存"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <TextView
@@ -75,10 +75,10 @@
                 android:id="@+id/waypointActions"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:numColumns="3"
-                android:stretchMode="columnWidth"
                 android:choiceMode="multipleChoiceModal"
-                android:scrollbars="none" />
+                android:numColumns="3"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

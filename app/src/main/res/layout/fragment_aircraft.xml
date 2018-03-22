@@ -2,9 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.hitices.autopatrol.fragment.AircraftFragment"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:gravity="center_horizontal">
+    tools:context="com.hitices.autopatrol.fragment.AircraftFragment">
 
     <TextView
         android:id="@+id/aircraft_type"
@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="18dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="18dp"
         android:src="@drawable/ic_flight_takeoff_unpressed" />
 </RelativeLayout>

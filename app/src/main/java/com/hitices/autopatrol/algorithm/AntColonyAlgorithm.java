@@ -16,15 +16,15 @@ import dji.common.mission.waypoint.Waypoint;
  */
 
 public class AntColonyAlgorithm {
-    private List<LatLng> rawWaypoints = new ArrayList<>();
-    private List<Integer> sortedWaypointsIndex = new ArrayList<>();
-    /*init param*/
-    private int antNum = 30; //
     final float alpha = 1; //信息素重要程度
     final float beta = 5;//启发函数重要程度
     final float vol = 0.2f; //信息素挥发因子
     final float Q = 10;  //常系数
     final int iter_max = 100; //最大迭代次数
+    private List<LatLng> rawWaypoints = new ArrayList<>();
+    private List<Integer> sortedWaypointsIndex = new ArrayList<>();
+    /*init param*/
+    private int antNum = 30; //
     private int unchangedTimes = 0;
     private double minLength = 0;
     private Random r = new Random();
@@ -34,6 +34,25 @@ public class AntColonyAlgorithm {
         for (int i = 0; i < points.size(); i++) {
             rawWaypoints.add(new LatLng(points.get(i).coordinate.getLatitude(), points.get(i).coordinate.getLongitude()));
         }
+    }
+
+    public static <T extends Comparable<T>> int findMinIndex(final List<T> xs) {
+        int minIndex;
+        if (xs.isEmpty()) {
+            minIndex = -1;
+        } else {
+            final ListIterator<T> itr = xs.listIterator();
+            T min = itr.next(); // first element as the current minimum
+            minIndex = itr.previousIndex();
+            while (itr.hasNext()) {
+                final T curr = itr.next();
+                if (curr.compareTo(min) < 0) {
+                    min = curr;
+                    minIndex = itr.previousIndex();
+                }
+            }
+        }
+        return minIndex;
     }
 
     public List<Integer> getSortedWaypoints() {
@@ -159,24 +178,5 @@ public class AntColonyAlgorithm {
             iter++;
         }
         return sortedWaypointsIndex;
-    }
-
-    public static <T extends Comparable<T>> int findMinIndex(final List<T> xs) {
-        int minIndex;
-        if (xs.isEmpty()) {
-            minIndex = -1;
-        } else {
-            final ListIterator<T> itr = xs.listIterator();
-            T min = itr.next(); // first element as the current minimum
-            minIndex = itr.previousIndex();
-            while (itr.hasNext()) {
-                final T curr = itr.next();
-                if (curr.compareTo(min) < 0) {
-                    min = curr;
-                    minIndex = itr.previousIndex();
-                }
-            }
-        }
-        return minIndex;
     }
 }

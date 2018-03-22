@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:layout_marginBottom="10dp"
-    android:layout_marginTop="10dp"
     android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp">
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
@@ -17,8 +17,8 @@
         android:id="@+id/preview_current_mission_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="mission name"
-        android:layout_gravity="start"></TextView>
+        android:layout_gravity="start"
+        android:text="mission name"></TextView>
 
     <View
         android:layout_width="match_parent"
@@ -120,39 +120,39 @@
         android:orientation="horizontal">
 
         <RadioGroup
+            android:id="@+id/preview_actionAfterFinished"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/preview_actionAfterFinished"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/preview_finishNone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="None" />
+                android:text="None"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_finishGoHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="GoHome" />
+                android:text="GoHome"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_finishAutoLanding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="AutoLand" />
+                android:text="AutoLand"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_finishToFirst"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="BackTo 1st" />
+                android:text="BackTo 1st"
+                android:textSize="5pt" />
         </RadioGroup>
     </LinearLayout>
 
@@ -173,39 +173,39 @@
         android:orientation="horizontal">
 
         <RadioGroup
+            android:id="@+id/preview_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/preview_heading"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/preview_headingNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="Auto" />
+                android:text="Auto"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_headingInitDirec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="Initial" />
+                android:text="Initial"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_headingRC"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="RC Control" />
+                android:text="RC Control"
+                android:textSize="5pt" />
 
             <RadioButton
                 android:id="@+id/preview_headingWP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="5pt"
-                android:text="Use Waypoint" />
+                android:text="Use Waypoint"
+                android:textSize="5pt" />
         </RadioGroup>
     </LinearLayout>
 
@@ -229,10 +229,10 @@
             android:id="@+id/preview_gv_action"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:numColumns="3"
             android:horizontalSpacing="3dp"
-            android:verticalSpacing="3dp"
-            android:scrollbars="none" />
+            android:numColumns="3"
+            android:scrollbars="none"
+            android:verticalSpacing="3dp" />
     </LinearLayout>
 
 </LinearLayout>

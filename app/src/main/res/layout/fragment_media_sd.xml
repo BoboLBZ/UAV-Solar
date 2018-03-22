@@ -17,11 +17,11 @@
         android:layout_height="match_parent" />
 
     <com.getbase.floatingactionbutton.FloatingActionButton
-        android:src="@drawable/ic_media_sd_refresh"
         android:id="@+id/media_sd_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp" />
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_media_sd_refresh" />
 
 </RelativeLayout>

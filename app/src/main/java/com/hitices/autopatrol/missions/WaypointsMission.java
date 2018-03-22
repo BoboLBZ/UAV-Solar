@@ -40,18 +40,17 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
  */
 
 public class WaypointsMission extends BaseMission {
+    private static WaypointMission.Builder builder; //任务builder，DJI SDK提供
+    public final Map<LatLng, Waypoint> waypoints = new ConcurrentHashMap<>(); //map，坐标与航点的对应，方便查找
     //public String missionName;
     public Date date; //创建时间，还没启用
     //mission
     public List<Waypoint> waypointList = new ArrayList();  // 航点集合
     public float altitude; //通用高度
     public float speed; //飞行速度
-
     public WaypointMissionFinishedAction finishedAction; //任务结束动作
     public WaypointMissionHeadingMode headingMode; //飞行器朝向
-    public final Map<LatLng, Waypoint> waypoints = new ConcurrentHashMap<>(); //map，坐标与航点的对应，方便查找
     public List<WaypointAction> currentGeneralActions = new ArrayList<>(); //航点通用动作
-    private static WaypointMission.Builder builder; //任务builder，DJI SDK提供
 
     public WaypointsMission(String mName) {
         missionName = mName;

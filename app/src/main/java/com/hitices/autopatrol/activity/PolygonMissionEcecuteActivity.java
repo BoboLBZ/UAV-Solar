@@ -70,8 +70,8 @@ import dji.sdk.sdkmanager.DJISDKManager;
  * 根据区域，应用全覆盖路径规划算法后等到航点
  */
 public class PolygonMissionEcecuteActivity extends AppCompatActivity {
-    private PolygonMission polygonMission;
     public static WaypointMission.Builder builder;
+    private PolygonMission polygonMission;
     private FlightController mFlightController;
     private WaypointMissionOperator insatnce;
     private MapView mapView;
@@ -79,6 +79,27 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
     private Marker droneMarker;
     private LatLng droneLocation;
     private ImageButton uplaod, start, stop;
+    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
+        @Override
+        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
+        }
+
+        @Override
+        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
+        }
+
+        @Override
+        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
+        }
+
+        @Override
+        public void onExecutionStart() {
+        }
+
+        @Override
+        public void onExecutionFinish(@Nullable final DJIError error) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -397,28 +418,6 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
             setResultToToast("remove listener");
         }
     }
-
-    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
-        @Override
-        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
-        }
-
-        @Override
-        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
-        }
-
-        @Override
-        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
-        }
-
-        @Override
-        public void onExecutionStart() {
-        }
-
-        @Override
-        public void onExecutionFinish(@Nullable final DJIError error) {
-        }
-    };
 
     private PolygonMission readMission(String path) {
         try {

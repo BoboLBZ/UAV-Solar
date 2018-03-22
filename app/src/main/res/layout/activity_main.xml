@@ -16,8 +16,8 @@
         <RadioButton
             android:id="@+id/mission"
             android:layout_width="44dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:button="@null"
             android:gravity="center"
             android:text="mission"
@@ -27,8 +27,8 @@
         <RadioButton
             android:id="@+id/aircraft"
             android:layout_width="44dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:button="@null"
             android:gravity="center"
             android:text="aircraft"
@@ -38,8 +38,8 @@
         <RadioButton
             android:id="@+id/media"
             android:layout_width="44dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:button="@null"
             android:gravity="center"
             android:text="media"

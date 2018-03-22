@@ -62,9 +62,35 @@ public class AircraftFragment extends Fragment {
     private ImageButton take_off;
     private Spinner spinnerMission;
     private ArrayAdapter<String> arrayAdapter;
+    protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
+                refreshSDKRelativeUI();
+                loginAccount();
+            } else if (intent.getAction().equals("MISSION_ITEMS_CHANGE"))
+                refreshSpinner();
+        }
+    };
     private OnFragmentInteractionListener mListener;
     private String missionName;
     private String missionType;
+    AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            String name = arrayAdapter.getItem(i);
+            if (name.length() > 0) {
+                missionName = name;
+                readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+                setResultToToast(missionName + ";" + missionType);
+            } else setResultToToast("选择任务失败");
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+        }
+    };
     private GestureDetector gestureDetector;
 
     public AircraftFragment() {
@@ -162,23 +188,6 @@ public class AircraftFragment extends Fragment {
         bundle.putBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN, isHidden());
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
-    protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
-                refreshSDKRelativeUI();
-                loginAccount();
-            } else if (intent.getAction().equals("MISSION_ITEMS_CHANGE"))
-                refreshSpinner();
-        }
-    };
-
     private void setResultToToast(final String result) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
@@ -226,22 +235,6 @@ public class AircraftFragment extends Fragment {
         arrayAdapter.addAll(AutoPatrolApplication.getMissionList());
     }
 
-    AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-            String name = arrayAdapter.getItem(i);
-            if (name.length() > 0) {
-                missionName = name;
-                readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
-                setResultToToast(missionName + ";" + missionType);
-            } else setResultToToast("选择任务失败");
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
-        }
-    };
-
     public void readBaseMission(String path) {
         try {
             //need test,
@@ -288,6 +281,11 @@ public class AircraftFragment extends Fragment {
                                 + error.getDescription());
                     }
                 });
+    }
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
     }
 
     private class myGestureListener extends GestureDetector.SimpleOnGestureListener {

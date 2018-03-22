@@ -55,6 +55,13 @@ public class myImageView extends AppCompatImageView
 
     // 判断双击中
     private boolean isDoubletag = false;
+    // ---------------------------------------------------------自由移动
+    // 存储最后的位置
+    private int lastPointCount;
+    private float Lx;
+    private float Ly;
+    private boolean isDrag;
+    private boolean isCheckLeftAndRight, isCheckTopAndBottom = false;
 
     /**
      * 重写 3个 构造方法
@@ -104,62 +111,6 @@ public class myImageView extends AppCompatImageView
                         return true;
                     }
                 });
-    }
-
-    /**
-     * 自动放大 缩小 缓慢的缩放
-     *
-     * @author yuan
-     */
-    private class AutoScaleRunnable implements Runnable {
-
-        private float mTargetScale;
-        private float x;
-        private float y;
-
-        private final float BIGGER = 1.07f;
-        private final float SMALL = 0.93f;
-        private float tmpScale;
-
-        /**
-         * 实现构造方法
-         *
-         * @param mTargetScale
-         * @param x
-         * @param y
-         */
-        public AutoScaleRunnable(float mTargetScale, float x, float y) {
-            this.mTargetScale = mTargetScale;
-            this.x = x;
-            this.y = y;
-            if (getScale() < mTargetScale) {
-                tmpScale = BIGGER;
-            }
-            if (getScale() > mTargetScale) {
-                tmpScale = SMALL;
-            }
-        }
-
-        @Override
-        public void run() {
-            //
-            matrix.postScale(tmpScale, tmpScale, x, y);
-            checkBorderAndCenterWhenScale();
-            setImageMatrix(matrix);
-
-            float currentScale = getScale();
-            if ((tmpScale > 1.0f && currentScale < mTargetScale)
-                    || (tmpScale < 1.0f && currentScale > mTargetScale)) {
-                postDelayed(this, 16);
-            } else {
-                float scale = mTargetScale / currentScale;
-                matrix.postScale(scale, scale, x, y);
-                checkBorderAndCenterWhenScale();
-                setImageMatrix(matrix);
-                isDoubletag = false;
-            }
-        }
-
     }
 
     public myImageView(Context context, AttributeSet attrs) {
@@ -295,14 +246,6 @@ public class myImageView extends AppCompatImageView
         // TODO Auto-generated method stub
 
     }
-
-    // ---------------------------------------------------------自由移动
-    // 存储最后的位置
-    private int lastPointCount;
-    private float Lx;
-    private float Ly;
-    private boolean isDrag;
-    private boolean isCheckLeftAndRight, isCheckTopAndBottom = false;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -448,8 +391,6 @@ public class myImageView extends AppCompatImageView
         return Math.sqrt(dx * dx + dy * dy) > touchSlop;
     }
 
-    // ------------------------------------------------比例缩放
-
     /**
      * 获得 图片放大缩小 以后的宽和高
      *
@@ -467,6 +408,8 @@ public class myImageView extends AppCompatImageView
         }
         return rectF;
     }
+
+    // ------------------------------------------------比例缩放
 
     /**
      * 防止缩放时，出现白边
@@ -506,6 +449,61 @@ public class myImageView extends AppCompatImageView
         }
 
         matrix.postTranslate(dx, dy);
+    }
+
+    /**
+     * 自动放大 缩小 缓慢的缩放
+     *
+     * @author yuan
+     */
+    private class AutoScaleRunnable implements Runnable {
+
+        private final float BIGGER = 1.07f;
+        private final float SMALL = 0.93f;
+        private float mTargetScale;
+        private float x;
+        private float y;
+        private float tmpScale;
+
+        /**
+         * 实现构造方法
+         *
+         * @param mTargetScale
+         * @param x
+         * @param y
+         */
+        public AutoScaleRunnable(float mTargetScale, float x, float y) {
+            this.mTargetScale = mTargetScale;
+            this.x = x;
+            this.y = y;
+            if (getScale() < mTargetScale) {
+                tmpScale = BIGGER;
+            }
+            if (getScale() > mTargetScale) {
+                tmpScale = SMALL;
+            }
+        }
+
+        @Override
+        public void run() {
+            //
+            matrix.postScale(tmpScale, tmpScale, x, y);
+            checkBorderAndCenterWhenScale();
+            setImageMatrix(matrix);
+
+            float currentScale = getScale();
+            if ((tmpScale > 1.0f && currentScale < mTargetScale)
+                    || (tmpScale < 1.0f && currentScale > mTargetScale)) {
+                postDelayed(this, 16);
+            } else {
+                float scale = mTargetScale / currentScale;
+                matrix.postScale(scale, scale, x, y);
+                checkBorderAndCenterWhenScale();
+                setImageMatrix(matrix);
+                isDoubletag = false;
+            }
+        }
+
     }
 
 }

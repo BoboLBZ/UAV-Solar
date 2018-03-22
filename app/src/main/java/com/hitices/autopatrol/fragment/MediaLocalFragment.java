@@ -38,19 +38,26 @@ import java.util.List;
 
 public class MediaLocalFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
     public static final int INDEX = 1;
-    private GridView gridView;
+    //menu
+    protected static final String STATE_PAUSE_ON_SCROLL = "STATE_PAUSE_ON_SCROLL";
+    protected static final String STATE_PAUSE_ON_FLING = "STATE_PAUSE_ON_FLING";
     private static String tag;
+    protected boolean pauseOnScroll = false;
+    protected boolean pauseOnFling = true;
+    private OnFragmentInteractionListener mListener;
+    private GridView gridView;
     private String[] urls;
     private ImageView showImageView;
     private List<String> imageurls;
     private List<String> videourls;
-    //menu
-    protected static final String STATE_PAUSE_ON_SCROLL = "STATE_PAUSE_ON_SCROLL";
-    protected static final String STATE_PAUSE_ON_FLING = "STATE_PAUSE_ON_FLING";
-    protected boolean pauseOnScroll = false;
-    protected boolean pauseOnFling = true;
+    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            /////show image
+            showFullImage(i);
+        }
+    };
 
     //    private Toolbar toolbar;
     public MediaLocalFragment() {
@@ -85,14 +92,6 @@ public class MediaLocalFragment extends Fragment {
         return view;
     }
 
-    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            /////show image
-            showFullImage(i);
-        }
-    };
-
     // TODO: Rename method, update argument and hook method into UI event
     @Override
     public void onResume() {
@@ -122,94 +121,6 @@ public class MediaLocalFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
-    private class ImageAdapter extends BaseAdapter {
-        //private String[] IMAGE_URLS= getUrls();
-        private String[] IMAGE_URLS = urls;
-        private LayoutInflater inflater;
-        private DisplayImageOptions options;
-
-        ImageAdapter(Context context) {
-            inflater = LayoutInflater.from(context);
-            options = new DisplayImageOptions.Builder()
-                    .showImageOnLoading(R.drawable.ic_stub)
-                    .showImageForEmptyUri(R.drawable.ic_empty)
-                    .showImageOnFail(R.drawable.ic_error)
-                    .cacheOnDisk(true)
-                    .cacheInMemory(true)
-                    .considerExifParams(true)
-                    .bitmapConfig(Bitmap.Config.RGB_565)
-                    .build();
-        }
-
-        @Override
-        public int getCount() {
-            return IMAGE_URLS.length;
-        }
-
-        @Override
-        public Object getItem(int pos) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int pos) {
-            return pos;
-        }
-
-        @Override
-        public View getView(int pos, View convertView, ViewGroup parent) {
-            final ViewHolder holder;
-            View view = convertView;
-            if (view == null) {
-                view = inflater.inflate(R.layout.item_grid_view, parent, false);
-                holder = new ViewHolder();
-                assert view != null;
-                holder.imageView = view.findViewById(R.id.image);
-                holder.progressBar = view.findViewById(R.id.progress);
-                view.setTag(holder);
-            } else {
-                holder = (ViewHolder) view.getTag();
-            }
-            ImageLoaderConfiguration configuration = ImageLoaderConfiguration.createDefault(getActivity());
-            ImageLoader.getInstance().init(configuration);
-            ImageLoader.getInstance()
-                    .displayImage(IMAGE_URLS[pos], holder.imageView, options, new SimpleImageLoadingListener() {
-                        @Override
-                        public void onLoadingStarted(String imageUri, View view) {
-                            holder.progressBar.setProgress(0);
-                            holder.progressBar.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                            holder.progressBar.setVisibility(View.GONE);
-                        }
-
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            holder.progressBar.setVisibility(View.GONE);
-                        }
-                    }, new ImageLoadingProgressListener() {
-                        @Override
-                        public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                            holder.progressBar.setProgress(Math.round(100.0f * current / total));
-                        }
-                    });
-            return view;
-        }
-
-    }
-
-    static class ViewHolder {
-        ImageView imageView;
-        ProgressBar progressBar;
     }
 
     //base menu o
@@ -350,5 +261,93 @@ public class MediaLocalFragment extends Fragment {
         urls.addAll(imageurls);
         urls.addAll(videourls);
         return urls.toArray(new String[0]);
+    }
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
+    static class ViewHolder {
+        ImageView imageView;
+        ProgressBar progressBar;
+    }
+
+    private class ImageAdapter extends BaseAdapter {
+        //private String[] IMAGE_URLS= getUrls();
+        private String[] IMAGE_URLS = urls;
+        private LayoutInflater inflater;
+        private DisplayImageOptions options;
+
+        ImageAdapter(Context context) {
+            inflater = LayoutInflater.from(context);
+            options = new DisplayImageOptions.Builder()
+                    .showImageOnLoading(R.drawable.ic_stub)
+                    .showImageForEmptyUri(R.drawable.ic_empty)
+                    .showImageOnFail(R.drawable.ic_error)
+                    .cacheOnDisk(true)
+                    .cacheInMemory(true)
+                    .considerExifParams(true)
+                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    .build();
+        }
+
+        @Override
+        public int getCount() {
+            return IMAGE_URLS.length;
+        }
+
+        @Override
+        public Object getItem(int pos) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int pos) {
+            return pos;
+        }
+
+        @Override
+        public View getView(int pos, View convertView, ViewGroup parent) {
+            final ViewHolder holder;
+            View view = convertView;
+            if (view == null) {
+                view = inflater.inflate(R.layout.item_grid_view, parent, false);
+                holder = new ViewHolder();
+                assert view != null;
+                holder.imageView = view.findViewById(R.id.image);
+                holder.progressBar = view.findViewById(R.id.progress);
+                view.setTag(holder);
+            } else {
+                holder = (ViewHolder) view.getTag();
+            }
+            ImageLoaderConfiguration configuration = ImageLoaderConfiguration.createDefault(getActivity());
+            ImageLoader.getInstance().init(configuration);
+            ImageLoader.getInstance()
+                    .displayImage(IMAGE_URLS[pos], holder.imageView, options, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingStarted(String imageUri, View view) {
+                            holder.progressBar.setProgress(0);
+                            holder.progressBar.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                            holder.progressBar.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            holder.progressBar.setVisibility(View.GONE);
+                        }
+                    }, new ImageLoadingProgressListener() {
+                        @Override
+                        public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                            holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                        }
+                    });
+            return view;
+        }
+
     }
 }

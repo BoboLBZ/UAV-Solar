@@ -2,39 +2,39 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/blue_gv_background">
+    android:background="@color/blue_gv_background"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/preview_gvitem_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waypoints"
-        android:textColor="@color/white"
         android:layout_marginBottom="3dp"
-        android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp" />
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="3dp"
+        android:text="Waypoints"
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/preview_gvitem_lat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waypoints"
-        android:textColor="@color/white"
         android:layout_marginBottom="3dp"
-        android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp" />
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="3dp"
+        android:text="Waypoints"
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/preview_gvitem_lng"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waypoints"
-        android:textColor="@color/white"
         android:layout_marginBottom="3dp"
-        android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp" />
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="3dp"
+        android:text="Waypoints"
+        android:textColor="@color/white" />
 </LinearLayout>
