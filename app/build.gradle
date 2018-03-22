@@ -13,7 +13,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\Public\\ap_keystore.jks')
+            storeFile file('ap_keystore.jks')
             storePassword 'liubozhou'
             keyAlias 'key_ap'
             keyPassword 'liubozhou'
