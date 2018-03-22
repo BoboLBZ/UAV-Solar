@@ -10,6 +10,16 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+
+        externalNativeBuild {
+            cmake {
+                //arguments  '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=gnustl_static'
+                cppFlags "-std=c++11","-frtti", "-fexceptions"
+            }
+        }
+        ndk{
+            abiFilters 'armeabi-v7a'
+        }
     }
     signingConfigs {
         release {
@@ -40,7 +50,11 @@ android {
         doNotStrip "*/*/libUpgradeVerify.so"
         doNotStrip "*/*/libFR.so"
     }
-
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
 }
 
 dependencies {
@@ -55,13 +69,11 @@ dependencies {
     compile 'com.amap.api:map2d:latest.integration'
     compile 'com.amap.api:search:latest.integration'
     compile 'com.android.support:multidex:1.0.1'
-
-
     compile 'com.dji:dji-uilibrary:4.4.1'
-    provided('com.dji:dji-sdk-provided:4.4.1')
-
+    provided 'com.dji:dji-sdk-provided:4.4.1'
     implementation 'com.android.support:design:26.1.0'
     compileOnly files('libs/universal-image-loader-1.9.5.jar')
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compileOnly files('libs/AMap_Location_V3.7.0_20171218.jar')
+    implementation project(':openCVLibrary341')
 }

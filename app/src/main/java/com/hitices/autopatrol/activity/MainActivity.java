@@ -24,6 +24,8 @@ import com.hitices.autopatrol.fragment.MediaLocalFragment;
 import com.hitices.autopatrol.fragment.MediaSDFragment;
 import com.hitices.autopatrol.fragment.MissionFragment;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +48,23 @@ public class MainActivity extends AppCompatActivity
         MediaFragment.OnFragmentInteractionListener,
         MediaLocalFragment.OnFragmentInteractionListener,
         MediaSDFragment.OnFragmentInteractionListener {
+
+    // opencv
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("MainActivity", "OpenCV not loaded");
+        } else {
+            Log.d("MainActivity", "OpenCV loaded！");
+        }
+        System.loadLibrary("native-lib");
+    }
+
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public native String stringFromJNI();
+
     //权限列表
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
             android.Manifest.permission.VIBRATE,
@@ -84,6 +103,8 @@ public class MainActivity extends AppCompatActivity
         //fragment
         fragmentManager = getSupportFragmentManager();
         initUI();
+
+        Log.d("MainActivity", stringFromJNI());
     }
 
     public void initUI() {
