@@ -6,8 +6,10 @@ package com.hitices.autopatrol.missions;
  * 接口，任务类型，waypiont 和 polygon
  */
 
-public enum  MissionType {
+public enum MissionType {
     WaypointMission(0),
     PolygonMission(1);
-    MissionType(int value){}
+
+    MissionType(int value) {
+    }
 }

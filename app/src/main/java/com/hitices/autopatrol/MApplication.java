@@ -5,6 +5,7 @@ package com.hitices.autopatrol;
  * email: bozliu@outlook.com
  * 我也不知道这个类是干什么的，DJI SDK升级到4.4.2后官方demo这样用的
  */
+
 import android.app.Application;
 import android.content.Context;
 
@@ -13,6 +14,7 @@ import com.secneo.sdk.Helper;
 public class MApplication extends Application {
 
     private AutoPatrolApplication application;
+
     @Override
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);

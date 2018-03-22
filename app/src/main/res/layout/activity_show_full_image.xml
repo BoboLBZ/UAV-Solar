@@ -9,6 +9,7 @@
         android:id="@+id/videoView_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
     <com.hitices.autopatrol.tool.myImageView
         android:id="@+id/imageView_activity"
         android:layout_width="wrap_content"

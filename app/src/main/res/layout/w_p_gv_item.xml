@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/blue_gv_background">
+
     <TextView
         android:id="@+id/preview_gvitem_id"
         android:layout_width="wrap_content"
@@ -13,7 +14,8 @@
         android:layout_marginBottom="3dp"
         android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"/>
+        android:layout_marginRight="3dp" />
+
     <TextView
         android:id="@+id/preview_gvitem_lat"
         android:layout_width="wrap_content"
@@ -23,7 +25,8 @@
         android:layout_marginBottom="3dp"
         android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"/>
+        android:layout_marginRight="3dp" />
+
     <TextView
         android:id="@+id/preview_gvitem_lng"
         android:layout_width="wrap_content"
@@ -33,5 +36,5 @@
         android:layout_marginBottom="3dp"
         android:layout_marginTop="3dp"
         android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"/>
+        android:layout_marginRight="3dp" />
 </LinearLayout>

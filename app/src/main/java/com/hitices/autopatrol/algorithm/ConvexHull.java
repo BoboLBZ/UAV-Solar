@@ -22,6 +22,7 @@ public class ConvexHull {
         }
         D = new int[2 * N];
     }
+
     public Point[] getTubaoPoint() {
         // 获得最小的Y，作为P0点
         double minY = pointArray[0].getY();
@@ -70,8 +71,8 @@ public class ConvexHull {
         for (i++; i < N; i++) {
             // 如果成立就是i在凸包内，跳过 //top=n+3 bot=n-2
 //			此时top、bot没有改变
-            if (isLeft(pointArray[D[top - 2]], pointArray[D[top - 1]],pointArray[i]) > 0 &&
-                    isLeft(pointArray[D[bot + 1]], pointArray[D[bot + 2]],pointArray[i]) > 0) {
+            if (isLeft(pointArray[D[top - 2]], pointArray[D[top - 1]], pointArray[i]) > 0 &&
+                    isLeft(pointArray[D[bot + 1]], pointArray[D[bot + 2]], pointArray[i]) > 0) {
                 continue;
             }
 
@@ -98,7 +99,7 @@ public class ConvexHull {
 //                    + pointArray[D[i]].getY());
             resultPoints[index++] = pointArray[D[i]];
         }
-        resultPoints[index]=resultPoints[0];
+        resultPoints[index] = resultPoints[0];
         //convert Point to Latlng
 //        LatLng[] result=new LatLng[resultPoints.length+1];
 //        for(int k=0;k<resultPoints.length;k++){

@@ -7,61 +7,68 @@
     android:layout_marginTop="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp">
+
     <View
         android:layout_width="match_parent"
         android:layout_height="3dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <TextView
         android:id="@+id/preview_polygon_mission_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="mission name"
-        android:layout_gravity="start">
-    </TextView>
+        android:layout_gravity="start"></TextView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <TextView
         android:id="@+id/preview_aircraft_name_pm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="aircraft name:">
-    </TextView>
+        android:text="aircraft name:"></TextView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <TextView
         android:id="@+id/preview_camera_pm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="camera:">
-    </TextView>
+        android:text="camera:"></TextView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <TextView
         android:id="@+id/preview_start_point_pm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="point:">
-    </TextView>
+        android:text="point:"></TextView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <TextView
         android:id="@+id/preview_time_pm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="time:">
-    </TextView>
+        android:text="time:"></TextView>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/half_black"/>
+        android:background="@color/half_black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,7 +78,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed:"/>
+            android:text="Speed:" />
 
         <SeekBar
             android:id="@+id/preview_speed_pm"
@@ -84,23 +91,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:orientation="horizontal">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="altitude:">
-        </TextView>
+            android:text="altitude:"></TextView>
+
         <EditText
             android:id="@+id/preview_altitude_pm"
             android:layout_width="200dp"
             android:layout_height="wrap_content" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="m"/>
+            android:text="m" />
     </LinearLayout>
 </LinearLayout>

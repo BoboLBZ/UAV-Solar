@@ -43,7 +43,7 @@ public class MediaSDFragment extends Fragment {
     private List<MediaFile> mediaFileList = new ArrayList<MediaFile>();
     private FileListAdapter mListAdapter;
     private MediaManager mMediaManager;
-    private int lastClickViewIndex =-1;
+    private int lastClickViewIndex = -1;
     private View lastClickView;
     private MediaManager.FileListState currentFileListState = MediaManager.FileListState.UNKNOWN;
     private FetchMediaTaskScheduler scheduler;
@@ -53,6 +53,7 @@ public class MediaSDFragment extends Fragment {
     public MediaSDFragment() {
         // Required empty public constructor
     }
+
     public static MediaSDFragment newInstance() {
         MediaSDFragment fragment = new MediaSDFragment();
         Bundle args = new Bundle();
@@ -64,23 +65,25 @@ public class MediaSDFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         initMediaManager();
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the waypoint_preview_waypoint_detail for this fragment
-        View view=inflater.inflate(R.layout.fragment_media_sd, container, false);
-        listView=view.findViewById(R.id.imageList);
+        View view = inflater.inflate(R.layout.fragment_media_sd, container, false);
+        listView = view.findViewById(R.id.imageList);
         mListAdapter = new FileListAdapter();
         listView.setAdapter(mListAdapter);
-        LinearLayoutManager layoutManager=new LinearLayoutManager(getActivity(), OrientationHelper.VERTICAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), OrientationHelper.VERTICAL, false);
         listView.setLayoutManager(layoutManager);
 
-        refresh=view.findViewById(R.id.media_sd_refresh);
+        refresh = view.findViewById(R.id.media_sd_refresh);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,11 +110,13 @@ public class MediaSDFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
+
     @Override
     public void onDestroyView() {
         lastClickView = null;
@@ -120,11 +125,11 @@ public class MediaSDFragment extends Fragment {
             mMediaManager.removeFileListStateCallback(this.updateFileListStateListener);
             mMediaManager.removeMediaUpdatedVideoPlaybackStateListener(updatedVideoPlaybackStateListener);
             mMediaManager.exitMediaDownloading();
-            if (scheduler!=null) {
+            if (scheduler != null) {
                 scheduler.removeAllTasks();
             }
         }
-        if(AutoPatrolApplication.getCameraInstance() != null) {
+        if (AutoPatrolApplication.getCameraInstance() != null) {
             AutoPatrolApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError mError) {
@@ -139,10 +144,12 @@ public class MediaSDFragment extends Fragment {
         }
         super.onDestroyView();
     }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
     private void initMediaManager() {
         if (AutoPatrolApplication.getProductInstance() == null) {
             mediaFileList.clear();
@@ -183,16 +190,16 @@ public class MediaSDFragment extends Fragment {
 
 
     private void getFileList() {
-        if(AutoPatrolApplication.getCameraInstance() == null){
+        if (AutoPatrolApplication.getCameraInstance() == null) {
             setResultToToast("this is no camera connect");
             return;
         }
         mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
         if (mMediaManager != null) {
 
-            if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)){
+            if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)) {
                 DJILog.e(TAG, "Media Manager is busy.");
-            }else{
+            } else {
                 mMediaManager.refreshFileList(new CommonCallbacks.CompletionCallback() {
                     @Override
                     public void onResult(DJIError error) {
@@ -236,6 +243,7 @@ public class MediaSDFragment extends Fragment {
             }
         }
     }
+
     private void getThumbnails() {
         if (mediaFileList.size() <= 0) {
             setResultToToast("No File info for downloading thumbnails");
@@ -245,6 +253,7 @@ public class MediaSDFragment extends Fragment {
             getThumbnailByIndex(i);
         }
     }
+
     private void getPreviews() {
         if (mediaFileList.size() <= 0) {
             setResultToToast("No File info for downloading previews");
@@ -254,10 +263,12 @@ public class MediaSDFragment extends Fragment {
             getPreviewByIndex(i);
         }
     }
+
     private void getThumbnailByIndex(final int index) {
         FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.THUMBNAIL, taskCallback);
         scheduler.moveTaskToEnd(task);
     }
+
     private void getPreviewByIndex(final int index) {
         FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.PREVIEW, taskCallback);
         scheduler.moveTaskToEnd(task);
@@ -273,12 +284,13 @@ public class MediaSDFragment extends Fragment {
         public ItemHolder(View itemView) {
             super(itemView);
             this.thumbnail_img = itemView.findViewById(R.id.filethumbnail);
-            this.file_name =  itemView.findViewById(R.id.filename);
-            this.file_type =  itemView.findViewById(R.id.filetype);
-            this.file_size =  itemView.findViewById(R.id.fileSize);
-            this.file_time =  itemView.findViewById(R.id.filetime);
+            this.file_name = itemView.findViewById(R.id.filename);
+            this.file_type = itemView.findViewById(R.id.filetype);
+            this.file_size = itemView.findViewById(R.id.fileSize);
+            this.file_time = itemView.findViewById(R.id.filetime);
         }
     }
+
     private class FileListAdapter extends RecyclerView.Adapter<ItemHolder> {
         @Override
         public int getItemCount() {
@@ -323,15 +335,16 @@ public class MediaSDFragment extends Fragment {
             }
         }
     }
+
     private FetchMediaTask.Callback taskCallback = new FetchMediaTask.Callback() {
         @Override
         public void onUpdate(MediaFile file, FetchMediaTaskContent option, DJIError error) {
             if (null == error) {
                 if (option == FetchMediaTaskContent.PREVIEW) {
-                            mListAdapter.notifyDataSetChanged();
+                    mListAdapter.notifyDataSetChanged();
                 }
                 if (option == FetchMediaTaskContent.THUMBNAIL) {
-                            mListAdapter.notifyDataSetChanged();
+                    mListAdapter.notifyDataSetChanged();
                 }
             } else {
                 DJILog.e(TAG, "Fetch Media Task Failed" + error.getDescription());
@@ -370,7 +383,7 @@ public class MediaSDFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
-            MediaFile selectedMedia = (MediaFile )v.getTag();
+            MediaFile selectedMedia = (MediaFile) v.getTag();
             final Bitmap previewImage = selectedMedia.getPreview();
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
@@ -380,6 +393,7 @@ public class MediaSDFragment extends Fragment {
             });
         }
     };
+
     private void setResultToToast(final String result) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {

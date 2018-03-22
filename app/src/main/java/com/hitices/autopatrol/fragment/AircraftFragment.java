@@ -48,13 +48,13 @@ import dji.sdk.useraccount.UserAccountManager;
  * to handle interaction events.
  * Use the {@link AircraftFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
+ * <p>
  * create by Rhys
  * email: bozliu@outlook.com
  * 显示飞行器的连接情况
  */
 public class AircraftFragment extends Fragment {
-    private static final String AIRCRAFT_STATE_SAVE_IS_HIDDEN="AIRCRAFT_STATE_SAVE_IS_HIDDEN";
+    private static final String AIRCRAFT_STATE_SAVE_IS_HIDDEN = "AIRCRAFT_STATE_SAVE_IS_HIDDEN";
 
     private TextView tvAircraftType;
     private TextView tvCameraType;
@@ -66,62 +66,67 @@ public class AircraftFragment extends Fragment {
     private String missionName;
     private String missionType;
     private GestureDetector gestureDetector;
+
     public AircraftFragment() {
         // Required empty public constructor
     }
+
     public static AircraftFragment newInstance() {
         AircraftFragment fragment = new AircraftFragment();
         return fragment;
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(savedInstanceState != null){
-            boolean isSupportHidden=savedInstanceState.getBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN);
-            FragmentTransaction fragmentTransaction=getFragmentManager().beginTransaction();
-            if(isSupportHidden){
+        if (savedInstanceState != null) {
+            boolean isSupportHidden = savedInstanceState.getBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN);
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            if (isSupportHidden) {
                 fragmentTransaction.hide(this);
-            }else {
+            } else {
                 fragmentTransaction.show(this);
             }
             fragmentTransaction.commit();
         }
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the waypoint_preview_waypoint_detail for this fragment
-        View view= inflater.inflate(R.layout.fragment_aircraft,container,false);
+        View view = inflater.inflate(R.layout.fragment_aircraft, container, false);
         tvAircraftType = view.findViewById(R.id.aircraft_type);
         tvCameraType = view.findViewById(R.id.camera_type);
         spinnerMission = view.findViewById(R.id.missionSelected);
-        take_off=view.findViewById(R.id.btn_take_off);
+        take_off = view.findViewById(R.id.btn_take_off);
         take_off.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ( missionType.equals("WaypointsMission")){
-                    Intent intent=new Intent(getActivity(),WaypointMissionExecuteActivity.class);
-                    intent.putExtra("missionName",missionName);
+                if (missionType.equals("WaypointsMission")) {
+                    Intent intent = new Intent(getActivity(), WaypointMissionExecuteActivity.class);
+                    intent.putExtra("missionName", missionName);
 //                    intent.putExtra("missionType","type");
                     startActivity(intent);
-                }else if(missionType.equals("PolygonMission")){
-                    Intent intent=new Intent(getActivity(),PolygonMissionEcecuteActivity.class);
-                    intent.putExtra("missionName",missionName);
+                } else if (missionType.equals("PolygonMission")) {
+                    Intent intent = new Intent(getActivity(), PolygonMissionEcecuteActivity.class);
+                    intent.putExtra("missionName", missionName);
 //                    intent.putExtra("missionType","type");
                     startActivity(intent);
                 }
             }
         });
 
-        arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, AutoPatrolApplication.getMissionList());
+        arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, AutoPatrolApplication.getMissionList());
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMission.setAdapter(arrayAdapter);
         spinnerMission.setOnItemSelectedListener(onItemSelectedListener);
 
-        gestureDetector=new GestureDetector(getActivity(),new myGestureListener());
+        gestureDetector = new GestureDetector(getActivity(), new myGestureListener());
         return view;
     }
+
     @Override
     public void onAttach(Context context) {
         IntentFilter filter = new IntentFilter();
@@ -137,38 +142,43 @@ public class AircraftFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
     @Override
     public void onDetach() {
         getContext().unregisterReceiver(mReceiver);
         super.onDetach();
         mListener = null;
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
 
     }
+
     @Override
-    public void onSaveInstanceState(Bundle bundle){
+    public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        bundle.putBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN,isHidden());
+        bundle.putBoolean(AIRCRAFT_STATE_SAVE_IS_HIDDEN, isHidden());
     }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
+            if (intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
                 refreshSDKRelativeUI();
                 loginAccount();
-            }
-            else if(intent.getAction().equals("MISSION_ITEMS_CHANGE"))
+            } else if (intent.getAction().equals("MISSION_ITEMS_CHANGE"))
                 refreshSpinner();
         }
     };
+
     private void setResultToToast(final String result) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
@@ -176,33 +186,33 @@ public class AircraftFragment extends Fragment {
             }
         });
     }
+
     private void refreshSDKRelativeUI() {
         BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
 
         if (null != mProduct && mProduct.isConnected()) {
             Log.v("connection", "refreshSDK: True");
 
-           // String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
+            // String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
             if (null != mProduct.getModel()) {
                 tvAircraftType.setText("type:" + mProduct.getModel().getDisplayName());
-                if(null != mProduct.getCamera()) {
+                if (null != mProduct.getCamera()) {
                     tvCameraType.setText("camera:" + mProduct.getCamera().getDisplayName());
-                    ISCONNECTED=true;
-                }
-                else {
+                    ISCONNECTED = true;
+                } else {
                     tvCameraType.setText(R.string.camera_unknown);
-                    ISCONNECTED=false;
+                    ISCONNECTED = false;
                 }
                 getView().setBackgroundColor(getResources().getColor(R.color.selected));
             } else {
-                ISCONNECTED=false;
+                ISCONNECTED = false;
                 tvAircraftType.setText(R.string.aircraft_unknown);
                 tvCameraType.setText(R.string.camera_unknown);
                 getView().setBackgroundColor(getResources().getColor(R.color.background));
             }
 
         } else {
-            ISCONNECTED=false;
+            ISCONNECTED = false;
             setResultToToast("no connection");
             Log.v("connection", "refreshSDK: False");
             tvAircraftType.setText(R.string.aircraft_unknown);
@@ -210,28 +220,29 @@ public class AircraftFragment extends Fragment {
             getView().setBackgroundColor(getResources().getColor(R.color.background));
         }
     }
-    private void refreshSpinner(){
+
+    private void refreshSpinner() {
         arrayAdapter.clear();
         arrayAdapter.addAll(AutoPatrolApplication.getMissionList());
     }
 
-    AdapterView.OnItemSelectedListener onItemSelectedListener =new AdapterView.OnItemSelectedListener() {
-       @Override
-       public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-           String name=arrayAdapter.getItem(i);
-           if(name.length()>0) {
-               missionName=name;
-               readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
-               setResultToToast(missionName+";"+missionType);
-           }
-           else setResultToToast("选择任务失败");
-       }
-       @Override
-       public void onNothingSelected(AdapterView<?> adapterView) {
-       }
-   };
+    AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            String name = arrayAdapter.getItem(i);
+            if (name.length() > 0) {
+                missionName = name;
+                readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+                setResultToToast(missionName + ";" + missionType);
+            } else setResultToToast("选择任务失败");
+        }
 
-    public void readBaseMission(String path){
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+        }
+    };
+
+    public void readBaseMission(String path) {
         try {
             //need test,
             File file = new File(path);
@@ -240,36 +251,37 @@ public class AircraftFragment extends Fragment {
             Document doc = dBuilder.parse(file);
 //            //root
             doc.getDocumentElement().normalize();
-            String type=doc.getDocumentElement().getNodeName();
+            String type = doc.getDocumentElement().getNodeName();
             System.out.println("Root element :" + type);
             //name
-            NodeList nodes=doc.getElementsByTagName("missionName");
-            if(nodes.item(0) == null){
-                return ;
-            }else {
-                if(type.equals("PolygonMission"))
-                {
-                    missionType="PolygonMission";
-                }else if(type.equals("WaypointsMission")){
-                    missionType="WaypointsMission";
-                }else {
-                    return ;
+            NodeList nodes = doc.getElementsByTagName("missionName");
+            if (nodes.item(0) == null) {
+                return;
+            } else {
+                if (type.equals("PolygonMission")) {
+                    missionType = "PolygonMission";
+                } else if (type.equals("WaypointsMission")) {
+                    missionType = "WaypointsMission";
+                } else {
+                    return;
                 }
             }
 
-            return ;
-        }catch (Exception e) {
+            return;
+        } catch (Exception e) {
             e.printStackTrace();
-            return ;
+            return;
         }
     }
-    private void loginAccount(){
+
+    private void loginAccount() {
         UserAccountManager.getInstance().logIntoDJIUserAccount(getContext(),
-                new CommonCallbacks.CompletionCallbackWith<UserAccountState>(){
+                new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
                     @Override
                     public void onSuccess(final UserAccountState userAccountState) {
-                       setResultToToast("Login Success");
+                        setResultToToast("Login Success");
                     }
+
                     @Override
                     public void onFailure(DJIError error) {
                         setResultToToast("Login Error:"
@@ -277,13 +289,15 @@ public class AircraftFragment extends Fragment {
                     }
                 });
     }
-    private class myGestureListener extends GestureDetector.SimpleOnGestureListener{
+
+    private class myGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if((e1.getY() - e2.getY() > 100 && Math.abs(velocityY) > 10))
+            if ((e1.getY() - e2.getY() > 100 && Math.abs(velocityY) > 10))
                 refreshSDKRelativeUI();
             return false;
         }
+
         @Override
         public boolean onDown(MotionEvent e) {
             return true;

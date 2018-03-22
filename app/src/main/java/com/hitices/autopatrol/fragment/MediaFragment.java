@@ -11,9 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
-import com.hitices.autopatrol.tool.MediaViewPagerAdapter;
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.tool.MediaViewPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +20,7 @@ import java.util.List;
 
 
 public class MediaFragment extends Fragment {
-    private static final String MEDIA_STATE_SAVE_IS_HIDDEN="MEDIA_STATE_SAVE_IS_HIDDEN";
+    private static final String MEDIA_STATE_SAVE_IS_HIDDEN = "MEDIA_STATE_SAVE_IS_HIDDEN";
     private OnFragmentInteractionListener mListener;
 
     private TabLayout tabLayout;
@@ -41,27 +40,29 @@ public class MediaFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(savedInstanceState != null){
-            boolean isSupportHidden=savedInstanceState.getBoolean(MEDIA_STATE_SAVE_IS_HIDDEN);
-            FragmentTransaction fragmentTransaction=getFragmentManager().beginTransaction();
-            if(isSupportHidden){
+        if (savedInstanceState != null) {
+            boolean isSupportHidden = savedInstanceState.getBoolean(MEDIA_STATE_SAVE_IS_HIDDEN);
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            if (isSupportHidden) {
                 fragmentTransaction.hide(this);
-            }else {
+            } else {
                 fragmentTransaction.show(this);
             }
             fragmentTransaction.commit();
         }
     }
+
     @Override
-    public void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(MEDIA_STATE_SAVE_IS_HIDDEN,isHidden());
+        outState.putBoolean(MEDIA_STATE_SAVE_IS_HIDDEN, isHidden());
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the waypoint_preview_waypoint_detail for this fragment
-        View view=inflater.inflate(R.layout.fragment_media,container,false);
+        View view = inflater.inflate(R.layout.fragment_media, container, false);
         tabLayout = view.findViewById(R.id.media_tab);
         viewPager = view.findViewById(R.id.media_viewPager);
         tabLayout.addTab(tabLayout.newTab().setText("本地"));
@@ -70,19 +71,20 @@ public class MediaFragment extends Fragment {
         tabLayout.setupWithViewPager(viewPager);
 
         //test
-        List<Fragment> fragments=new ArrayList<>();
+        List<Fragment> fragments = new ArrayList<>();
         fragments.add(MediaLocalFragment.newInstance());
         fragments.add(MediaSDFragment.newInstance());
 
-        String[] titles=new String[]{"本地","相机"};
+        String[] titles = new String[]{"本地", "相机"};
         MediaViewPagerAdapter viewPagerAdapter =
-                new MediaViewPagerAdapter(getActivity().getSupportFragmentManager(),fragments, Arrays.asList(titles));
+                new MediaViewPagerAdapter(getActivity().getSupportFragmentManager(), fragments, Arrays.asList(titles));
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(onPageChangeListener);
         setHasOptionsMenu(true);
         return view;
     }
-    TabLayout.OnTabSelectedListener onTabSelectedListener=new TabLayout.OnTabSelectedListener() {
+
+    TabLayout.OnTabSelectedListener onTabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
 
@@ -98,7 +100,7 @@ public class MediaFragment extends Fragment {
 
         }
     };
-    ViewPager.OnPageChangeListener onPageChangeListener =new ViewPager.OnPageChangeListener() {
+    ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -121,6 +123,7 @@ public class MediaFragment extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -131,11 +134,13 @@ public class MediaFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

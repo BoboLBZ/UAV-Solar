@@ -3,17 +3,13 @@ package com.hitices.autopatrol;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.media.audiofx.Equalizer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
-
-import android.os.Handler;
 
 import com.amap.api.maps2d.CoordinateConverter;
 import com.amap.api.maps2d.model.LatLng;
@@ -41,7 +37,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change"; //用于通知飞行器连接状态的变化
     public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";  //默认任务保存位置
-    public static final String photoDir=Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
+    public static final String photoDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
     private static BaseProduct mProduct; //产品
     private Handler mHandler;
     private Application instance;
@@ -70,6 +66,7 @@ public class AutoPatrolApplication extends Application {
     public AutoPatrolApplication() {
 
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -88,7 +85,7 @@ public class AutoPatrolApplication extends Application {
             @Override
             public void onComponentChange(BaseProduct.ComponentKey key, BaseComponent oldComponent, BaseComponent newComponent) {
 
-                if(newComponent != null) {
+                if (newComponent != null) {
                     newComponent.setComponentListener(mDJIComponentListener);
                 }
                 notifyStatusChange();
@@ -107,13 +104,13 @@ public class AutoPatrolApplication extends Application {
             @Override
             public void onRegister(DJIError error) {
 
-                if(error == DJISDKError.REGISTRATION_SUCCESS) {
+                if (error == DJISDKError.REGISTRATION_SUCCESS) {
 
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Log.e("autopatrol","Register Success");
+                            Log.e("autopatrol", "Register Success");
                             //Toast.makeText(getApplicationContext(), "Register Success", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -140,7 +137,7 @@ public class AutoPatrolApplication extends Application {
             public void onProductChange(BaseProduct oldProduct, BaseProduct newProduct) {
 
                 mProduct = newProduct;
-                if(mProduct != null) {
+                if (mProduct != null) {
                     mProduct.setBaseProductListener(mDJIBaseProductListener);
                 }
 
@@ -158,16 +155,19 @@ public class AutoPatrolApplication extends Application {
             Toast.makeText(getApplicationContext(), "Please check if the permission is granted.", Toast.LENGTH_LONG).show();
         }
     }
+
     public static synchronized BaseProduct getProductInstance() {
         if (null == mProduct) {
             mProduct = DJISDKManager.getInstance().getProduct();
         }
         return mProduct;
     }
+
     public static synchronized Aircraft getAircraftInstance() {
         if (!isAircraftConnected()) return null;
         return (Aircraft) getProductInstance();
     }
+
     public static synchronized Camera getCameraInstance() {
 
         if (getProductInstance() == null) return null;
@@ -175,8 +175,8 @@ public class AutoPatrolApplication extends Application {
         Camera camera = null;
         //rhys
         //DJILog.e("rhys","get product instance");
-        camera =getProductInstance().getCamera();
-        if (getProductInstance() instanceof Aircraft){
+        camera = getProductInstance().getCamera();
+        if (getProductInstance() instanceof Aircraft) {
             //DJILog.e("rhys","get camera instance");
             camera = ((Aircraft) getProductInstance()).getCamera();
 
@@ -186,46 +186,54 @@ public class AutoPatrolApplication extends Application {
 
         return camera;
     }
-    public static synchronized Gimbal getGimbalInstance(){
+
+    public static synchronized Gimbal getGimbalInstance() {
         if (getProductInstance() == null) return null;
 
         return getProductInstance().getGimbal();
     }
+
     public static boolean isAircraftConnected() {
         return getProductInstance() != null && getProductInstance() instanceof Aircraft;
     }
+
     public static boolean isHandHeldConnected() {
         return getProductInstance() != null && getProductInstance() instanceof HandHeld;
     }
+
     public static boolean isProductModuleAvailable() {
         return (null != AutoPatrolApplication.getProductInstance());
     }
+
     public static boolean isCameraModuleAvailable() {
         return isProductModuleAvailable() &&
                 (null != AutoPatrolApplication.getProductInstance().getCamera());
     }
+
     public static boolean isPlaybackAvailable() {
         return isCameraModuleAvailable() &&
                 (null != AutoPatrolApplication.getProductInstance().getCamera().getPlaybackManager());
     }
-    public static List<String> getMissionList(){
+
+    public static List<String> getMissionList() {
         //获取默认文件夹内的所有任务名称
-        File dir=new File(missionDir);
-        List<String> missionList =new ArrayList<>();
-        if(dir.exists()){
-            if(dir.listFiles() == null)
+        File dir = new File(missionDir);
+        List<String> missionList = new ArrayList<>();
+        if (dir.exists()) {
+            if (dir.listFiles() == null)
                 return missionList;
-            for(int i=0;i<dir.listFiles().length;i++){
-                File f=dir.listFiles()[i];
-                if(f.isFile()){
-                    if(f.getName().endsWith("xml")) {//xml file
-                        missionList.add(f.getName().substring(0,f.getName().lastIndexOf(".")));
+            for (int i = 0; i < dir.listFiles().length; i++) {
+                File f = dir.listFiles()[i];
+                if (f.isFile()) {
+                    if (f.getName().endsWith("xml")) {//xml file
+                        missionList.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
                     }
                 }
             }
         }
         return missionList;
     }
+
     private void notifyStatusChange() {
         mHandler.removeCallbacks(updateRunnable);
         mHandler.postDelayed(updateRunnable, 500);
@@ -233,15 +241,17 @@ public class AutoPatrolApplication extends Application {
 
     /**
      * 将GPS坐标系坐标转换成国内坐标系
+     *
      * @return
      */
-    public static LatLng WGS84ConvertToAmap(LatLng sourceLatLng){
-        CoordinateConverter converter  = new CoordinateConverter();
+    public static LatLng WGS84ConvertToAmap(LatLng sourceLatLng) {
+        CoordinateConverter converter = new CoordinateConverter();
         converter.from(CoordinateConverter.CoordType.GPS);
         converter.coord(sourceLatLng);
         return converter.convert();
     }
-    public static LatLng AmapConvertToWGS84(LatLng sourceLatLng){
+
+    public static LatLng AmapConvertToWGS84(LatLng sourceLatLng) {
         double dlat = transformlat(sourceLatLng.longitude - 105.0, sourceLatLng.latitude - 35.0);
         double dlng = transformlng(sourceLatLng.longitude - 105.0, sourceLatLng.latitude - 35.0);
         double radlat = sourceLatLng.latitude / 180.0 * pi;
@@ -252,11 +262,12 @@ public class AutoPatrolApplication extends Application {
         dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * pi);
         double mglat = sourceLatLng.latitude + dlat;
         double mglng = sourceLatLng.longitude + dlng;
-        return new LatLng(sourceLatLng.latitude * 2 - mglat,sourceLatLng.longitude * 2 - mglng );
+        return new LatLng(sourceLatLng.latitude * 2 - mglat, sourceLatLng.longitude * 2 - mglng);
     }
 
     /**
      * 维度转换
+     *
      * @param lng
      * @param lat
      * @return
@@ -283,6 +294,7 @@ public class AutoPatrolApplication extends Application {
         ret += (150.0 * Math.sin(lng / 12.0 * pi) + 300.0 * Math.sin(lng / 30.0 * pi)) * 2.0 / 3.0;
         return ret;
     }
+
     private Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {

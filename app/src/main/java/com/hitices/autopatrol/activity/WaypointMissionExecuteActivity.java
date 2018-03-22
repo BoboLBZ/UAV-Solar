@@ -4,14 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Handler;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,7 +18,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -37,7 +33,6 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.AMapOptions;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
@@ -64,7 +59,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.gimbal.GimbalMode;
@@ -87,24 +81,81 @@ import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
-import dji.ui.widget.TakeOffWidget;
 
 /**
  * WaypointMissionExecuteActivity 用于执行waypoint类型任务
  * created by Rhys
  */
 public class WaypointMissionExecuteActivity extends Activity implements View.OnClickListener {
-    private WaypointsMission waypointsMission;
     public static WaypointMission.Builder builder;
+    private WaypointsMission waypointsMission;
     private FlightController mFlightController;
     private Waypoint currentWaypoint;
+    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            showWaypointDetail(i);
+        }
+    };
     private WaypointMissionOperator insatnce;
     private MapView mapView;
     private AMap aMap;
     private Marker droneMarker;
     private LatLng droneLocation, locationLatlng;
     private Marker location;//photo location
+    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+//
+                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
+//                    LatLng harbin = new LatLng(126.640692,45.748065);-
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(locationLatlng);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                    if (location != null)
+                        location.destroy();
+                    location = aMap.addMarker(markerOptions);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError", "location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
     private ImageButton uplaod, start, stop;
+    /**
+     * WaypointMissionOperatorListener
+     */
+    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
+        @Override
+        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
+        }
+
+        @Override
+        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
+        }
+
+        @Override
+        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
+        }
+
+        @Override
+        public void onExecutionStart() {
+        }
+
+        @Override
+        public void onExecutionFinish(@Nullable final DJIError error) {
+//            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+//              if(error ==null){
+//                  openReportActivity();
+//              }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,10 +242,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                                                      djiFlightControllerCurrentState) {
                             droneLocation = new LatLng(djiFlightControllerCurrentState.getAircraftLocation().getLatitude(),
                                     djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
-                            setResultToToast("before坐标" + droneLocation.latitude + "," + droneLocation.longitude);
+                            // setResultToToast("before坐标" + droneLocation.latitude + "," + droneLocation.longitude);
                             //gps 坐标转换成 高德坐标系
                             updateDroneLocation(AutoPatrolApplication.WGS84ConvertToAmap(droneLocation));
-                            setResultToToast("after坐标" + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).latitude + "," + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).longitude);
+                            //  setResultToToast("after坐标" + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).latitude + "," + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).longitude);
                         }
                     });
             setResultToToast("in flight control");
@@ -243,8 +294,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         for (int i = 0; i < sortedIndex.size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             int index = sortedIndex.get(i);
-            LatLng ll = new LatLng(waypointsMission.waypointList.get(i).coordinate.getLatitude(),
-                    waypointsMission.waypointList.get(i).coordinate.getLongitude());
+            LatLng ll = new LatLng(waypointsMission.waypointList.get(index).coordinate.getLatitude(),
+                    waypointsMission.waypointList.get(index).coordinate.getLongitude());
             lines.add(ll);
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -319,35 +370,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             setResultToToast("remove listener");
         }
     }
-
-    /**
-     * WaypointMissionOperatorListener
-     */
-    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
-        @Override
-        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
-        }
-
-        @Override
-        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
-        }
-
-        @Override
-        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
-        }
-
-        @Override
-        public void onExecutionStart() {
-        }
-
-        @Override
-        public void onExecutionFinish(@Nullable final DJIError error) {
-//            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-//              if(error ==null){
-//                  openReportActivity();
-//              }
-        }
-    };
 
     /**
      * 在任务执行完成后打开新的activity，显示执行结果
@@ -662,60 +684,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 //        TakeOffWidget widget=findViewById()
     }
 
-    private class WPGridviewAdapter extends BaseAdapter {
-        private LayoutInflater inflater;
-
-        WPGridviewAdapter(Context context) {
-            inflater = LayoutInflater.from(context);
-        }
-
-        @Override
-        public int getCount() {
-            return waypointsMission.waypointList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return waypointsMission.waypointList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                convertView = inflater.inflate(R.layout.w_p_gv_item, null);
-                holder.id = convertView.findViewById(R.id.preview_gvitem_id);
-                holder.lat = convertView.findViewById(R.id.preview_gvitem_lat);
-                holder.lng = convertView.findViewById(R.id.preview_gvitem_lng);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            holder.id.setText(String.valueOf(position));
-            holder.lat.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLatitude()));
-            holder.lng.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLongitude()));
-            return convertView;
-        }
-
-        class ViewHolder {
-            TextView id, lat, lng;
-        }
-
-    }
-
-    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            showWaypointDetail(i);
-        }
-    };
-
     /**
      * 显示航点具体信息，不支持修改
      *
@@ -744,99 +712,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                     }
                 })
                 .create().show();
-    }
-
-    private class WPWaypointGridviewAdapter extends BaseAdapter {
-        private List<WaypointAction> actions;
-        private List<WaypointActionType> allAction;
-        private List<WaypointActionType> selectedAction;
-        private LayoutInflater inflater = null;
-
-        WPWaypointGridviewAdapter(List<WaypointAction> list, Context context) {
-            this.actions = list;
-            inflater = LayoutInflater.from(context);
-            initData();
-        }
-
-        @Override
-        public int getCount() {
-            return allAction.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return allAction.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                convertView = inflater.inflate(R.layout.gridview_action, null);
-                holder.name = convertView.findViewById(R.id.item_name);
-                holder.cb = convertView.findViewById(R.id.item_cb);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            holder.name.setText(getActionChinese(allAction.get(position)));
-            holder.cb.setId(position);
-            holder.cb.setChecked(isSelected(allAction.get(position)));
-            holder.cb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CheckBox cb = (CheckBox) view;
-                    int position = cb.getId();
-                    boolean b = cb.isChecked();
-                    if (b) {
-                        if (!selectedAction.contains(allAction.get(position)))
-                            selectedAction.add(allAction.get(position));
-                    } else {
-                        selectedAction.remove(allAction.get(position));
-                    }
-                }
-            });
-            return convertView;
-        }
-
-        class ViewHolder {
-            CheckBox cb;
-            TextView name;
-        }
-
-        private boolean isSelected(WaypointActionType wat) {
-            for (int i = 0; i < actions.size(); i++) {
-                if (actions.get(i).actionType.equals(wat))
-                    return true;
-            }
-            return false;
-        }
-
-        public List<WaypointActionType> getSelectedAction() {
-            return selectedAction;
-        }
-
-        private void initData() {
-            allAction = new ArrayList<>();
-            allAction.add(WaypointActionType.CAMERA_FOCUS);
-            allAction.add(WaypointActionType.CAMERA_ZOOM);
-            allAction.add(WaypointActionType.GIMBAL_PITCH);
-            allAction.add(WaypointActionType.START_RECORD);
-            allAction.add(WaypointActionType.STOP_RECORD);
-            allAction.add(WaypointActionType.START_TAKE_PHOTO);
-            allAction.add(WaypointActionType.STAY);
-            allAction.add(WaypointActionType.ROTATE_AIRCRAFT);
-            selectedAction = new ArrayList<>();
-            for (int i = 0; i < actions.size(); i++) {
-                selectedAction.add(actions.get(i).actionType);
-            }
-        }
     }
 
     /**
@@ -1050,28 +925,143 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         return chinese;
     }
 
-    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
+    private class WPGridviewAdapter extends BaseAdapter {
+        private LayoutInflater inflater;
+
+        WPGridviewAdapter(Context context) {
+            inflater = LayoutInflater.from(context);
+        }
+
         @Override
-        public void onLocationChanged(AMapLocation amapLocation) {
-            if (amapLocation != null) {
-                if (amapLocation.getErrorCode() == 0) {
-//
-                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
-//                    LatLng harbin = new LatLng(126.640692,45.748065);-
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(locationLatlng);
-                    markerOptions.title("marker");
-                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-                    if (location != null)
-                        location.destroy();
-                    location = aMap.addMarker(markerOptions);
-                } else {
-                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                    Log.e("AmapError", "location Error, ErrCode:"
-                            + amapLocation.getErrorCode() + ", errInfo:"
-                            + amapLocation.getErrorInfo());
+        public int getCount() {
+            return waypointsMission.waypointList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return waypointsMission.waypointList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = inflater.inflate(R.layout.w_p_gv_item, null);
+                holder.id = convertView.findViewById(R.id.preview_gvitem_id);
+                holder.lat = convertView.findViewById(R.id.preview_gvitem_lat);
+                holder.lng = convertView.findViewById(R.id.preview_gvitem_lng);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.id.setText(String.valueOf(position));
+            holder.lat.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLatitude()));
+            holder.lng.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLongitude()));
+            return convertView;
+        }
+
+        class ViewHolder {
+            TextView id, lat, lng;
+        }
+
+    }
+
+    private class WPWaypointGridviewAdapter extends BaseAdapter {
+        private List<WaypointAction> actions;
+        private List<WaypointActionType> allAction;
+        private List<WaypointActionType> selectedAction;
+        private LayoutInflater inflater = null;
+
+        WPWaypointGridviewAdapter(List<WaypointAction> list, Context context) {
+            this.actions = list;
+            inflater = LayoutInflater.from(context);
+            initData();
+        }
+
+        @Override
+        public int getCount() {
+            return allAction.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return allAction.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = inflater.inflate(R.layout.gridview_action, null);
+                holder.name = convertView.findViewById(R.id.item_name);
+                holder.cb = convertView.findViewById(R.id.item_cb);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.name.setText(getActionChinese(allAction.get(position)));
+            holder.cb.setId(position);
+            holder.cb.setChecked(isSelected(allAction.get(position)));
+            holder.cb.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CheckBox cb = (CheckBox) view;
+                    int position = cb.getId();
+                    boolean b = cb.isChecked();
+                    if (b) {
+                        if (!selectedAction.contains(allAction.get(position)))
+                            selectedAction.add(allAction.get(position));
+                    } else {
+                        selectedAction.remove(allAction.get(position));
+                    }
                 }
+            });
+            return convertView;
+        }
+
+        private boolean isSelected(WaypointActionType wat) {
+            for (int i = 0; i < actions.size(); i++) {
+                if (actions.get(i).actionType.equals(wat))
+                    return true;
+            }
+            return false;
+        }
+
+        public List<WaypointActionType> getSelectedAction() {
+            return selectedAction;
+        }
+
+        private void initData() {
+            allAction = new ArrayList<>();
+            allAction.add(WaypointActionType.CAMERA_FOCUS);
+            allAction.add(WaypointActionType.CAMERA_ZOOM);
+            allAction.add(WaypointActionType.GIMBAL_PITCH);
+            allAction.add(WaypointActionType.START_RECORD);
+            allAction.add(WaypointActionType.STOP_RECORD);
+            allAction.add(WaypointActionType.START_TAKE_PHOTO);
+            allAction.add(WaypointActionType.STAY);
+            allAction.add(WaypointActionType.ROTATE_AIRCRAFT);
+            selectedAction = new ArrayList<>();
+            for (int i = 0; i < actions.size(); i++) {
+                selectedAction.add(actions.get(i).actionType);
             }
         }
-    };
+
+        class ViewHolder {
+            CheckBox cb;
+            TextView name;
+        }
+    }
 }

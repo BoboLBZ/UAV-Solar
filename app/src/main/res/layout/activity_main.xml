@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hitices.autopatrol.activity.MainActivity">
+
     <RadioGroup
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"
@@ -12,6 +12,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/colorAccent"
         android:orientation="horizontal">
+
         <RadioButton
             android:id="@+id/mission"
             android:layout_width="44dp"
@@ -21,7 +22,8 @@
             android:gravity="center"
             android:text="mission"
             android:textColor="@color/unselected"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
+
         <RadioButton
             android:id="@+id/aircraft"
             android:layout_width="44dp"
@@ -31,7 +33,8 @@
             android:gravity="center"
             android:text="aircraft"
             android:textColor="@color/unselected"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
+
         <RadioButton
             android:id="@+id/media"
             android:layout_width="44dp"
@@ -41,14 +44,16 @@
             android:gravity="center"
             android:text="media"
             android:textColor="@color/unselected"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
     </RadioGroup>
+
     <View
         android:id="@+id/div_tab_bar"
         android:layout_width="match_parent"
-        android:layout_height="2px" 
+        android:layout_height="2px"
         android:layout_above="@id/tab_bar"
-        android:background="@color/colorPrimary"/>
+        android:background="@color/colorPrimary" />
+
     <FrameLayout
         android:id="@+id/layout_content"
         android:layout_width="match_parent"

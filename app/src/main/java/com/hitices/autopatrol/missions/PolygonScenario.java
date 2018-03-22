@@ -7,7 +7,9 @@ package com.hitices.autopatrol.missions;
  */
 
 public enum PolygonScenario {
-     TYPEA(1),
+    TYPEA(1),
     TYPEB(2);
-    PolygonScenario(int value){}
+
+    PolygonScenario(int value) {
+    }
 }

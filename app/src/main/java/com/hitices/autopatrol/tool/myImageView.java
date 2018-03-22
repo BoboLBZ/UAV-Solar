@@ -14,24 +14,24 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
+
 /**
  * Created by Administrator on 2018/1/4.
  */
 
-public class myImageView  extends AppCompatImageView
+public class myImageView extends AppCompatImageView
         implements ViewTreeObserver.OnGlobalLayoutListener,
         ScaleGestureDetector.OnScaleGestureListener,
         View.OnTouchListener {
 
     /**
      * 自由的放大 和 缩小 放大 可以 自由的 移动 处理 和viewpager 事件冲突
-     *
-     *
+     * <p>
+     * <p>
      * 1.Matrix 2.ScaleGestureDetector 3.GestureDetector 4.事件分发机制
-     *
-     *
+     * <p>
+     * <p>
      * 1.实现
-     *
      */
 
     // 第一次运行 初始化
@@ -110,7 +110,6 @@ public class myImageView  extends AppCompatImageView
      * 自动放大 缩小 缓慢的缩放
      *
      * @author yuan
-     *
      */
     private class AutoScaleRunnable implements Runnable {
 
@@ -178,6 +177,7 @@ public class myImageView  extends AppCompatImageView
         super.onAttachedToWindow();
         getViewTreeObserver().addOnGlobalLayoutListener(this);
     }
+
     @Override
     protected void onDetachedFromWindow() {
         // 移除 GlobalListener
@@ -306,7 +306,7 @@ public class myImageView  extends AppCompatImageView
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        Log.i("TAG","onTouch"+1);
+        Log.i("TAG", "onTouch" + 1);
         // 双击的时候不让其 移动
         if (gestureDetector.onTouchEvent(event)) {
             return true;
@@ -322,7 +322,7 @@ public class myImageView  extends AppCompatImageView
             x += event.getX(i);
             y += event.getY(i);
         }
-        Log.i("TEST","pointerCount:"+pointerCount+"X:"+x+"Y:"+y);
+        Log.i("TEST", "pointerCount:" + pointerCount + "X:" + x + "Y:" + y);
         x /= pointerCount;
         y /= pointerCount;
 
@@ -341,7 +341,7 @@ public class myImageView  extends AppCompatImageView
         switch (event.getAction()) {
 
             case MotionEvent.ACTION_DOWN:
-                Log.i("TAG","onTouch"+2);
+                Log.i("TAG", "onTouch" + 2);
                 // 解决事件冲突
                 // 当图片的 高度和宽度 大于屏幕的寬高度的时候，为图片的事件，否则为viewPager
                 if (ischong(f)) {
@@ -352,7 +352,7 @@ public class myImageView  extends AppCompatImageView
 
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i("TAG","onTouch"+3);
+                Log.i("TAG", "onTouch" + 3);
                 // 解决事件冲突
                 if (ischong(f)) {
                     if (getParent() instanceof Activity) {
@@ -390,7 +390,7 @@ public class myImageView  extends AppCompatImageView
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                Log.i("TAG","onTouch"+4);
+                Log.i("TAG", "onTouch" + 4);
                 lastPointCount = 0;
                 break;
         }
@@ -449,6 +449,7 @@ public class myImageView  extends AppCompatImageView
     }
 
     // ------------------------------------------------比例缩放
+
     /**
      * 获得 图片放大缩小 以后的宽和高
      *

@@ -1,10 +1,10 @@
 package com.hitices.autopatrol.activity;
 
 import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,22 +61,23 @@ public class ShowFullImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_full_image);
         initUi();
     }
-    private void initUi(){
+
+    private void initUi() {
         mVisible = true;
         //rhys,0104
-        imageView=findViewById(R.id.imageView_activity);
-        videoView=findViewById(R.id.videoView_activity);
+        imageView = findViewById(R.id.imageView_activity);
+        videoView = findViewById(R.id.videoView_activity);
         videoView.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.VISIBLE);
-        int type=getIntent().getIntExtra("type",2);
-        if(type == 1){
+        int type = getIntent().getIntExtra("type", 2);
+        if (type == 1) {
             //video
             imageView.setVisibility(View.INVISIBLE);
             videoView.setVisibility(View.VISIBLE);
             videoView.setVideoPath(getIntent().getStringExtra("url"));
             videoView.setMediaController(new MediaController(this));
             videoView.start();
-        }else if(type == 0){
+        } else if (type == 0) {
             //image
             videoView.setVisibility(View.INVISIBLE);
             imageView.setVisibility(View.VISIBLE);
@@ -87,12 +88,13 @@ public class ShowFullImageActivity extends AppCompatActivity {
                     onBackPressed();
                 }
             });
-            String url=getIntent().getStringExtra("url");
+            String url = getIntent().getStringExtra("url");
             ImageLoader.getInstance().displayImage(url, imageView);
-        }else {
-            Toast.makeText(this,"error there is no right url",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "error there is no right url", Toast.LENGTH_LONG).show();
         }
     }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);

@@ -6,32 +6,38 @@ package com.hitices.autopatrol.algorithm;
  */
 
 public class Point {
-    private double x;	    //X坐标
-    private double y;	    //Y坐标
-    private double arCos;	//与P0点的角度
+    private double x;        //X坐标
+    private double y;        //Y坐标
+    private double arCos;    //与P0点的角度
 
-    public Point(double x, double y){
+    public Point(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public Point(){}
+    public Point() {
+    }
 
     public double getX() {
         return x;
     }
+
     public void setX(double x) {
         this.x = x;
     }
+
     public double getY() {
         return y;
     }
+
     public void setY(double y) {
         this.y = y;
     }
+
     public double getArCos() {
         return arCos;
     }
+
     public void setArCos(double arCos) {
         this.arCos = arCos;
     }

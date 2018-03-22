@@ -7,16 +7,18 @@ package com.hitices.autopatrol.missions;
  */
 
 public abstract class BaseMission {
-    public  String missionName; //任务名称
+    public String missionName; //任务名称
     public MissionType missionType; //任务类型
     public boolean FLAG_ISSAVED;  //任务是否保存标志变量
-    public BaseMission(String name,MissionType type){
+
+    public BaseMission(String name, MissionType type) {
         //初始化，需指明 名称和类型
-        this.missionName=name;
-        this.missionType=type;
+        this.missionName = name;
+        this.missionType = type;
     }
 
     public BaseMission() {
     }
+
     public abstract boolean saveMission(); //接口，必须实现
 }
