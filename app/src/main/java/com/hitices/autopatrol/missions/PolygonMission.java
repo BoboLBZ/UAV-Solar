@@ -43,8 +43,8 @@ public class PolygonMission extends BaseMission {
     public List<Waypoint> waypointList;
     private List<LatLng> vertexs = new ArrayList<>();  //polygon 定点集合
     private PolygonScenario scenario;  //任务场景
-    private float altitude, speed;   //飞行高度和速度
-    private int horizontalOverlapRate, verticalOverlapRate; //重叠率，horizontal 指主航线上的照片重叠率，vertical指主航线间的重叠率
+    private float altitude, speed, width;   //飞行高度和速度,扫描宽度
+    private int OverlapRate; //重叠率
 
     public PolygonMission(String name) {
         //使用默认参数，后续根据类型做不同初始化
@@ -53,8 +53,8 @@ public class PolygonMission extends BaseMission {
         scenario = PolygonScenario.TYPEA;
         altitude = 5.0f;
         speed = 3f;
-        horizontalOverlapRate = 70;
-        verticalOverlapRate = 70;
+        OverlapRate = 50;
+        width = altitude;
         FLAG_ISSAVED = false;
     }
 
@@ -93,12 +93,12 @@ public class PolygonMission extends BaseMission {
             eScenario.appendChild(doc.createTextNode(scenario.name()));
             rootElement.appendChild(eScenario);
 
-            Element eHorRate = doc.createElement("horizontalOverlapRate");
-            eHorRate.appendChild(doc.createTextNode(String.valueOf(horizontalOverlapRate)));
+            Element eHorRate = doc.createElement("OverlapRate");
+            eHorRate.appendChild(doc.createTextNode(String.valueOf(OverlapRate)));
             rootElement.appendChild(eHorRate);
 
-            Element eVerRate = doc.createElement("verticalOverlapRate");
-            eVerRate.appendChild(doc.createTextNode(String.valueOf(verticalOverlapRate)));
+            Element eVerRate = doc.createElement("width");
+            eVerRate.appendChild(doc.createTextNode(String.valueOf(width)));
             rootElement.appendChild(eVerRate);
 
             // vertex elements
@@ -164,20 +164,20 @@ public class PolygonMission extends BaseMission {
         this.altitude = value;
     }
 
-    public int getHorizontalOverlapRate() {
-        return horizontalOverlapRate;
+    public int getOverlapRate() {
+        return OverlapRate;
     }
 
-    public void setHorizontalOverlapRate(int value) {
-        this.horizontalOverlapRate = value;
+    public void setOverlapRate(int value) {
+        this.OverlapRate = value;
     }
 
-    public int getVerticalOverlapRate() {
-        return verticalOverlapRate;
+    public float getWidth() {
+        return width;
     }
 
-    public void setVerticalOverlapRate(int value) {
-        this.verticalOverlapRate = value;
+    public void setWidth(float value) {
+        this.width = value;
     }
 
     public List<LatLng> getVertexs() {

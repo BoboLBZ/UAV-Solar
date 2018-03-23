@@ -78,7 +78,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed:" />
+            android:text="巡航速度:" />
 
         <SeekBar
             android:id="@+id/preview_speed_pm"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/preview_seekBar_text_pm"
+            android:id="@+id/preview_speed_text_pm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -101,14 +101,40 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="altitude:"></TextView>
+            android:text="飞行高度:"></TextView>
 
-        <EditText
+        <SeekBar
             android:id="@+id/preview_altitude_pm"
+            style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="200dp"
             android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/preview_altitude_text_pm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="拍照间隔:"></TextView>
+
+        <SeekBar
+            android:id="@+id/preview_width_pm"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/preview_width_text_pm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="m" />

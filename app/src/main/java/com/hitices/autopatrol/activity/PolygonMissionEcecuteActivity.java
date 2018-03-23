@@ -8,10 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -206,26 +204,33 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
     private void showPreviewDialog() {
         LinearLayout pmPreview = (LinearLayout) getLayoutInflater().inflate(R.layout.activity_preview_polygon, null);
         //ui
-        final TextView name, aircraft, camera, time, startpoint, seekBar_text;
-        SeekBar sb_speed;
-        final EditText altitude;
+        final TextView name, aircraft, camera, time, startpoint;
+        final TextView speed_text, altitude_text, width_text;
+        final SeekBar sb_speed, sb_altitude, sb_width;
 
         name = pmPreview.findViewById(R.id.preview_polygon_mission_name);
         aircraft = pmPreview.findViewById(R.id.preview_aircraft_name_pm);
         camera = pmPreview.findViewById(R.id.preview_camera_pm);
         time = pmPreview.findViewById(R.id.preview_time_pm);
         startpoint = pmPreview.findViewById(R.id.preview_start_point_pm);
-        seekBar_text = pmPreview.findViewById(R.id.preview_seekBar_text_pm);
+
+        speed_text = pmPreview.findViewById(R.id.preview_speed_text_pm);
+        altitude_text = pmPreview.findViewById(R.id.preview_altitude_text_pm);
+        width_text = pmPreview.findViewById(R.id.preview_width_text_pm);
 
         sb_speed = pmPreview.findViewById(R.id.preview_speed_pm);
-        altitude = pmPreview.findViewById(R.id.preview_altitude_pm);
+        sb_altitude = pmPreview.findViewById(R.id.preview_altitude_pm);
+        sb_width = pmPreview.findViewById(R.id.preview_width_pm);
+
+        sb_altitude.setMax(200);
+        sb_width.setMax(200);
 
         if (polygonMission != null) {
             sb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     float tSpeed = (((float) i) / 100) * 15;
-                    seekBar_text.setText(String.valueOf((int) (tSpeed + 0.5)) + "m/s");
+                    speed_text.setText(String.valueOf((int) (tSpeed + 0.5)) + "m/s");
                     polygonMission.setSpeed(tSpeed);
                 }
 
@@ -237,18 +242,58 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
+            sb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    altitude_text.setText(String.valueOf(i) + " m");
+                    polygonMission.setAltitude(i);
+                    //change the value of width
+                    int width = i;
+                    sb_width.setProgress(width);
+                    width_text.setText(String.valueOf(width) + " m");
+                    polygonMission.setWidth(width);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+            sb_width.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    width_text.setText(String.valueOf(i) + " m");
+                    polygonMission.setWidth(i);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
             //update text
             name.setText("任务名称:" + polygonMission.missionName);
             time.setText("预计执行时间:" + String.valueOf(polygonMission.getSpeed()));
             //convert between float and int
             //rate=waypointsMission.speed/15
             sb_speed.setProgress((int) (polygonMission.getSpeed() / 15 * 100 + 0.5));
-            seekBar_text.setText(String.valueOf((int) (polygonMission.getSpeed() + 0.5)) + "m/s");
-
-            altitude.setInputType(InputType.TYPE_CLASS_NUMBER);
-            altitude.setText(String.valueOf(polygonMission.getAltitude()));
+            speed_text.setText(String.valueOf((int) (polygonMission.getSpeed() + 0.5)) + "m/s");
+            sb_altitude.setProgress((int) (polygonMission.getAltitude() + 0.5));
+            altitude_text.setText(String.valueOf((int) (polygonMission.getAltitude() + 0.5)) + "m");
+            sb_width.setProgress((int) (polygonMission.getWidth() + 0.5));
+            width_text.setText(String.valueOf((int) (polygonMission.getWidth() + 0.5)) + "m");
         } else {
-            name.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            name.setText("read mission failed");
         }
         Aircraft myAircraft = AutoPatrolApplication.getAircraftInstance();
         Camera myCamera = AutoPatrolApplication.getCameraInstance();
@@ -285,7 +330,7 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         dialog.dismiss();
                         //deal with altitude
-                        polygonMission.setAltitude(Float.valueOf(altitude.getText().toString()));
+                        //polygonMission.setAltitude(Float.valueOf(altitude.getText().toString()));
                         missionProcessing();
                     }
                 });
@@ -457,10 +502,6 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
         if (nodes.item(0) != null) {
             newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
         }
-        nodes = doc.getElementsByTagName("speed");
-        if (nodes.item(0) != null) {
-            newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
-        }
         nodes = doc.getElementsByTagName("altitude");
         if (nodes.item(0) != null) {
             newPolygonMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
@@ -473,13 +514,13 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
             else if (s.equals(PolygonScenario.TYPEB.name()))
                 newPolygonMission.setScenario(PolygonScenario.TYPEB);
         }
-        nodes = doc.getElementsByTagName("horizontalOverlapRate");
+        nodes = doc.getElementsByTagName("OverlapRate");
         if (nodes.item(0) != null) {
-            newPolygonMission.setHorizontalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            newPolygonMission.setOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
         }
-        nodes = doc.getElementsByTagName("verticalOverlapRate");
+        nodes = doc.getElementsByTagName("width");
         if (nodes.item(0) != null) {
-            newPolygonMission.setVerticalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            newPolygonMission.setWidth(Float.parseFloat(nodes.item(0).getTextContent()));
         }
 
         nodes = doc.getElementsByTagName("Vertexs");
