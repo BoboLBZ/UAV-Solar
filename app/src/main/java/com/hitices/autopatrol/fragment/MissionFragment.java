@@ -128,74 +128,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
     private Polyline polyline;
     private Polygon polygon;
     private Marker startPoint;
-    //info window
-    private boolean flag_isShow = false;
-    private Marker currentMarker;
-    AMap.OnMapClickListener onMapClickListener = new AMap.OnMapClickListener() {
-        @Override
-        public void onMapClick(LatLng latLng) {
-            switch (currentMission.missionType) {
-                case WaypointMission:
-                    markWaypoint(latLng);
-                    setWaypointList(latLng);
-                    break;
-                case PolygonMission:
-                    if (creatable) {
-                        drawPolygon(latLng);
-                    } else {
-                        setResultToToast("请选择修改任务");
-                    }
-                    break;
-            }
-        }
-    };
-    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
-        @Override
-        public boolean onMarkerClick(Marker marker) {
-            if (currentMarker == null)
-                currentMarker = marker;
-            if (currentMarker.equals(marker)) {
-                if (!flag_isShow) {
-                    marker.showInfoWindow();
-                    flag_isShow = true;
-                } else {
-                    marker.hideInfoWindow();
-                    flag_isShow = false;
-                }
-            } else {
-                currentMarker.hideInfoWindow();
-                marker.showInfoWindow();
-                flag_isShow = true;
-            }
-            currentMarker = marker;
-            return true;
-        }
-    };
-    private Marker location;
-    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
-        @Override
-        public void onLocationChanged(AMapLocation amapLocation) {
-            if (amapLocation != null) {
-                if (amapLocation.getErrorCode() == 0) {
-//
-                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
-//                    LatLng harbin = new LatLng(126.640692,45.748065);
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(locationLatlng);
-                    markerOptions.title("marker");
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_marker)));
-                    if (location != null)
-                        location.destroy();
-                    location = aMap.addMarker(markerOptions);
-                } else {
-                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                    Log.e("AmapError", "location Error, ErrCode:"
-                            + amapLocation.getErrorCode() + ", errInfo:"
-                            + amapLocation.getErrorInfo());
-                }
-            }
-        }
-    };
     AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
         private String currentindex = "";
 
@@ -264,6 +196,74 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             currentMission = null;
         }
 
+    };
+    //info window
+    private boolean flag_isShow = false;
+    private Marker currentMarker;
+    AMap.OnMapClickListener onMapClickListener = new AMap.OnMapClickListener() {
+        @Override
+        public void onMapClick(LatLng latLng) {
+            switch (currentMission.missionType) {
+                case WaypointMission:
+                    markWaypoint(latLng);
+                    setWaypointList(latLng);
+                    break;
+                case PolygonMission:
+                    if (creatable) {
+                        drawPolygon(latLng);
+                    } else {
+                        setResultToToast("请选择修改任务");
+                    }
+                    break;
+            }
+        }
+    };
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            if (currentMarker == null)
+                currentMarker = marker;
+            if (currentMarker.equals(marker)) {
+                if (!flag_isShow) {
+                    marker.showInfoWindow();
+                    flag_isShow = true;
+                } else {
+                    marker.hideInfoWindow();
+                    flag_isShow = false;
+                }
+            } else {
+                currentMarker.hideInfoWindow();
+                marker.showInfoWindow();
+                flag_isShow = true;
+            }
+            currentMarker = marker;
+            return true;
+        }
+    };
+    private Marker location;
+    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+//
+                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
+//                    LatLng harbin = new LatLng(126.640692,45.748065);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(locationLatlng);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_marker)));
+                    if (location != null)
+                        location.destroy();
+                    location = aMap.addMarker(markerOptions);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError", "location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
     };
 
     public MissionFragment() {
@@ -932,25 +932,38 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         TextView mName = settingView.findViewById(R.id.polygon_setting_mName);
         Button mSave = settingView.findViewById(R.id.polygon_setting_save);
         Button mDelete = settingView.findViewById(R.id.polygon_setting_delete);
-        final EditText mAltitude = settingView.findViewById(R.id.polygon_setting_altitude);
-        SeekBar mSpeed = settingView.findViewById(R.id.polygon_setting_speed);
-        final SeekBar mHorRate = settingView.findViewById(R.id.polygon_setting_horizontal_rate);
-        SeekBar mVerRate = settingView.findViewById(R.id.polygon_setting_vertical_rate);
+
+        final SeekBar mAltitude = settingView.findViewById(R.id.polygon_setting_altitude);
+        final SeekBar mSpeed = settingView.findViewById(R.id.polygon_setting_speed);
+        final SeekBar mOverate = settingView.findViewById(R.id.polygon_setting_overrate);
+        final SeekBar mWidth = settingView.findViewById(R.id.polygon_setting_width);
+
         final TextView mSpeedText = settingView.findViewById(R.id.polygon_setting_speed_text);
-        final TextView mHorRateText = settingView.findViewById(R.id.polygon_setting_horizontal_rate_text);
-        final TextView mVerRateText = settingView.findViewById(R.id.polygon_setting_vertical_rate_text);
+        final TextView mOverateText = settingView.findViewById(R.id.polygon_setting_overrate_text);
+        final TextView mWidthText = settingView.findViewById(R.id.polygon_setting_width_text);
+        final TextView mAltitudeText = settingView.findViewById(R.id.polygon_setting_altitude_text);
+
         RadioGroup mScenario = settingView.findViewById(R.id.polygon_setting_scenario);
         GridView Vertexs = settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
         mName.setText(getCurrentPolygonMission().missionName);
-        mAltitude.setInputType(InputType.TYPE_CLASS_NUMBER);
-        mAltitude.setText(String.valueOf(getCurrentPolygonMission().getAltitude()));
+
+        mAltitude.setMax(200);
+        mAltitude.setProgress((int) (getCurrentPolygonMission().getAltitude() + 0.5));
+        mAltitudeText.setText(String.valueOf((int) (getCurrentPolygonMission().getAltitude() + 0.5)) + " m");
+
         mSpeed.setProgress((int) (getCurrentPolygonMission().getSpeed() / 15 * 100 + 0.5));
-        mSpeedText.setText(String.valueOf((int) (getCurrentPolygonMission().getSpeed() + 0.5)) + "m/s");
-        mHorRate.setProgress(getCurrentPolygonMission().getHorizontalOverlapRate());
-        mHorRateText.setText(String.valueOf(getCurrentPolygonMission().getHorizontalOverlapRate()));
-        mVerRate.setProgress(getCurrentPolygonMission().getVerticalOverlapRate());
-        mVerRateText.setText(String.valueOf(getCurrentPolygonMission().getVerticalOverlapRate()));
+        mSpeedText.setText(String.valueOf((int) (getCurrentPolygonMission().getSpeed() + 0.5)) + " m/s");
+
+        mOverate.setMax(80);
+        //mOverate.setMin(10);
+        mOverate.setProgress(getCurrentPolygonMission().getOverlapRate());
+        mOverateText.setText(String.valueOf(getCurrentPolygonMission().getOverlapRate()) + "%");
+
+        mWidth.setMax(200);
+        mWidth.setProgress((int) (getCurrentPolygonMission().getWidth() + 0.5));
+        mWidthText.setText(String.valueOf((int) (getCurrentPolygonMission().getWidth() + 0.5)) + " m");
+
         mScenario.check(R.id.polygon_setting_scenario_A);
 
         mSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -971,11 +984,11 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-        mHorRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mOverate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                mHorRateText.setText(String.valueOf(i));
-                getCurrentPolygonMission().setHorizontalOverlapRate(i);
+                mOverateText.setText(String.valueOf(i) + " %");
+                getCurrentPolygonMission().setOverlapRate(i);
             }
 
             @Override
@@ -988,11 +1001,11 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-        mVerRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                mVerRateText.setText(String.valueOf(i));
-                getCurrentPolygonMission().setVerticalOverlapRate(i);
+                mWidthText.setText(String.valueOf(i) + " m");
+                getCurrentPolygonMission().setWidth(i);
             }
 
             @Override
@@ -1005,6 +1018,24 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
             }
         });
+        mAltitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mAltitudeText.setText(String.valueOf(i) + " m");
+                getCurrentPolygonMission().setAltitude(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         mScenario.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
@@ -1025,8 +1056,8 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String altitudeStr = mAltitude.getText().toString();
-                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
+//                String altitudeStr = mAltitude.getText().toString();
+//                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
             }
         });
         builder.setNeutralButton("cancel", new DialogInterface.OnClickListener() {
@@ -1039,8 +1070,8 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         mSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String altitudeStr = mAltitude.getText().toString();
-                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
+//                String altitudeStr = mAltitude.getText().toString();
+//                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
                 if (saveMission()) {
                     alertDialog.cancel();
                 } else {
@@ -1074,10 +1105,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         if (nodes.item(0) != null) {
             newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
         }
-        nodes = doc.getElementsByTagName("speed");
-        if (nodes.item(0) != null) {
-            newPolygonMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
-        }
         nodes = doc.getElementsByTagName("altitude");
         if (nodes.item(0) != null) {
             newPolygonMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
@@ -1090,15 +1117,14 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             else if (s.equals(PolygonScenario.TYPEB.name()))
                 newPolygonMission.setScenario(PolygonScenario.TYPEB);
         }
-        nodes = doc.getElementsByTagName("horizontalOverlapRate");
+        nodes = doc.getElementsByTagName("OverlapRate");
         if (nodes.item(0) != null) {
-            newPolygonMission.setHorizontalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            newPolygonMission.setOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
         }
-        nodes = doc.getElementsByTagName("verticalOverlapRate");
+        nodes = doc.getElementsByTagName("width");
         if (nodes.item(0) != null) {
-            newPolygonMission.setVerticalOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            newPolygonMission.setWidth(Float.parseFloat(nodes.item(0).getTextContent()));
         }
-
         nodes = doc.getElementsByTagName("Vertexs");
         Node node = nodes.item(0);
         NodeList nVertexList = ((Element) node).getElementsByTagName("vertex");
