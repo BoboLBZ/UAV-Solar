@@ -74,7 +74,6 @@ public class PatrolMainActivity extends AppCompatActivity
     private MediaFragment fMedia;
     private MissionFragment fMission;
     //back
-    private long mExitTime = 0;
     private int position;
     private List<String> missingPermission = new ArrayList<>();
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
@@ -282,20 +281,6 @@ public class PatrolMainActivity extends AppCompatActivity
                 Toast.makeText(PatrolMainActivity.this, msg, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                setResultToToast("再按一次退出程序");
-                mExitTime = System.currentTimeMillis();
-            } else {
-                System.exit(0);
-            }
-            return true;
-        }
-        return super.onKeyDown(keyCode, keyEvent);
     }
 
 }

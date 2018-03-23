@@ -4,15 +4,17 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.helper.PermissionHelper;
+import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.opencv.android.OpenCVLoader;
 
-public class AppMainActivity extends AppCompatActivity implements View.OnClickListener{
+public class AppMainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // opencv
     static {
@@ -24,6 +26,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         System.loadLibrary("native-lib");
     }
 
+    private long mExitTime = 0;
     private Button appFunc1Button, appFunc2Button;
 
     @Override
@@ -42,8 +45,8 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void onClick(View v){
-        switch (v.getId()){
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.app_func1_button:
                 startActivity(new Intent(this, PatrolMainActivity.class));
                 break;
@@ -58,6 +61,20 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         appFunc2Button = findViewById(R.id.app_func2_button);
         appFunc1Button.setOnClickListener(this);
         appFunc2Button.setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                ToastHelper.showShortToast(this, "再按一次退出程序");
+                mExitTime = System.currentTimeMillis();
+            } else {
+                System.exit(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, keyEvent);
     }
 
     /**
