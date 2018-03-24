@@ -887,7 +887,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             }
         });
     }

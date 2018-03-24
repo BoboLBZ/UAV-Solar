@@ -102,6 +102,7 @@
             android:theme="@style/FullscreenTheme" />
         <activity
             android:name=".activity.WaypointMissionExecuteActivity"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity android:name=".activity.PolygonMissionEcecuteActivity" />
         <activity android:name=".activity.MissionReportActivity" />
