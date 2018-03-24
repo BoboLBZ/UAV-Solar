@@ -585,11 +585,15 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
      */
     private void loadMission() {
         setResultToToast("on load");
-        //以无人机位置作为返航点
-        //waypointsMission.addWaypointList(droneLocation);
+        //以无人机起飞位置作为返航点
+        if (droneLocation != null) {
+            waypointsMission.addWaypointList(droneLocation);
+        }
         //以当前人的位置作返航点
-        if (locationLatlng != null)
-            waypointsMission.addWaypointList(locationLatlng);
+        else {
+            if (locationLatlng != null)
+                waypointsMission.addWaypointList(AutoPatrolApplication.AmapConvertToWGS84(locationLatlng));
+        }
         builder = waypointsMission.getMissionBuilder();
         if (builder != null) {
             DJIError error = getWaypointMissionOperator().loadMission(builder.build());
