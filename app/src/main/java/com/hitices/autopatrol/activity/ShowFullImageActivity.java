@@ -14,6 +14,7 @@ import android.widget.VideoView;
 
 import com.hitices.autopatrol.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 public class ShowFullImageActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
@@ -89,6 +90,8 @@ public class ShowFullImageActivity extends AppCompatActivity {
                 }
             });
             String url = getIntent().getStringExtra("url");
+            ImageLoaderConfiguration configuration = ImageLoaderConfiguration.createDefault(this);
+            ImageLoader.getInstance().init(configuration);
             ImageLoader.getInstance().displayImage(url, imageView);
         } else {
             Toast.makeText(this, "error there is no right url", Toast.LENGTH_LONG).show();

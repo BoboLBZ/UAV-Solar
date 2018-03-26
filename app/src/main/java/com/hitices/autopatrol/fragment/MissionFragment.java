@@ -50,6 +50,7 @@ import com.amap.api.maps2d.model.Polygon;
 import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.Polyline;
 import com.amap.api.maps2d.model.PolylineOptions;
+import com.amap.api.maps2d.model.Tile;
 import com.amap.api.maps2d.model.TileOverlay;
 import com.amap.api.maps2d.model.TileOverlayOptions;
 import com.amap.api.maps2d.model.TileProvider;
@@ -58,6 +59,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.helper.GoogleMap;
 import com.hitices.autopatrol.missions.BaseMission;
 import com.hitices.autopatrol.missions.MissionType;
 import com.hitices.autopatrol.missions.PolygonMission;
@@ -399,7 +401,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         if (aMap == null) {
             aMap = mapView.getMap();
             //use google map satellite data
-            useGoogleMapSatelliteData(aMap);
+            GoogleMap.useGoogleMapSatelliteData(aMap);
             aMap.setOnMapClickListener(onMapClickListener);
             aMap.setOnMarkerClickListener(markerClickListener);
             aMap.setOnMarkerDragListener(markerDragListener);
@@ -415,40 +417,17 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         mLocationOption.setInterval(1000);
         mlocationClient.setLocationOption(mLocationOption);
         mlocationClient.startLocation();
-
+        //info
+        aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
+        myInfoWindowAdapter myInfoWindowAdapter = new myInfoWindowAdapter();
+        aMap.setInfoWindowAdapter(myInfoWindowAdapter);
         //first zoom update
         aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(mlocationClient.getLastKnownLocation().getLatitude(),
                         mlocationClient.getLastKnownLocation().getLongitude()),
                 18f));
-        //info
-        aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
-        myInfoWindowAdapter myInfoWindowAdapter = new myInfoWindowAdapter();
-        aMap.setInfoWindowAdapter(myInfoWindowAdapter);
     }
 
-    private void useGoogleMapSatelliteData(AMap aMap) {
-        final String url = "http://mt0.google.cn/vt/lyrs=s@198&hl=zh-CN&gl=cn&src=app&x=%d&y=%d&z=%d&s=";
-        TileProvider tileProvider = new UrlTileProvider(256, 256) {
-            public URL getTileUrl(int x, int y, int zoom) {
-                try {
-                    return new URL(String.format(url, x, y, zoom));
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        if (tileProvider != null) {
-            TileOverlay tileOverlay = aMap.addTileOverlay(new TileOverlayOptions()
-                    .tileProvider(tileProvider)
-                    .diskCacheEnabled(true)
-                    .diskCacheDir("/storage/emulated/0/amap/cache")
-                    .diskCacheSize(100000)
-                    .memoryCacheEnabled(true)
-                    .memCacheSize(100000));
-        }
-    }
 
     protected void initSpinner() {
         arrayAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, AutoPatrolApplication.getMissionList());
@@ -533,7 +512,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                 LatLng ll = new LatLng(((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLatitude(),
                         ((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLongitude());
                 markerOptions.position(ll);
-                System.out.println("\nnewtest" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
+                //System.out.println("\nnewtest" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 markerOptions.draggable(true);
                 markerOptions.title("waypoint");

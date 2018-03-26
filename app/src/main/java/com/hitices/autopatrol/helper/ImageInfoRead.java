@@ -27,7 +27,7 @@ public class ImageInfoRead {
     /**
      * get gps info
      */
-    private LatLng getLatlng() {
+    public LatLng getLatlng() {
         double lat = getLatlng(exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE),
                 exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
         double lng = getLatlng(exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE),

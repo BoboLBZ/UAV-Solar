@@ -51,7 +51,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, PatrolMainActivity.class));
                 break;
             case R.id.app_func2_button:
-
+                startActivity(new Intent(this,MissionReportActivity.class));
                 break;
         }
     }
