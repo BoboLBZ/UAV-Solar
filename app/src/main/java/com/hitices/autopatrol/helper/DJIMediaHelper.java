@@ -10,6 +10,7 @@ import com.hitices.autopatrol.activity.MissionSelectActivity;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -139,13 +140,11 @@ public class DJIMediaHelper {
             return;
         }
 
-        mediaFileList.get(index).fetchFileData(photoDir, null, downloadOnePicListener);
+        downLoadFile(index, photoDir, downloadOnePicListener);
     }
 
-    public void downloadFiles(Date startDate, Date endDate) {
-        for (int i = 0; i < mediaFileList.size(); i++) {
-
-        }
+    public void downLoadFile(final int index, File storePath, DownloadListener<String> listener) {
+        mediaFileList.get(index).fetchFileData(storePath, null, listener);
     }
 
     private DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
