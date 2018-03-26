@@ -2,6 +2,7 @@ package com.hitices.autopatrol.fragment;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.PatrolMainActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -351,7 +353,6 @@ public class MediaSDFragment extends Fragment {
             this.file_time = itemView.findViewById(R.id.filetime);
         }
     }
-
     private class FileListAdapter extends RecyclerView.Adapter<ItemHolder> {
         @Override
         public int getItemCount() {

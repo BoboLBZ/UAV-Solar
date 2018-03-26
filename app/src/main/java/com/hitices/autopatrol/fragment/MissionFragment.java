@@ -50,6 +50,10 @@ import com.amap.api.maps2d.model.Polygon;
 import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.Polyline;
 import com.amap.api.maps2d.model.PolylineOptions;
+import com.amap.api.maps2d.model.TileOverlay;
+import com.amap.api.maps2d.model.TileOverlayOptions;
+import com.amap.api.maps2d.model.TileProvider;
+import com.amap.api.maps2d.model.UrlTileProvider;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.AutoPatrolApplication;
@@ -66,6 +70,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -392,6 +398,8 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
     private void initMapView() {
         if (aMap == null) {
             aMap = mapView.getMap();
+            //use google map satellite data
+            useGoogleMapSatelliteData(aMap);
             aMap.setOnMapClickListener(onMapClickListener);
             aMap.setOnMarkerClickListener(markerClickListener);
             aMap.setOnMarkerDragListener(markerDragListener);
@@ -417,6 +425,29 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         aMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
         myInfoWindowAdapter myInfoWindowAdapter = new myInfoWindowAdapter();
         aMap.setInfoWindowAdapter(myInfoWindowAdapter);
+    }
+
+    private void useGoogleMapSatelliteData(AMap aMap) {
+        final String url = "http://mt0.google.cn/vt/lyrs=s@198&hl=zh-CN&gl=cn&src=app&x=%d&y=%d&z=%d&s=";
+        TileProvider tileProvider = new UrlTileProvider(256, 256) {
+            public URL getTileUrl(int x, int y, int zoom) {
+                try {
+                    return new URL(String.format(url, x, y, zoom));
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+        if (tileProvider != null) {
+            TileOverlay tileOverlay = aMap.addTileOverlay(new TileOverlayOptions()
+                    .tileProvider(tileProvider)
+                    .diskCacheEnabled(true)
+                    .diskCacheDir("/storage/emulated/0/amap/cache")
+                    .diskCacheSize(100000)
+                    .memoryCacheEnabled(true)
+                    .memCacheSize(100000));
+        }
     }
 
     protected void initSpinner() {

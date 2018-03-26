@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,6 +34,7 @@ import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,7 +197,7 @@ public class MediaLocalFragment extends Fragment {
         }
         for (File _file : files) {//遍历目录
             if (_file.isFile()) {
-                if (_file.getName().endsWith("jpg") || _file.getName().endsWith("png")) {
+                if (_file.getName().endsWith("jpg") || _file.getName().endsWith("png") || _file.getName().endsWith("JPG")) {
                     imageurls.add("file://" + _file.getAbsolutePath());//获取文件路径
                 }
             }
