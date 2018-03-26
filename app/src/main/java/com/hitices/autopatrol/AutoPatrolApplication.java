@@ -36,8 +36,9 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 public class AutoPatrolApplication extends Application {
     public static final String FLAG_CONNECTION_CHANGE = "connection_change"; //用于通知飞行器连接状态的变化
-    public static final String missionDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";  //默认任务保存位置
-    public static final String photoDir = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
+    public static final String MISSION_DIR = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/TwoMissions";  //默认任务保存位置
+    public static final String PHOTO_DIR = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
+    public static final String MISSION_PHOTO_DIR = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/MissionPhoto";  //任务采集照片保存位置
     //convert
     static double x_pi = 3.14159265358979324 * 3000.0 / 180.0;
     // π
@@ -126,7 +127,7 @@ public class AutoPatrolApplication extends Application {
 
     public static List<String> getMissionList() {
         //获取默认文件夹内的所有任务名称
-        File dir = new File(missionDir);
+        File dir = new File(MISSION_DIR);
         List<String> missionList = new ArrayList<>();
         if (dir.exists()) {
             if (dir.listFiles() == null)

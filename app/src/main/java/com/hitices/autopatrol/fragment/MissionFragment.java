@@ -177,9 +177,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
         private void changeMission(String name) {
             if (name.length() > 0) {
-//                currentWaypointsMission=readMission(AutoPatrolApplication.missionDir+"/"+name+".xml");
+//                currentWaypointsMission=readMission(AutoPatrolApplication.MISSION_DIR+"/"+name+".xml");
 //                lastSelectedMissionName=currentWaypointsMission.missionName;
-                currentMission = readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+                currentMission = readBaseMission(AutoPatrolApplication.MISSION_DIR + "/" + name + ".xml");
                 lastSelectedMissionName = currentMission.missionName;
                 spinner.setSelection(arrayAdapter.getPosition(lastSelectedMissionName), true);
                 refreshMapView();
@@ -368,7 +368,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             case R.id.import_mission:
                 //test
 //                WaypointsMission w=new WaypointsMission("test");
-//                w.readMission(AutoPatrolApplication.missionDir+"/121212.xml");
+//                w.readMission(AutoPatrolApplication.MISSION_DIR+"/121212.xml");
                 break;
             case R.id.adjust_mission:
                 if (currentMission != null) {
@@ -554,12 +554,12 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         setResultToToast("success");
         creatable = false;
         sendMissionChange();
-        //currentWaypointsMission.readMission(AutoPatrolApplication.missionDir+"/"+currentWaypointsMission.missionName+".xml");
+        //currentWaypointsMission.readMission(AutoPatrolApplication.MISSION_DIR+"/"+currentWaypointsMission.missionName+".xml");
         return true;
     }
 
     private boolean deleteMission() {
-        File f = new File(AutoPatrolApplication.missionDir + "/" + currentMission.missionName + ".xml");
+        File f = new File(AutoPatrolApplication.MISSION_DIR + "/" + currentMission.missionName + ".xml");
         if (f.exists()) {
             f.delete();
             return true;

@@ -104,7 +104,7 @@ public class PolygonMissionEcecuteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polygon_mission_ececute);
         Intent intent = getIntent();
-        String path = AutoPatrolApplication.missionDir + "/" + intent.getStringExtra("missionName") + ".xml";
+        String path = AutoPatrolApplication.MISSION_DIR + "/" + intent.getStringExtra("missionName") + ".xml";
         polygonMission = readMission(path);
 
         initMapView(savedInstanceState);

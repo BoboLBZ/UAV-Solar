@@ -7,6 +7,10 @@
     <color name="unselected">#F7FCF7</color>
 
     <color name="black_overlay">#66000000</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="background_blue">#242d34</color>
+    <color name="transparent">#00000000</color>
+    <color name="dark_gray">#80000000</color>
 
     <color name="black_semi_transparent">#B2000000</color>
     <color name="background">#e5e5e5</color>

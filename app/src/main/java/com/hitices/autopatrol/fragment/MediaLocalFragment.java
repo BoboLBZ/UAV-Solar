@@ -183,7 +183,7 @@ public class MediaLocalFragment extends Fragment {
     private void getLocalImageUrls() {
         imageurls = new ArrayList<>();
         //test
-        File f = new File(AutoPatrolApplication.photoDir);
+        File f = new File(AutoPatrolApplication.PHOTO_DIR);
         if (!f.exists()) {//判断路径是否存在
             if (!f.mkdirs()) {
                 return;
@@ -202,7 +202,7 @@ public class MediaLocalFragment extends Fragment {
         }
         //test
 //        Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-//        Uri mImageUri =Uri.parse(AutoPatrolApplication.photoDir+"/11.jpg");
+//        Uri mImageUri =Uri.parse(AutoPatrolApplication.PHOTO_DIR+"/11.jpg");
 //        System.out.println("uri:" + mImageUri);
 //        String[] projImage = { MediaStore.Images.Media._ID
 //                , MediaStore.Images.Media.DATA
