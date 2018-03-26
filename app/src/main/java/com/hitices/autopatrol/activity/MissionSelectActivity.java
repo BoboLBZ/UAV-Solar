@@ -9,9 +9,11 @@ import android.widget.Button;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.helper.DJIMediaHelper;
 import com.hitices.autopatrol.helper.DJIMissionMediaHelper;
-import com.hitices.autopatrol.helper.FilesDownloadCompleteListener;
+import com.hitices.autopatrol.helper.FlightRecords;
 import com.hitices.autopatrol.helper.ToastHelper;
 
+
+import org.litepal.crud.DataSupport;
 
 import dji.common.error.DJIError;
 import dji.log.DJILog;
@@ -26,7 +28,7 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
 
     private DJIMissionMediaHelper missionMediaHelper;
 
-    private MyMission selectedMission;
+    private FlightRecords selectedMission;
 
     private Button selectMissionButton;
 
@@ -89,8 +91,11 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
             case R.id.btn_select_mission:
 
                 ToastHelper.showShortToast("start download");
+
+                selectedMission = DataSupport.findLast(FlightRecords.class);
+
                 missionMediaHelper.analyseMission(selectedMission);
-                missionMediaHelper.setCompleteListener(new FilesDownloadCompleteListener() {
+                missionMediaHelper.setCompleteListener(new DJIMissionMediaHelper.FilesDownloadCompleteListener() {
                     @Override
                     public void onStart() {
 
@@ -101,6 +106,8 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
                         startActivity(new Intent(MissionSelectActivity.this, MissionReportActivity.class));
                     }
                 });
+
+                missionMediaHelper.downloadFilesByMission();
 
                 break;
             default:

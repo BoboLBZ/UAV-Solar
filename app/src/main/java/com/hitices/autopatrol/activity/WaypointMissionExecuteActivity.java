@@ -154,9 +154,9 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
             setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-              if(error ==null){
-                  FlightRecordHelper.SaveRecord(waypointsMission.missionName,startTime,new Date());
-              }
+            if (error == null) {
+                FlightRecordHelper.SaveRecord(waypointsMission.missionName, startTime, new Date());
+            }
         }
     };
 
@@ -370,6 +370,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             setResultToToast("remove listener");
         }
     }
+
     /**
      * 调整云台，让相机竖直向下
      */
@@ -636,8 +637,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError error3) {
-                if(error3 == null){
-                    startTime=new Date();
+                if (error3 == null) {
+                    startTime = new Date();
                 }
                 setResultToToast("Mission Start: " + (error3 == null ? "Successfully" : error3.getDescription()));
             }

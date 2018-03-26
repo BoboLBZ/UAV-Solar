@@ -12,18 +12,19 @@ import java.util.List;
  */
 
 public class FlightRecordHelper {
-     public static void SaveRecord(String name, Date start,Date end){
-         FlightRecords record=new FlightRecords();
-         //record.setId(id);
-         record.setName(name);
-         record.setStartTime(start);
-         record.setEndTime(end);
-         record.save();
-     }
-    public static void readRecord(String name){
-        List<FlightRecords> records= DataSupport.findAll(FlightRecords.class);
-        if (records != null){
-            for(int i=0;i<records.size();i++){
+    public static void SaveRecord(String name, Date start, Date end) {
+        FlightRecords record = new FlightRecords();
+        //record.setId(id);
+        record.setName(name);
+        record.setStartTime(start);
+        record.setEndTime(end);
+        record.save();
+    }
+
+    public static void readRecord(String name) {
+        List<FlightRecords> records = DataSupport.findAll(FlightRecords.class);
+        if (records != null) {
+            for (int i = 0; i < records.size(); i++) {
                 System.out.println(records.get(i).getName());
                 System.out.println(records.get(i).getStartTime().toString());
             }

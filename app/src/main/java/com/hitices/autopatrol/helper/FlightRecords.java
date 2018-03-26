@@ -16,25 +16,32 @@ public class FlightRecords extends DataSupport {
     private String name;
     private Date startTime;
     private Date endTime;
-    public String getName(){
+
+    public String getName() {
         return name;
     }
-    public Date getStartTime(){
+
+    public Date getStartTime() {
         return startTime;
     }
-    public Date getEndTime(){
+
+    public Date getEndTime() {
         return endTime;
     }
-    public void setName(String name){
-        this.name=name;
+
+    public void setName(String name) {
+        this.name = name;
     }
-    public void setStartTime(Date time){
-        this.startTime=time;
+
+    public void setStartTime(Date time) {
+        this.startTime = time;
     }
-    public void setEndTime(Date time){
-        this.endTime=time;
+
+    public void setEndTime(Date time) {
+        this.endTime = time;
     }
-    public void setId(int i){
-        this.id=i;
+
+    public void setId(int i) {
+        this.id = i;
     }
 }

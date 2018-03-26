@@ -147,7 +147,7 @@ public class DJIMediaHelper {
         mediaFileList.get(index).fetchFileData(storePath, null, listener);
     }
 
-    private DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
+    public DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
         @Override
         public void onFailure(DJIError error) {
             HideDownloadProgressDialog();
@@ -210,10 +210,13 @@ public class DJIMediaHelper {
         if (AutoPatrolApplication.getProductInstance() == null) {
             mediaFileList.clear();
 //            mListAdapter.notifyDataSetChanged();
+            ToastHelper.showShortToast("Product disconnected");
             DJILog.e(TAG, "Product disconnected");
             return;
         } else {
-            if (null != AutoPatrolApplication.getCameraInstance() && AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
+            ToastHelper.showShortToast("Product connected");
+            if (null != AutoPatrolApplication.getCameraInstance() &&
+                    AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
                 mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
                 if (null != mMediaManager) {
                     mMediaManager.addUpdateFileListStateListener(this.updateFileListStateListener);
@@ -222,6 +225,7 @@ public class DJIMediaHelper {
                         @Override
                         public void onResult(DJIError error) {
                             if (error == null) {
+                                ToastHelper.showShortToast("Set cameraMode success");
                                 DJILog.e(TAG, "Set cameraMode success");
                                 showProgressDialog();
                                 getFileList();
