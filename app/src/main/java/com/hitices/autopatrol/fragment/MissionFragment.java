@@ -459,7 +459,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 //            //root
             doc.getDocumentElement().normalize();
             String type = doc.getDocumentElement().getNodeName();
-            System.out.println("Root element :" + type);
             //name
             BaseMission newMission;
 
@@ -512,7 +511,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                 LatLng ll = new LatLng(((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLatitude(),
                         ((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLongitude());
                 markerOptions.position(ll);
-                //System.out.println("\nnewtest" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 markerOptions.draggable(true);
                 markerOptions.title("waypoint");
@@ -803,7 +801,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             NodeList nWaypointList = ((Element) node).getElementsByTagName("waypoint");
             for (int temp = 0; temp < nWaypointList.getLength(); temp++) {
                 Node nNode = nWaypointList.item(temp);
-                System.out.println("\nCurrent Element :" + nNode.getNodeName());
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     LatLng ll = new LatLng(
@@ -826,7 +823,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                     }
                     newWaypointsMission.waypointList.add(w);
                     newWaypointsMission.waypoints.put(ll, w);
-                    System.out.println("\nlat and lng" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
                 }
             }
             newWaypointsMission.FLAG_ISSAVED = true;
@@ -1140,14 +1136,12 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         NodeList nVertexList = ((Element) node).getElementsByTagName("vertex");
         for (int temp = 0; temp < nVertexList.getLength(); temp++) {
             Node nNode = nVertexList.item(temp);
-            System.out.println("\nvertex :" + nNode.getNodeName());
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) nNode;
                 LatLng ll = new LatLng(
                         Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
                         Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
                 newPolygonMission.addVertex(ll);
-                System.out.println("\npolygon" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
             }
         }
         newPolygonMission.FLAG_ISSAVED = true;

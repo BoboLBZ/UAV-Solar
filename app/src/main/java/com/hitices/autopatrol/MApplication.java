@@ -8,9 +8,12 @@ package com.hitices.autopatrol;
 
 import android.app.Application;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.hitices.autopatrol.helper.ContextHelper;
 import com.secneo.sdk.Helper;
+
+import org.litepal.LitePal;
 
 public class MApplication extends Application {
 
@@ -30,6 +33,7 @@ public class MApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ContextHelper.initial(this);
+
         application.onCreate();
     }
 }

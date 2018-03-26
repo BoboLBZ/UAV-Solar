@@ -45,6 +45,7 @@ import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
+import com.hitices.autopatrol.helper.FlightRecordHelper;
 import com.hitices.autopatrol.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
@@ -54,6 +55,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -103,6 +105,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     private Marker droneMarker;
     private LatLng droneLocation, locationLatlng;
     private Marker location;//photo location
+    private Date startTime;
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
@@ -150,10 +153,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-//            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-//              if(error ==null){
-//                  openReportActivity();
-//              }
+            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+              if(error ==null){
+                  FlightRecordHelper.SaveRecord(waypointsMission.missionName,startTime,new Date());
+              }
         }
     };
 
@@ -161,7 +164,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_execute);
-        //   setContentView(R.layout.layout_test);
         Intent intent = getIntent();
         String path = AutoPatrolApplication.MISSION_DIR + "/" + intent.getStringExtra("missionName") + ".xml";
         waypointsMission = readMission(path);
@@ -176,8 +178,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if(getRequestedOrientation()== ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-//            WaypointMissionExecuteActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         removeListener();
     }
 
@@ -370,19 +370,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             setResultToToast("remove listener");
         }
     }
-
-    /**
-     * 在任务执行完成后打开新的activity，显示执行结果
-     */
-    private void openReportActivity() {
-        //photoNums
-        Intent intent = new Intent(this, MissionReportActivity.class);
-        intent.putExtra("name", waypointsMission.missionName);
-        intent.putExtra("type", waypointsMission.missionType);
-        intent.putExtra("photoNums", String.valueOf(0));
-        startActivity(intent);
-    }
-
     /**
      * 调整云台，让相机竖直向下
      */
@@ -649,6 +636,9 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError error3) {
+                if(error3 == null){
+                    startTime=new Date();
+                }
                 setResultToToast("Mission Start: " + (error3 == null ? "Successfully" : error3.getDescription()));
             }
         });
@@ -671,7 +661,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
     /**
      * 任务暂停
-     * 目前没什么卵用，没找到解决方案
      */
     private void pauseMission() {
         setResultToToast("on pause");
@@ -682,10 +671,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 setResultToToast("Mission Pause: " + (error3 == null ? "Successfully" : error3.getDescription()));
             }
         });
-    }
-
-    private void test() {
-//        TakeOffWidget widget=findViewById()
     }
 
     /**

@@ -138,9 +138,7 @@ public class WaypointsMission extends BaseMission {
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(AutoPatrolApplication.MISSION_DIR + "/" + missionName + ".xml"));
-            StreamResult result1 = new StreamResult(System.out);
             transformer.transform(source, result);
-            transformer.transform(source, result1);
             FLAG_ISSAVED = true;
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
