@@ -11,10 +11,16 @@
         android:layout_marginTop="0dp"
         android:visibility="invisible" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/imageList"
+    <GridView
+        android:id="@+id/sd_imageGrid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:horizontalSpacing="4dp"
+        android:numColumns="3"
+        android:padding="4dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="4dp" />
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/media_sd_refresh"
