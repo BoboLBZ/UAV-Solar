@@ -101,17 +101,17 @@ public class MissionReportActivity extends AppCompatActivity {
         for (int i = 0; i < imageurls.size(); i++) {
             ImageInfoRead read = new ImageInfoRead(imageurls.get(i));
             LatLng location = read.getLatlng();
-            aMap.addMarker(getMarkerOptions(location,i,2));
+            aMap.addMarker(getMarkerOptions(location, i, 2));
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);
             aMap.moveCamera(cameraupdate);
         }
 
     }
 
-    private MarkerOptions getMarkerOptions(LatLng location,int index,int type){
+    private MarkerOptions getMarkerOptions(LatLng location, int index, int type) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(location);
-        switch (type){
+        switch (type) {
             case 1:
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 break;
@@ -136,7 +136,7 @@ public class MissionReportActivity extends AppCompatActivity {
     private void getUris() {
         imageurls = new ArrayList<>();
         //test
-        File f = new File(AutoPatrolApplication.photoDir);
+        File f = new File(AutoPatrolApplication.PHOTO_DIR);
         if (!f.exists()) {//判断路径是否存在
             if (!f.mkdirs()) {
                 return;
