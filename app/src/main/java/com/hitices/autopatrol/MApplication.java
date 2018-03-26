@@ -9,6 +9,7 @@ package com.hitices.autopatrol;
 import android.app.Application;
 import android.content.Context;
 
+import com.hitices.autopatrol.helper.ContextHelper;
 import com.secneo.sdk.Helper;
 
 public class MApplication extends Application {
@@ -28,6 +29,7 @@ public class MApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        ContextHelper.initial(this);
         application.onCreate();
     }
 }

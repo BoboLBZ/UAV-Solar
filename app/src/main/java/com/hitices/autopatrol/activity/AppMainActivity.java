@@ -23,6 +23,8 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         } else {
             Log.d("PatrolMainActivity", "OpenCV loaded！");
         }
+
+        // ndk support test
         System.loadLibrary("native-lib");
     }
 
@@ -51,7 +53,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, PatrolMainActivity.class));
                 break;
             case R.id.app_func2_button:
-                startActivity(new Intent(this,MissionReportActivity.class));
+                startActivity(new Intent(this, MissionSelectActivity.class));
                 break;
         }
     }

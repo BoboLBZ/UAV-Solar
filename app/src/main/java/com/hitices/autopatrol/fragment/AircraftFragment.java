@@ -82,7 +82,7 @@ public class AircraftFragment extends Fragment {
             String name = arrayAdapter.getItem(i);
             if (name.length() > 0) {
                 missionName = name;
-                readBaseMission(AutoPatrolApplication.missionDir + "/" + name + ".xml");
+                readBaseMission(AutoPatrolApplication.MISSION_DIR + "/" + name + ".xml");
                 setResultToToast(missionName + ";" + missionType);
             } else setResultToToast("选择任务失败");
         }

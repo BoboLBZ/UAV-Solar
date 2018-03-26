@@ -102,10 +102,13 @@
             android:theme="@style/FullscreenTheme" />
         <activity
             android:name=".activity.WaypointMissionExecuteActivity"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape" />
         <activity android:name=".activity.PolygonMissionEcecuteActivity" />
         <activity android:name=".activity.MissionReportActivity" />
+        <activity android:name=".activity.DJIDefaultLayoutActivity" />
+        <activity android:name=".activity.DJIMediaManageActivity" />
+        <activity android:name=".activity.MissionSelectActivity"></activity>
     </application>
 
 </manifest>

@@ -163,7 +163,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         setContentView(R.layout.activity_execute);
         //   setContentView(R.layout.layout_test);
         Intent intent = getIntent();
-        String path = AutoPatrolApplication.missionDir + "/" + intent.getStringExtra("missionName") + ".xml";
+        String path = AutoPatrolApplication.MISSION_DIR + "/" + intent.getStringExtra("missionName") + ".xml";
         waypointsMission = readMission(path);
 
         initUI();
