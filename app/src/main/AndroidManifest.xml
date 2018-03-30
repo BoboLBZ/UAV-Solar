@@ -108,7 +108,8 @@
         <activity android:name=".activity.MissionReportActivity" />
         <activity android:name=".activity.DJIDefaultLayoutActivity" />
         <activity android:name=".activity.DJIMediaManageActivity" />
-        <activity android:name=".activity.MissionSelectActivity"></activity>
+        <activity android:name=".activity.MissionSelectActivity" />
+        <activity android:name=".activity.MapFakeActivity"></activity>
     </application>
 
 </manifest>

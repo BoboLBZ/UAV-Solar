@@ -14,8 +14,13 @@ public class FlightRecords extends DataSupport {
     @Column(unique = true, defaultValue = "unknown")
     private int id;
     private String name;
+    private String location;
     private Date startTime;
     private Date endTime;
+    private boolean isDistributed;
+    private boolean hasVisible;
+    private boolean hasInfrared;
+    private boolean isDownload;
 
     public String getName() {
         return name;
@@ -43,5 +48,49 @@ public class FlightRecords extends DataSupport {
 
     public void setId(int i) {
         this.id = i;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public boolean isDistributed() {
+        return isDistributed;
+    }
+
+    public void setDistributed(boolean distributed) {
+        isDistributed = distributed;
+    }
+
+    public boolean isHasVisible() {
+        return hasVisible;
+    }
+
+    public void setHasVisible(boolean hasVisible) {
+        this.hasVisible = hasVisible;
+    }
+
+    public boolean isHasInfrared() {
+        return hasInfrared;
+    }
+
+    public void setHasInfrared(boolean hasInfrared) {
+        this.hasInfrared = hasInfrared;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public boolean isDownload() {
+        return isDownload;
+    }
+
+    public void setDownload(boolean download) {
+        isDownload = download;
     }
 }
