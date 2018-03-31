@@ -274,10 +274,10 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     private void markWaypoint() {
         List<LatLng> lines = new ArrayList<>();
         //lines.add(droneLocation);
-        for (int i = 0; i < waypointsMission.waypointList.size(); i++) {
+        for (int i = 0; i < waypointsMission.getWaypointList().size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
-            LatLng ll = new LatLng(waypointsMission.waypointList.get(i).coordinate.getLatitude(),
-                    waypointsMission.waypointList.get(i).coordinate.getLongitude());
+            LatLng ll = new LatLng(waypointsMission.getWaypointList().get(i).coordinate.getLatitude(),
+                    waypointsMission.getWaypointList().get(i).coordinate.getLongitude());
             lines.add(ll);
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -294,8 +294,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         for (int i = 0; i < sortedIndex.size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             int index = sortedIndex.get(i);
-            LatLng ll = new LatLng(waypointsMission.waypointList.get(index).coordinate.getLatitude(),
-                    waypointsMission.waypointList.get(index).coordinate.getLongitude());
+            LatLng ll = new LatLng(waypointsMission.getWaypointList().get(index).coordinate.getLatitude(),
+                    waypointsMission.getWaypointList().get(index).coordinate.getLongitude());
             lines.add(ll);
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -431,7 +431,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     float tSpeed = (((float) i) / 100) * 15;
                     seekBar_text.setText(String.valueOf((int) (tSpeed + 0.5)) + "m/s");
-                    waypointsMission.speed = tSpeed;
+                    waypointsMission.setSpeed(tSpeed);
                 }
 
                 @Override
@@ -447,13 +447,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 @Override
                 public void onCheckedChanged(RadioGroup radioGroup, int i) {
                     if (i == R.id.finishNone) {
-                        waypointsMission.finishedAction = WaypointMissionFinishedAction.NO_ACTION;
+                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.NO_ACTION);
                     } else if (i == R.id.finishGoHome) {
-                        waypointsMission.finishedAction = WaypointMissionFinishedAction.GO_HOME;
+                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.GO_HOME);
                     } else if (i == R.id.finishAutoLanding) {
-                        waypointsMission.finishedAction = WaypointMissionFinishedAction.AUTO_LAND;
+                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.AUTO_LAND);
                     } else if (i == R.id.finishToFirst) {
-                        waypointsMission.finishedAction = WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.GO_FIRST_WAYPOINT);
                     }
                 }
             });
@@ -461,13 +461,13 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 @Override
                 public void onCheckedChanged(RadioGroup radioGroup, int i) {
                     if (i == R.id.headingNext) {
-                        waypointsMission.headingMode = WaypointMissionHeadingMode.AUTO;
+                        waypointsMission.setHeadingMode(WaypointMissionHeadingMode.AUTO);
                     } else if (i == R.id.headingInitDirec) {
-                        waypointsMission.headingMode = WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+                        waypointsMission.setHeadingMode(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION);
                     } else if (i == R.id.headingRC) {
-                        waypointsMission.headingMode = WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+                        waypointsMission.setHeadingMode(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER);
                     } else if (i == R.id.headingWP) {
-                        waypointsMission.headingMode = WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+                        waypointsMission.setHeadingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
                     }
                 }
             });
@@ -475,15 +475,15 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             gv_missions.setOnItemClickListener(onItemClickListener);
             //update text
             name.setText("任务名称:" + waypointsMission.missionName);
-            time.setText("速度:" + String.valueOf(waypointsMission.speed));
-            altitude.setText("默认高度:" + String.valueOf(waypointsMission.altitude + " m"));
+            time.setText("速度:" + String.valueOf(waypointsMission.getSpeed()));
+            altitude.setText("默认高度:" + String.valueOf(waypointsMission.getAltitude() + " m"));
             //convert between float and int
             //rate=waypointsMission.speed/15
-            sb_speed.setProgress((int) (waypointsMission.speed / 15 * 100 + 0.5));
-            seekBar_text.setText(String.valueOf((int) (waypointsMission.speed + 0.5)) + "m/s");
+            sb_speed.setProgress((int) (waypointsMission.getSpeed() / 15 * 100 + 0.5));
+            seekBar_text.setText(String.valueOf((int) (waypointsMission.getSpeed() + 0.5)) + "m/s");
 
-            rg_actionAfterFinished.check(getFinishCheckedId(waypointsMission.finishedAction));
-            rg_heading.check(getHeadingCheckedId(waypointsMission.headingMode));
+            rg_actionAfterFinished.check(getFinishCheckedId(waypointsMission.getFinishedAction()));
+            rg_heading.check(getHeadingCheckedId(waypointsMission.getHeadingMode()));
         } else {
             name.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
         }
@@ -538,19 +538,20 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
     private void sortingWaypoints() {
         if (waypointsMission != null) {
             if (droneLocation == null) {
-                droneLocation = new LatLng(waypointsMission.waypointList.get(0).coordinate.getLatitude(),
-                        waypointsMission.waypointList.get(0).coordinate.getLongitude());
+//                droneLocation = new LatLng(waypointsMission.waypointList.get(0).coordinate.getLatitude(),
+//                        waypointsMission.waypointList.get(0).coordinate.getLongitude());
+                droneLocation = AutoPatrolApplication.AmapConvertToWGS84(locationLatlng);
             }
-            AntColonyAlgorithm antColonyAlgorithm = new AntColonyAlgorithm(waypointsMission.waypointList, droneLocation);
+            AntColonyAlgorithm antColonyAlgorithm = new AntColonyAlgorithm(waypointsMission.getWaypointList(), droneLocation);
             List<Integer> sortedIndex = antColonyAlgorithm.getSortedWaypoints();
             //markwaypoint
             markWaypointbyIndex(sortedIndex);
             List<Waypoint> newWaypointList = new ArrayList<>();
             //built new waypoint list,include convert
             for (int i = 0; i < sortedIndex.size(); i++) {
-                newWaypointList.add(waypointConvert(waypointsMission.waypointList.get(sortedIndex.get(i))));
+                newWaypointList.add(waypointConvert(waypointsMission.getWaypointList().get(sortedIndex.get(i))));
             }
-            waypointsMission.waypointList = newWaypointList;
+            waypointsMission.setWaypointList(newWaypointList);
         }
     }
 
@@ -684,7 +685,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         LinearLayout waypointDetail = (LinearLayout) getLayoutInflater().inflate(R.layout.waypoint_preview_waypoint_detail, null);
         GridView detail = waypointDetail.findViewById(R.id.preview_wp_setting);
         final EditText altitude = waypointDetail.findViewById(R.id.preview_wp_altitude);
-        currentWaypoint = waypointsMission.waypointList.get(i);
+        currentWaypoint = waypointsMission.getWaypointList().get(i);
         final WPWaypointGridviewAdapter adapter = new WPWaypointGridviewAdapter(currentWaypoint.waypointActions, this);
         detail.setAdapter(adapter);
         altitude.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -726,21 +727,21 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
             nodes = doc.getElementsByTagName("speed");
             if (nodes.item(0) != null) {
-                newMission.speed = Float.parseFloat(nodes.item(0).getTextContent());
+                newMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             nodes = doc.getElementsByTagName("altitude");
             if (nodes.item(0) != null) {
-                newMission.altitude = Float.parseFloat(nodes.item(0).getTextContent());
+                newMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             //finishedAction
             nodes = doc.getElementsByTagName("finishedAction");
             if (nodes.item(0) != null) {
-                newMission.finishedAction = getFinishedAction(nodes.item(0).getTextContent());
+                newMission.setFinishedAction(getFinishedAction(nodes.item(0).getTextContent()));
             }
             //headingMode
             nodes = doc.getElementsByTagName("headingMode");
             if (nodes.item(0) != null) {
-                newMission.headingMode = getHeadingMode(nodes.item(0).getTextContent());
+                newMission.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
             }
             //Waypoints
             nodes = doc.getElementsByTagName("Waypoints");
@@ -770,8 +771,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                             }
                         }
                     }
-                    newMission.waypointList.add(w);
-                    newMission.waypoints.put(ll, w);
+                    newMission.addWaypointToList(w);
+                    newMission.getWaypoints().put(ll, w);
                     System.out.println("\nlat and lng" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
                 }
             }
@@ -924,12 +925,12 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
         @Override
         public int getCount() {
-            return waypointsMission.waypointList.size();
+            return waypointsMission.getWaypointList().size();
         }
 
         @Override
         public Object getItem(int position) {
-            return waypointsMission.waypointList.get(position);
+            return waypointsMission.getWaypoints().get(position);
         }
 
         @Override
@@ -951,8 +952,8 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 holder = (ViewHolder) convertView.getTag();
             }
             holder.id.setText(String.valueOf(position));
-            holder.lat.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLatitude()));
-            holder.lng.setText(String.valueOf(waypointsMission.waypointList.get(position).coordinate.getLongitude()));
+            holder.lat.setText(String.valueOf(waypointsMission.getWaypointList().get(position).coordinate.getLatitude()));
+            holder.lng.setText(String.valueOf(waypointsMission.getWaypoints().get(position).coordinate.getLongitude()));
             return convertView;
         }
 

@@ -120,7 +120,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void onMarkerDragEnd(Marker arg0) {
-            getCurrentWaypointsMission().waypointList.remove(new Waypoint(tempLatlng.latitude, tempLatlng.longitude, getCurrentWaypointsMission().altitude));
+            getCurrentWaypointsMission().getWaypointList().remove(new Waypoint(tempLatlng.latitude, tempLatlng.longitude, getCurrentWaypointsMission().getAltitude()));
             getCurrentWaypointsMission().addWaypointList(arg0.getPosition());
         }
 
@@ -185,8 +185,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
 
         private void changeMission(String name) {
             if (name.length() > 0) {
-//                currentWaypointsMission=readMission(AutoPatrolApplication.MISSION_DIR+"/"+name+".xml");
-//                lastSelectedMissionName=currentWaypointsMission.missionName;
                 currentMission = readBaseMission(AutoPatrolApplication.MISSION_DIR + "/" + name + ".xml");
                 lastSelectedMissionName = currentMission.missionName;
                 spinner.setSelection(arrayAdapter.getPosition(lastSelectedMissionName), true);
@@ -506,10 +504,10 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         if (currentMission.missionType == MissionType.WaypointMission) {
             //update new markers
 
-            for (int i = 0; i < ((WaypointsMission) currentMission).waypointList.size(); i++) {
+            for (int i = 0; i < ((WaypointsMission) currentMission).getWaypointList().size(); i++) {
                 MarkerOptions markerOptions = new MarkerOptions();
-                LatLng ll = new LatLng(((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLatitude(),
-                        ((WaypointsMission) currentMission).waypointList.get(i).coordinate.getLongitude());
+                LatLng ll = new LatLng(((WaypointsMission) currentMission).getWaypointList().get(i).coordinate.getLatitude(),
+                        ((WaypointsMission) currentMission).getWaypointList().get(i).coordinate.getLongitude());
                 markerOptions.position(ll);
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 markerOptions.draggable(true);
@@ -648,24 +646,28 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showWaypointsSettingDialog() {
-        final List<WaypointAction> actions = getCurrentWaypointsMission().currentGeneralActions;
+        final List<WaypointAction> actions = getCurrentWaypointsMission().getCurrentGeneralActions();
         LinearLayout wayPointSettings = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
-        final TextView tv_wayPointAltitude = wayPointSettings.findViewById(R.id.altitude);
+        final TextView tv_wayPointAltitude = wayPointSettings.findViewById(R.id.altitude_text);
         final TextView seekBar_speed = wayPointSettings.findViewById(R.id.seekBar_text);
         final TextView mName = wayPointSettings.findViewById(R.id.setting_mName);
         Button mSave = wayPointSettings.findViewById(R.id.dialog_save);
         Button mDelete = wayPointSettings.findViewById(R.id.dialog_delete);
         GridView gv_missions = wayPointSettings.findViewById(R.id.gv_general_actions);
         SeekBar sb_speed = wayPointSettings.findViewById(R.id.speed);
+        final SeekBar sb_altitude = wayPointSettings.findViewById(R.id.altitude);
         RadioGroup rg_actionAfterFinished = wayPointSettings.findViewById(R.id.actionAfterFinished);
         RadioGroup rg_heading = wayPointSettings.findViewById(R.id.heading);
 
         //init,use waypoint mission value
-        tv_wayPointAltitude.setText(String.valueOf(getCurrentWaypointsMission().altitude));
+        sb_altitude.setProgress((int) (getCurrentWaypointsMission().getAltitude()));
+        tv_wayPointAltitude.setText(String.valueOf(getCurrentWaypointsMission().getAltitude()) + " m");
         mName.setText(getCurrentWaypointsMission().missionName);
         sb_speed.setMax(15);
         sb_speed.setProgress(10);
-        seekBar_speed.setText(String.valueOf(getCurrentWaypointsMission().speed) + " m/s");
+        seekBar_speed.setText(String.valueOf(getCurrentWaypointsMission().getSpeed()) + " m/s");
+
+
 
         rg_actionAfterFinished.check(R.id.finishAutoLanding);
         rg_heading.check(R.id.headingWP);
@@ -676,7 +678,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 seekBar_speed.setText(String.valueOf(i) + " m/s");
-                getCurrentWaypointsMission().speed = i;
+                getCurrentWaypointsMission().setSpeed(i);
             }
 
             @Override
@@ -687,17 +689,34 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+        sb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                getCurrentWaypointsMission().setAltitude(i);
+                tv_wayPointAltitude.setText(String.valueOf(i) + " m");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if (i == R.id.finishNone) {
-                    getCurrentWaypointsMission().finishedAction = WaypointMissionFinishedAction.NO_ACTION;
+                    getCurrentWaypointsMission().setFinishedAction(WaypointMissionFinishedAction.NO_ACTION);
                 } else if (i == R.id.finishGoHome) {
-                    getCurrentWaypointsMission().finishedAction = WaypointMissionFinishedAction.GO_HOME;
+                    getCurrentWaypointsMission().setFinishedAction(WaypointMissionFinishedAction.GO_HOME);
                 } else if (i == R.id.finishAutoLanding) {
-                    getCurrentWaypointsMission().finishedAction = WaypointMissionFinishedAction.AUTO_LAND;
+                    getCurrentWaypointsMission().setFinishedAction(WaypointMissionFinishedAction.AUTO_LAND);
                 } else if (i == R.id.finishToFirst) {
-                    getCurrentWaypointsMission().finishedAction = WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
+                    getCurrentWaypointsMission().setFinishedAction(WaypointMissionFinishedAction.GO_FIRST_WAYPOINT);
                 }
             }
         });
@@ -705,13 +724,13 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if (i == R.id.headingNext) {
-                    getCurrentWaypointsMission().headingMode = WaypointMissionHeadingMode.AUTO;
+                    getCurrentWaypointsMission().setHeadingMode(WaypointMissionHeadingMode.AUTO);
                 } else if (i == R.id.headingInitDirec) {
-                    getCurrentWaypointsMission().headingMode = WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+                    getCurrentWaypointsMission().setHeadingMode(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION);
                 } else if (i == R.id.headingRC) {
-                    getCurrentWaypointsMission().headingMode = WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+                    getCurrentWaypointsMission().setHeadingMode(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER);
                 } else if (i == R.id.headingWP) {
-                    getCurrentWaypointsMission().headingMode = WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+                    getCurrentWaypointsMission().setHeadingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
                 }
             }
         });
@@ -722,9 +741,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                 .setPositiveButton("finish", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String altitudeStr = tv_wayPointAltitude.getText().toString();
-                        getCurrentWaypointsMission().genernalWaypointSetting(
-                                Integer.parseInt(nulltoIntgerDefault(altitudeStr)),
+                        getCurrentWaypointsMission().genernalWaypointSetting(sb_altitude.getProgress(),
                                 gridviewAdapter.getSelectedAction());
                     }
                 })
@@ -741,9 +758,8 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         mSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String altitudeStr = tv_wayPointAltitude.getText().toString();
                 getCurrentWaypointsMission().genernalWaypointSetting(
-                        Integer.parseInt(nulltoIntgerDefault(altitudeStr)),
+                        sb_altitude.getProgress(),
                         gridviewAdapter.getSelectedAction());
                 if (saveMission()) {
                     dialog.cancel();
@@ -777,22 +793,22 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         try {
             NodeList nodes = doc.getElementsByTagName("speed");
             if (nodes.item(0) != null) {
-                newWaypointsMission.speed = Float.parseFloat(nodes.item(0).getTextContent());
+                newWaypointsMission.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             //general altitude
             nodes = doc.getElementsByTagName("altitude");
             if (nodes.item(0) != null) {
-                newWaypointsMission.altitude = Float.parseFloat(nodes.item(0).getTextContent());
+                newWaypointsMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             //finishedAction
             nodes = doc.getElementsByTagName("finishedAction");
             if (nodes.item(0) != null) {
-                newWaypointsMission.finishedAction = getFinishedAction(nodes.item(0).getTextContent());
+                newWaypointsMission.setFinishedAction(getFinishedAction(nodes.item(0).getTextContent()));
             }
             //headingMode
             nodes = doc.getElementsByTagName("headingMode");
             if (nodes.item(0) != null) {
-                newWaypointsMission.headingMode = getHeadingMode(nodes.item(0).getTextContent());
+                newWaypointsMission.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
             }
             //Waypoints
             nodes = doc.getElementsByTagName("Waypoints");
@@ -821,8 +837,8 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                             }
                         }
                     }
-                    newWaypointsMission.waypointList.add(w);
-                    newWaypointsMission.waypoints.put(ll, w);
+                    newWaypointsMission.addWaypointToList(w);
+                    newWaypointsMission.getWaypoints().put(ll, w);
                 }
             }
             newWaypointsMission.FLAG_ISSAVED = true;

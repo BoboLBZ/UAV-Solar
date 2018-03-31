@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:text="mission name"></TextView>
+        android:text="mission name" />
 
     <View
         android:layout_width="match_parent"
@@ -29,7 +29,7 @@
         android:id="@+id/preview_aircraft_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="aircraft name:"></TextView>
+        android:text="aircraft name:" />
 
     <View
         android:layout_width="match_parent"
@@ -40,7 +40,7 @@
         android:id="@+id/preview_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="camera:"></TextView>
+        android:text="camera:" />
 
     <View
         android:layout_width="match_parent"
@@ -51,7 +51,7 @@
         android:id="@+id/preview_start_point"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="point:"></TextView>
+        android:text="point:" />
 
     <View
         android:layout_width="match_parent"
@@ -62,7 +62,7 @@
         android:id="@+id/preview_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="time:"></TextView>
+        android:text="time:" />
 
     <View
         android:layout_width="match_parent"
@@ -73,7 +73,7 @@
         android:id="@+id/preview_altitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="altitude:"></TextView>
+        android:text="altitude:" />
 
     <View
         android:layout_width="match_parent"

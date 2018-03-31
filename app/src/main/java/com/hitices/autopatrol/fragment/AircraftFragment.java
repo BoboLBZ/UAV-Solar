@@ -245,7 +245,7 @@ public class AircraftFragment extends Fragment {
 //            //root
             doc.getDocumentElement().normalize();
             String type = doc.getDocumentElement().getNodeName();
-            System.out.println("Root element :" + type);
+            //System.out.println("Root element :" + type);
             //name
             NodeList nodes = doc.getElementsByTagName("missionName");
             if (nodes.item(0) == null) {

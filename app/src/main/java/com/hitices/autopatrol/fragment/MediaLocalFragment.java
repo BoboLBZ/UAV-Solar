@@ -261,7 +261,7 @@ public class MediaLocalFragment extends Fragment {
         getLocalImageUrls();
         getLocalVideoUrls();
         urls.addAll(imageurls);
-        urls.addAll(videourls);
+        //urls.addAll(videourls);
         return urls.toArray(new String[0]);
     }
 

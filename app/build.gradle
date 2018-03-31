@@ -66,15 +66,15 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    compile 'com.amap.api:map2d:latest.integration'
-    compile 'com.amap.api:search:latest.integration'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.dji:dji-uilibrary:4.4.1'
-    provided 'com.dji:dji-sdk-provided:4.4.1'
+    implementation 'com.amap.api:map2d:latest.integration'
+    implementation 'com.amap.api:search:latest.integration'
+    implementation 'com.android.support:multidex:1.0.1'
+    implementation 'com.dji:dji-uilibrary:4.4.1'
+    compileOnly 'com.dji:dji-sdk-provided:4.4.1'
     implementation 'com.android.support:design:26.1.0'
     compileOnly files('libs/universal-image-loader-1.9.5.jar')
-    compile 'com.getbase:floatingactionbutton:1.10.1'
+    implementation 'com.getbase:floatingactionbutton:1.10.1'
     compileOnly files('libs/AMap_Location_V3.7.0_20171218.jar')
     implementation project(':openCVLibrary341')
-    compile 'org.litepal.android:core:1.6.1'
+    implementation 'org.litepal.android:core:1.6.1'
 }
