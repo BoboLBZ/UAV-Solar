@@ -1182,13 +1182,6 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         return true;
     }
 
-    String nulltoIntgerDefault(String str) {
-        if (!isInteger(str)) {
-            str = "0";
-        }
-        return str;
-    }
-
     private void sendMissionChange() {
         Intent intent = new Intent("MISSION_ITEMS_CHANGE");
         getActivity().sendBroadcast(intent);
@@ -1366,6 +1359,9 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
                     waypoint.addAction(new WaypointAction(gva.getSelectedAction().get(j), j));
                 }
                 mMarker.hideInfoWindow();
+                if (!currentMission.saveMission()) {
+                    setResultToToast("修改失败");
+                }
             } else
                 setResultToToast("不可修改任务");
         }

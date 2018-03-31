@@ -70,7 +70,6 @@ public class WaypointsMission extends BaseMission {
     public float getSpeed() {
         return speed;
     }
-
     public WaypointMission.Builder getMissionBuilder() {
         //任务执行前调用
         if (builder == null) {
@@ -155,7 +154,6 @@ public class WaypointsMission extends BaseMission {
     public void addWaypointToList(Waypoint waypoint) {
         this.waypointList.add(waypoint);
     }
-
     public void removeWaypoint(LatLng latLng) {
         //删除航点
         int i = findWaypoint(latLng);
@@ -180,17 +178,6 @@ public class WaypointsMission extends BaseMission {
         this.altitude = alt;
     }
 
-    public void singleWaypointsetting(LatLng latLng, float alt, List<WaypointAction> aActions) {
-        //对单个航点设置
-        int index = findWaypoint(latLng);
-        if (index >= 0) {
-            waypointList.get(index).altitude = alt;
-            waypointList.get(index).removeAllAction();
-            for (int j = 0; j < aActions.size(); j++) {
-                waypointList.get(index).addAction(aActions.get(j));
-            }
-        }
-    }
     @Override
     public boolean saveMission() {
 //        Log.e("rhys","in save class");

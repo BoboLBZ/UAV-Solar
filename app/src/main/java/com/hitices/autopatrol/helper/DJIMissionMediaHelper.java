@@ -122,6 +122,10 @@ public class DJIMissionMediaHelper extends DJIMediaHelper {
                 Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2]));
     }
 
+    public File getMissionDir() {
+        return missionDir;
+    }
+
     public interface FilesDownloadCompleteListener {
         public void onStart();
 

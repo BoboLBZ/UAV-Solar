@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
@@ -15,10 +14,10 @@ import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
-import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.helper.GoogleMap;
 import com.hitices.autopatrol.helper.ImageInfoRead;
+import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,12 +33,12 @@ public class MissionReportActivity extends AppCompatActivity {
     private TextView name, type, photo_nums;
     private AMap aMap;
     private MapView mapView;
-    private List<String> imageurls = new ArrayList<>();
+    private List<String> imageUrls = new ArrayList<>();
     AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
         @Override
         public boolean onMarkerClick(Marker marker) {
             int i = Integer.parseInt(marker.getTitle());
-            displayImage(imageurls.get(i));
+            displayImage(imageUrls.get(i));
             return true;
         }
     };
@@ -95,11 +94,11 @@ public class MissionReportActivity extends AppCompatActivity {
     private void markImages() {
         //清除当前屏幕所有marker
         aMap.clear();
-        imageurls.clear();
+        imageUrls.clear();
         //test
         getUris();
-        for (int i = 0; i < imageurls.size(); i++) {
-            ImageInfoRead read = new ImageInfoRead(imageurls.get(i));
+        for (int i = 0; i < imageUrls.size(); i++) {
+            ImageInfoRead read = new ImageInfoRead(imageUrls.get(i));
             LatLng location = read.getLatlng();
             aMap.addMarker(getMarkerOptions(location, i, 2));
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);
@@ -134,22 +133,27 @@ public class MissionReportActivity extends AppCompatActivity {
     }
 
     private void getUris() {
-        imageurls = new ArrayList<>();
-        //test
-        File f = new File(AutoPatrolApplication.PHOTO_DIR);
-        if (!f.exists()) {//判断路径是否存在
-            if (!f.mkdirs()) {
+        imageUrls = new ArrayList<>();
+        //获得intent传递的path信息
+        String path = getIntent().getStringExtra("path");
+        if (path.isEmpty()) {
+            ToastHelper.showLongToast("获得照片存储路径失败");
+        } else {
+            File f = new File(path);
+            if (!f.exists()) {//判断路径是否存在
+                if (!f.mkdirs()) {
+                    return;
+                }
+            }
+            File[] files = f.listFiles();
+            if (files == null) {//判断权限
                 return;
             }
-        }
-        File[] files = f.listFiles();
-        if (files == null) {//判断权限
-            return;
-        }
-        for (File _file : files) {//遍历目录
-            if (_file.isFile()) {
-                if (_file.getName().endsWith("jpg") || _file.getName().endsWith("png") || _file.getName().endsWith("JPG")) {
-                    imageurls.add(_file.getAbsolutePath());//获取文件路径
+            for (File _file : files) {//遍历目录
+                if (_file.isFile()) {
+                    if (_file.getName().endsWith("jpg") || _file.getName().endsWith("png") || _file.getName().endsWith("JPG")) {
+                        imageUrls.add(_file.getAbsolutePath());//获取文件路径
+                    }
                 }
             }
         }

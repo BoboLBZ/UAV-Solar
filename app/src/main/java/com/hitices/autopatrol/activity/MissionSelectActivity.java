@@ -19,6 +19,7 @@ import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -138,7 +139,9 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
 
                     @Override
                     public void onComplete() {
-                        startActivity(new Intent(MissionSelectActivity.this, MissionReportActivity.class));
+                        Intent intent = new Intent(MissionSelectActivity.this, MissionReportActivity.class);
+                        intent.putExtra("path", missionMediaHelper.getMissionDir().getPath());
+                        startActivity(intent);
                     }
                 });
 

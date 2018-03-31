@@ -407,7 +407,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         LinearLayout wpPreview = (LinearLayout) getLayoutInflater().inflate(R.layout.activity_preview_waypoint, null);
         //ui
         final TextView name, aircraft, camera, time, startpoint, seekBar_text, altitude;
-        //final TextView tv_speed=findViewById(R.id.preview_seekBar_text);
         SeekBar sb_speed;
         RadioGroup rg_actionAfterFinished;
         RadioGroup rg_heading;
@@ -953,7 +952,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             }
             holder.id.setText(String.valueOf(position));
             holder.lat.setText(String.valueOf(waypointsMission.getWaypointList().get(position).coordinate.getLatitude()));
-            holder.lng.setText(String.valueOf(waypointsMission.getWaypoints().get(position).coordinate.getLongitude()));
+            holder.lng.setText(String.valueOf(waypointsMission.getWaypointList().get(position).coordinate.getLongitude()));
             return convertView;
         }
 
