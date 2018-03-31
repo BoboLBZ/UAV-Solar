@@ -28,4 +28,6 @@
     <string name="app_func1">执行巡检任务</string>
     <string name="app_func2">巡检结果分析</string>
 
+    <string name="mission_select_title">选择任务</string>
+
 </resources>

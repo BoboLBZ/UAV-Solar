@@ -21,6 +21,20 @@ public class FlightRecordHelper {
         record.save();
     }
 
+    public static void SaveRecord(String name, Date start, Date end, boolean isDownload, boolean isDistributed,
+                                  boolean hasVisible, boolean hasInfrared) {
+        FlightRecords record = new FlightRecords();
+        //record.setId(id);
+        record.setName(name);
+        record.setStartTime(start);
+        record.setEndTime(end);
+        record.setDownload(isDownload);
+        record.setDistributed(isDistributed);
+        record.setHasInfrared(hasInfrared);
+        record.setHasVisible(hasVisible);
+        record.save();
+    }
+
     public static void readRecord(String name) {
         List<FlightRecords> records = DataSupport.findAll(FlightRecords.class);
         if (records != null) {
