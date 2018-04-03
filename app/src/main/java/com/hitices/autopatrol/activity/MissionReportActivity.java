@@ -17,6 +17,7 @@ import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
 import com.hitices.autopatrol.helper.ImageInfoReadHelper;
+import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class MissionReportActivity extends AppCompatActivity {
         //test
         getUris();
         for (int i = 0; i < imageUrls.size(); i++) {
-            ImageInfoRead read = new ImageInfoRead(imageUrls.get(i));
+            ImageInfoReadHelper read = new ImageInfoReadHelper(imageUrls.get(i));
             LatLng location = read.getLatlng();
             aMap.addMarker(getMarkerOptions(location, i, 2));
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);
