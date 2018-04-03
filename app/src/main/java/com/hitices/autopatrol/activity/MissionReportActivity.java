@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
@@ -17,8 +16,8 @@ import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.helper.GoogleMap;
-import com.hitices.autopatrol.helper.ImageInfoRead;
+import com.hitices.autopatrol.helper.GoogleMapHelper;
+import com.hitices.autopatrol.helper.ImageInfoReadHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ public class MissionReportActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
         if (aMap == null) {
             aMap = mapView.getMap();
-            GoogleMap.useGoogleMapSatelliteData(aMap);
+            GoogleMapHelper.useGoogleMapSatelliteData(aMap);
             aMap.setOnMapClickListener(onMapClickListener);
             aMap.setOnMarkerClickListener(markerClickListener);
         }
@@ -99,7 +98,7 @@ public class MissionReportActivity extends AppCompatActivity {
         //test
         getUris();
         for (int i = 0; i < imageurls.size(); i++) {
-            ImageInfoRead read = new ImageInfoRead(imageurls.get(i));
+            ImageInfoReadHelper read = new ImageInfoReadHelper(imageurls.get(i));
             LatLng location = read.getLatlng();
             aMap.addMarker(getMarkerOptions(location, i, 2));
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);

@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.tool.MediaViewPagerAdapter;
+import com.hitices.autopatrol.adapter.MediaViewPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

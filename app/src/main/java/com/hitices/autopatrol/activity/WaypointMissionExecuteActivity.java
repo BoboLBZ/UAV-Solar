@@ -46,7 +46,7 @@ import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
 import com.hitices.autopatrol.helper.FlightRecordHelper;
-import com.hitices.autopatrol.missions.WaypointsMission;
+import com.hitices.autopatrol.entity.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

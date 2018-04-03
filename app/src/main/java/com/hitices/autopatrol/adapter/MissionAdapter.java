@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.helper.FlightRecords;
+import com.hitices.autopatrol.entity.FlightRecords;
 
 import java.util.List;
 

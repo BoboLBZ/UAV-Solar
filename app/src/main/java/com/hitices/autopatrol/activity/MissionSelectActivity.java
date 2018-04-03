@@ -10,10 +10,9 @@ import android.widget.Button;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.MissionAdapter;
-import com.hitices.autopatrol.helper.DJIMediaHelper;
 import com.hitices.autopatrol.helper.DJIMissionMediaHelper;
 import com.hitices.autopatrol.helper.FlightRecordHelper;
-import com.hitices.autopatrol.helper.FlightRecords;
+import com.hitices.autopatrol.entity.FlightRecords;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 

@@ -50,21 +50,16 @@ import com.amap.api.maps2d.model.Polygon;
 import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.Polyline;
 import com.amap.api.maps2d.model.PolylineOptions;
-import com.amap.api.maps2d.model.Tile;
-import com.amap.api.maps2d.model.TileOverlay;
-import com.amap.api.maps2d.model.TileOverlayOptions;
-import com.amap.api.maps2d.model.TileProvider;
-import com.amap.api.maps2d.model.UrlTileProvider;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.helper.GoogleMap;
-import com.hitices.autopatrol.missions.BaseMission;
-import com.hitices.autopatrol.missions.MissionType;
-import com.hitices.autopatrol.missions.PolygonMission;
-import com.hitices.autopatrol.missions.PolygonScenario;
-import com.hitices.autopatrol.missions.WaypointsMission;
+import com.hitices.autopatrol.helper.GoogleMapHelper;
+import com.hitices.autopatrol.entity.missions.BaseMission;
+import com.hitices.autopatrol.entity.missions.MissionType;
+import com.hitices.autopatrol.entity.missions.PolygonMission;
+import com.hitices.autopatrol.entity.missions.PolygonScenario;
+import com.hitices.autopatrol.entity.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,8 +67,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -401,7 +394,7 @@ public class MissionFragment extends Fragment implements View.OnClickListener {
         if (aMap == null) {
             aMap = mapView.getMap();
             //use google map satellite data
-            GoogleMap.useGoogleMapSatelliteData(aMap);
+            GoogleMapHelper.useGoogleMapSatelliteData(aMap);
             aMap.setOnMapClickListener(onMapClickListener);
             aMap.setOnMarkerClickListener(markerClickListener);
             aMap.setOnMarkerDragListener(markerDragListener);
