@@ -5,7 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
-import com.hitices.autopatrol.entity.FlightRecords;
+import com.hitices.autopatrol.entity.FlightRecord;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class DJIMissionMediaHelper extends DJIMediaHelper {
         this.completeListener = listener;
     }
 
-    public void analyseMission(FlightRecords mission) {
+    public void analyseMission(FlightRecord mission) {
         // get missionDir
         missionDir = new File(AutoPatrolApplication.MISSION_PHOTO_DIR + "/" +
                 mission.getName() + "_" + mission.getStartTime());

@@ -10,14 +10,14 @@ import java.util.Date;
  * email: bozliu@outlook.com
  */
 
-public class FlightRecords extends DataSupport {
+public class FlightRecord extends DataSupport {
     @Column(unique = true, defaultValue = "unknown")
     private int id;
     private String name;
     private String location;
     private Date startTime;
     private Date endTime;
-    private boolean isDistributed;
+//    private boolean isDistributed;
     private boolean hasVisible;
     private boolean hasInfrared;
     private boolean isDownload;
@@ -58,13 +58,13 @@ public class FlightRecords extends DataSupport {
         this.location = location;
     }
 
-    public boolean isDistributed() {
-        return isDistributed;
-    }
+//    public boolean isDistributed() {
+//        return isDistributed;
+//    }
 
-    public void setDistributed(boolean distributed) {
-        isDistributed = distributed;
-    }
+//    public void setDistributed(boolean distributed) {
+//        isDistributed = distributed;
+//    }
 
     public boolean isHasVisible() {
         return hasVisible;

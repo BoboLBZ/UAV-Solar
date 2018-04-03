@@ -3,7 +3,7 @@
     <dbname value="autopatrolrecords" />
     <version value="2" />
     <list>
-        <mapping class="com.hitices.autopatrol.entity.FlightRecords" />
+        <mapping class="com.hitices.autopatrol.entity.FlightRecord" />
     </list>
     <storage value="external"/>
 </litepal>

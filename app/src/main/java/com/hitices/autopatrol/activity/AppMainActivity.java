@@ -1,7 +1,6 @@
 package com.hitices.autopatrol.activity;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,14 +9,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.helper.FlightRecordHelper;
 import com.hitices.autopatrol.helper.PermissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.LitePal;
 import org.opencv.android.OpenCVLoader;
-
-import java.util.Date;
 
 public class AppMainActivity extends AppCompatActivity implements View.OnClickListener {
 

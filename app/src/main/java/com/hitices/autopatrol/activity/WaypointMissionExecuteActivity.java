@@ -45,7 +45,7 @@ import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
-import com.hitices.autopatrol.helper.FlightRecordHelper;
+import com.hitices.autopatrol.entity.FlightRecord;
 import com.hitices.autopatrol.entity.missions.WaypointsMission;
 
 import org.w3c.dom.Document;
@@ -155,7 +155,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         public void onExecutionFinish(@Nullable final DJIError error) {
             setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
-                FlightRecordHelper.SaveRecord(waypointsMission.missionName, startTime, new Date());
+                FlightRecord record = new FlightRecord();
+                record.setName(waypointsMission.missionName);
+                record.setStartTime(startTime);
+                record.setEndTime(new Date());
+                record.save();
             }
         }
     };

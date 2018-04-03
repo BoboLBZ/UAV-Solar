@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.entity.FlightRecords;
+import com.hitices.autopatrol.entity.FlightRecord;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
 
-    private List<FlightRecords> mMissionList;
+    private List<FlightRecord> mMissionList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         View missionView;
@@ -29,8 +29,6 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         TextView downloadText;
         TextView visiblePicView;
         TextView infraredPicView;
-
-        boolean isDistributed;
 
         public ViewHolder(View view) {
             super(view);
@@ -46,7 +44,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         }
     }
 
-    public MissionAdapter(List<FlightRecords> missionList) {
+    public MissionAdapter(List<FlightRecord> missionList) {
         this.mMissionList = missionList;
     }
 
@@ -58,7 +56,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
             @Override
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
-                FlightRecords selectedMission = mMissionList.get(position);
+                FlightRecord selectedMission = mMissionList.get(position);
                 // do something
             }
         });
@@ -73,13 +71,12 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FlightRecords mission = mMissionList.get(position);
+        FlightRecord mission = mMissionList.get(position);
 
         // bind mission to view
         // holder.view.set(mission.name)
         holder.nameText.setText(mission.getName());
         holder.dateText.setText(mission.getStartTime().toString());
-        holder.isDistributed = mission.isDistributed();
         if (mission.isDownload()) {
             holder.downloadText.setText("（ 已下载 ）");
         } else {
@@ -94,11 +91,6 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
             holder.infraredPicView.setVisibility(View.VISIBLE);
         } else {
             holder.infraredPicView.setVisibility(View.GONE);
-        }
-        if (mission.isDistributed()) {
-            holder.missionImg.setImageResource(R.drawable.is_dis);
-        } else {
-            holder.missionImg.setImageResource(R.drawable.not_dis);
         }
     }
 

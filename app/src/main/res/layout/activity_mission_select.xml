@@ -22,10 +22,10 @@
         android:layout_height="match_parent"
         android:layout_marginTop="20dp" />
 
-    <Button
-        android:id="@+id/btn_select_mission"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="选择上次任务" />
+    <!--<Button-->
+        <!--android:id="@+id/btn_select_mission"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="选择上次任务" />-->
 
 </LinearLayout>
