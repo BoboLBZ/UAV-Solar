@@ -1,4 +1,4 @@
-package com.hitices.autopatrol.entity;
+package com.hitices.autopatrol.entity.dataSupport;
 
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
@@ -13,18 +13,18 @@ import java.util.Date;
 public class FlightRecord extends DataSupport {
     @Column(unique = true, defaultValue = "unknown")
     private int id;
-    private String name;
-    private String location;
+
+    // 本次执行时间
     private Date startTime;
     private Date endTime;
-//    private boolean isDistributed;
+    // 包含图集
     private boolean hasVisible;
     private boolean hasInfrared;
+    // 是否下载
     private boolean isDownload;
 
-    public String getName() {
-        return name;
-    }
+    // 外建：所执行的任务
+    private PatrolMission mission;
 
     public Date getStartTime() {
         return startTime;
@@ -32,10 +32,6 @@ public class FlightRecord extends DataSupport {
 
     public Date getEndTime() {
         return endTime;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setStartTime(Date time) {
@@ -49,22 +45,6 @@ public class FlightRecord extends DataSupport {
     public void setId(int i) {
         this.id = i;
     }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-//    public boolean isDistributed() {
-//        return isDistributed;
-//    }
-
-//    public void setDistributed(boolean distributed) {
-//        isDistributed = distributed;
-//    }
 
     public boolean isHasVisible() {
         return hasVisible;
@@ -92,5 +72,13 @@ public class FlightRecord extends DataSupport {
 
     public void setDownload(boolean download) {
         isDownload = download;
+    }
+
+    public PatrolMission getMission() {
+        return mission;
+    }
+
+    public void setMission(PatrolMission mission) {
+        this.mission = mission;
     }
 }

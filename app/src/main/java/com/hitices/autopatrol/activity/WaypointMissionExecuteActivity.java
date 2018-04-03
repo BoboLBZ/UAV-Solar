@@ -45,7 +45,7 @@ import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
-import com.hitices.autopatrol.entity.FlightRecord;
+import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.entity.missions.WaypointsMission;
 
 import org.w3c.dom.Document;

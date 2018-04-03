@@ -5,7 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
-import com.hitices.autopatrol.entity.FlightRecord;
+import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 
 import java.io.File;
 import java.util.ArrayList;

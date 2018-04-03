@@ -8,7 +8,7 @@ import android.view.View;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.MissionAdapter;
-import com.hitices.autopatrol.entity.FlightRecord;
+import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.DJIMissionMediaHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
