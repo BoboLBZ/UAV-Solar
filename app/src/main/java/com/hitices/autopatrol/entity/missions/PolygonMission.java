@@ -1,4 +1,4 @@
-package com.hitices.autopatrol.missions;
+package com.hitices.autopatrol.entity.missions;
 
 
 import android.util.Log;

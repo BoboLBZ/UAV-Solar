@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <com.hitices.autopatrol.tool.myImageView
+    <com.hitices.autopatrol.widgets.MyImageView
         android:id="@+id/imageView_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

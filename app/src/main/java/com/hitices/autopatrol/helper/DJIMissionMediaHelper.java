@@ -5,15 +5,13 @@ import android.content.Context;
 import android.util.Log;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
+import com.hitices.autopatrol.entity.FlightRecords;
 
 import java.io.File;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import dji.common.error.DJIError;
-import dji.sdk.camera.DownloadListener;
 import dji.sdk.camera.FetchMediaTask;
 import dji.sdk.camera.MediaFile;
 

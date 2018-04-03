@@ -1,4 +1,4 @@
-package com.hitices.autopatrol.helper;
+package com.hitices.autopatrol.entity;
 
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;

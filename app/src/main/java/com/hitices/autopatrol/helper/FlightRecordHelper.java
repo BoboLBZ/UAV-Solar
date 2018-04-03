@@ -1,6 +1,8 @@
 package com.hitices.autopatrol.helper;
 
 
+import com.hitices.autopatrol.entity.FlightRecords;
+
 import org.litepal.crud.DataSupport;
 
 import java.util.Date;

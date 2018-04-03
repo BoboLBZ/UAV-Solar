@@ -12,10 +12,10 @@ import java.io.IOException;
  * 读取无人机拍摄照片的地理位置信息
  */
 
-public class ImageInfoRead {
+public class ImageInfoReadHelper {
     private ExifInterface exifInterface;
 
-    public ImageInfoRead(String path) {
+    public ImageInfoReadHelper(String path) {
         try {
             exifInterface = new ExifInterface(path);
         } catch (IOException e) {

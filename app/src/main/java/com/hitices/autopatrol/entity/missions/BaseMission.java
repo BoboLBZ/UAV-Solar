@@ -1,4 +1,4 @@
-package com.hitices.autopatrol.missions;
+package com.hitices.autopatrol.entity.missions;
 
 /**
  * Created by Rhys on 2018/1/28.

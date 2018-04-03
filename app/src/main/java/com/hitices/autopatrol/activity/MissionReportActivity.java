@@ -15,9 +15,8 @@ import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.helper.GoogleMap;
-import com.hitices.autopatrol.helper.ImageInfoRead;
-import com.hitices.autopatrol.helper.ToastHelper;
+import com.hitices.autopatrol.helper.GoogleMapHelper;
+import com.hitices.autopatrol.helper.ImageInfoReadHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public class MissionReportActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
         if (aMap == null) {
             aMap = mapView.getMap();
-            GoogleMap.useGoogleMapSatelliteData(aMap);
+            GoogleMapHelper.useGoogleMapSatelliteData(aMap);
             aMap.setOnMapClickListener(onMapClickListener);
             aMap.setOnMarkerClickListener(markerClickListener);
         }

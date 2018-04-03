@@ -29,8 +29,8 @@ import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.missions.PolygonMission;
-import com.hitices.autopatrol.missions.PolygonScenario;
+import com.hitices.autopatrol.entity.missions.PolygonMission;
+import com.hitices.autopatrol.entity.missions.PolygonScenario;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

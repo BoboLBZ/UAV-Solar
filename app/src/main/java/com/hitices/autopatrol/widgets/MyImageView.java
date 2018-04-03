@@ -1,4 +1,4 @@
-package com.hitices.autopatrol.tool;
+package com.hitices.autopatrol.widgets;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,7 +19,7 @@ import android.view.ViewTreeObserver;
  * Created by Administrator on 2018/1/4.
  */
 
-public class myImageView extends AppCompatImageView
+public class MyImageView extends AppCompatImageView
         implements ViewTreeObserver.OnGlobalLayoutListener,
         ScaleGestureDetector.OnScaleGestureListener,
         View.OnTouchListener {
@@ -71,7 +71,7 @@ public class myImageView extends AppCompatImageView
      * @param defStyleAttr
      */
 
-    public myImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MyImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         //
@@ -113,11 +113,11 @@ public class myImageView extends AppCompatImageView
                 });
     }
 
-    public myImageView(Context context, AttributeSet attrs) {
+    public MyImageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public myImageView(Context context) {
+    public MyImageView(Context context) {
         this(context, null);
     }
 

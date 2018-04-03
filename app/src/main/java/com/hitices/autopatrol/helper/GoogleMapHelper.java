@@ -14,7 +14,7 @@ import java.net.URL;
  * email: bozliu@outlook.com
  */
 
-public class GoogleMap {
+public class GoogleMapHelper {
     public static void useGoogleMapSatelliteData(AMap aMap){
         final String url = "http://mt0.google.cn/vt/lyrs=s@198&hl=zh-CN&gl=cn&src=app&x=%d&y=%d&z=%d&s=";
         TileProvider tileProvider = new UrlTileProvider(256, 256) {
