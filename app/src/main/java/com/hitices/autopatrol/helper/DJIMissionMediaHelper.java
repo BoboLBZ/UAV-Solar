@@ -42,7 +42,7 @@ public class DJIMissionMediaHelper extends DJIMediaHelper {
     public void analyseMission(FlightRecord mission) {
         // get missionDir
         missionDir = new File(AutoPatrolApplication.MISSION_PHOTO_DIR + "/" +
-                mission.getName() + "_" + mission.getStartTime());
+                mission.getMission().getName() + "_" + mission.getStartTime());
         // get missionDate
         missionStartDate = mission.getStartTime();
         missionEndDate = mission.getEndTime();

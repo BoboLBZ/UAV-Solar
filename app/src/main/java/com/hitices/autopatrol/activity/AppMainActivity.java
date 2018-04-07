@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.PermissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
@@ -30,7 +31,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private long mExitTime = 0;
-    private Button appFunc1Button, appFunc2Button;
+    private Button appFunc1Button, appFunc2Button, appFunc3Button, appFunc4Button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,10 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         PermissionHelper.checkAndRequestPermissions(this);
         LitePal.initialize(this);
         LitePal.getDatabase();
+//        PatrolMission mission=new PatrolMission();
+//        mission.setName("test");
+//        mission.setFilePath("path");
+//        mission.save();
         // 初始化界面
         initUI();
     }
@@ -52,10 +57,14 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.app_func1_button:
-                startActivity(new Intent(this, PatrolMainActivity.class));
+                startActivity(new Intent(this, MissionManagemantActivity.class));
                 break;
             case R.id.app_func2_button:
                 startActivity(new Intent(this, MissionSelectActivity.class));
+                break;
+            case R.id.app_func3_button:
+                break;
+            case R.id.app_func4_button:
                 break;
         }
     }
@@ -63,8 +72,12 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     private void initUI() {
         appFunc1Button = findViewById(R.id.app_func1_button);
         appFunc2Button = findViewById(R.id.app_func2_button);
+        appFunc3Button = findViewById(R.id.app_func3_button);
+        appFunc4Button = findViewById(R.id.app_func4_button);
         appFunc1Button.setOnClickListener(this);
         appFunc2Button.setOnClickListener(this);
+        appFunc3Button.setOnClickListener(this);
+        appFunc4Button.setOnClickListener(this);
     }
 
     @Override

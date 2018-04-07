@@ -3,6 +3,7 @@ package com.hitices.autopatrol.entity.dataSupport;
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +18,8 @@ public class PatrolMission extends DataSupport {
     // 任务名称
     private String name;
     // 其他属性：
-
+    private String filePath;
+    private Date lastModifiedTime;
     // 外键：巡检任务所在电站
     private PowerStation powerStation;
 
@@ -38,6 +40,22 @@ public class PatrolMission extends DataSupport {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public Date getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
+    public void setLastModifiedTime(Date lastModifiedTime) {
+        this.lastModifiedTime = lastModifiedTime;
     }
 
     public PowerStation getPowerStation() {

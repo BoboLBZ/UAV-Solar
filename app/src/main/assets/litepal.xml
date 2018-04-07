@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="autopatrolrecords" />
-    <version value="3" />
+    <version value="4" />
     <list>
         <mapping class="com.hitices.autopatrol.entity.dataSupport.FlightRecord" />
+        <mapping class="com.hitices.autopatrol.entity.dataSupport.PatrolMission" />
+        <mapping class="com.hitices.autopatrol.entity.dataSupport.PowerStation" />
     </list>
     <storage value="external"/>
 </litepal>

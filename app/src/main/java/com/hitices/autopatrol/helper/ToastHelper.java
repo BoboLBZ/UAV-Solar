@@ -1,11 +1,7 @@
 package com.hitices.autopatrol.helper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
-
-import com.hitices.autopatrol.AutoPatrolApplication;
-import com.hitices.autopatrol.activity.PatrolMainActivity;
 
 /**
  * Created by dusz7 on 20180323.

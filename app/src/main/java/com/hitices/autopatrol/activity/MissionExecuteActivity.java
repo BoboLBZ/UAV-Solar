@@ -46,7 +46,7 @@ import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.entity.missions.WaypointsMission;
+import com.hitices.autopatrol.entity.missions.MultiPointsModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -85,12 +85,12 @@ import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 /**
- * WaypointMissionExecuteActivity 用于执行waypoint类型任务
+ * MissionExecuteActivity 用于执行waypoint类型任务
  * created by Rhys
  */
-public class WaypointMissionExecuteActivity extends Activity implements View.OnClickListener {
+public class MissionExecuteActivity extends Activity implements View.OnClickListener {
     public static WaypointMission.Builder builder;
-    private WaypointsMission waypointsMission;
+    private MultiPointsModel waypointsMission;
     private FlightController mFlightController;
     private Waypoint currentWaypoint;
     AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -155,11 +155,11 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
         public void onExecutionFinish(@Nullable final DJIError error) {
             setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
-                FlightRecord record = new FlightRecord();
-                record.setName(waypointsMission.missionName);
-                record.setStartTime(startTime);
-                record.setEndTime(new Date());
-                record.save();
+//                FlightRecord record = new FlightRecord();
+////                record.setName(waypointsMission.getMissionName());
+////                record.setStartTime(startTime);
+////                record.setEndTime(new Date());
+////                record.save();
             }
         }
     };
@@ -446,20 +446,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
 
                 }
             });
-            rg_actionAfterFinished.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                    if (i == R.id.finishNone) {
-                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.NO_ACTION);
-                    } else if (i == R.id.finishGoHome) {
-                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.GO_HOME);
-                    } else if (i == R.id.finishAutoLanding) {
-                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.AUTO_LAND);
-                    } else if (i == R.id.finishToFirst) {
-                        waypointsMission.setFinishedAction(WaypointMissionFinishedAction.GO_FIRST_WAYPOINT);
-                    }
-                }
-            });
+
             rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup radioGroup, int i) {
@@ -477,7 +464,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             gv_missions.setAdapter(new WPGridviewAdapter(this));
             gv_missions.setOnItemClickListener(onItemClickListener);
             //update text
-            name.setText("任务名称:" + waypointsMission.missionName);
+            name.setText("任务名称:" + waypointsMission.getMissionName());
             time.setText("速度:" + String.valueOf(waypointsMission.getSpeed()));
             altitude.setText("默认高度:" + String.valueOf(waypointsMission.getAltitude() + " m"));
             //convert between float and int
@@ -485,7 +472,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             sb_speed.setProgress((int) (waypointsMission.getSpeed() / 15 * 100 + 0.5));
             seekBar_text.setText(String.valueOf((int) (waypointsMission.getSpeed() + 0.5)) + "m/s");
 
-            rg_actionAfterFinished.check(getFinishCheckedId(waypointsMission.getFinishedAction()));
             rg_heading.check(getHeadingCheckedId(waypointsMission.getHeadingMode()));
         } else {
             name.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
@@ -715,7 +701,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
      * @param path
      * @return
      */
-    private WaypointsMission readMission(String path) {
+    private MultiPointsModel readMission(String path) {
         try {
             File file = new File(path);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -726,7 +712,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
             if (nodes.item(0) == null) {
                 return null;
             }
-            WaypointsMission newMission = new WaypointsMission(nodes.item(0).getTextContent());
+            MultiPointsModel newMission = new MultiPointsModel(nodes.item(0).getTextContent());
 
             nodes = doc.getElementsByTagName("speed");
             if (nodes.item(0) != null) {
@@ -737,10 +723,7 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                 newMission.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             //finishedAction
-            nodes = doc.getElementsByTagName("finishedAction");
-            if (nodes.item(0) != null) {
-                newMission.setFinishedAction(getFinishedAction(nodes.item(0).getTextContent()));
-            }
+
             //headingMode
             nodes = doc.getElementsByTagName("headingMode");
             if (nodes.item(0) != null) {
@@ -779,7 +762,6 @@ public class WaypointMissionExecuteActivity extends Activity implements View.OnC
                     System.out.println("\nlat and lng" + String.valueOf(ll.latitude) + " : " + String.valueOf(ll.longitude));
                 }
             }
-            newMission.FLAG_ISSAVED = true;
             return newMission;
         } catch (Exception e) {
             e.printStackTrace();

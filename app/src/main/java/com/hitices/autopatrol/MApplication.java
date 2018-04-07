@@ -33,7 +33,6 @@ public class MApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ContextHelper.initial(this);
-
         application.onCreate();
     }
 }

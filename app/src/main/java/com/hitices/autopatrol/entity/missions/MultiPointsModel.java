@@ -38,7 +38,7 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
  * 航点任务类
  */
 
-public class WaypointsMission extends BaseMission {
+public class MultiPointsModel extends BaseModel {
     private static WaypointMission.Builder builder; //任务builder，DJI SDK提供
     private final Map<LatLng, Waypoint> waypoints = new ConcurrentHashMap<>(); //map，坐标与航点的对应，方便查找
     //public String missionName;
@@ -46,18 +46,13 @@ public class WaypointsMission extends BaseMission {
     private List<Waypoint> waypointList = new ArrayList();  // 航点集合
     private float altitude; //通用高度
     private float speed; //飞行速度
-    private WaypointMissionFinishedAction finishedAction; //任务结束动作
-    private WaypointMissionHeadingMode headingMode; //飞行器朝向
     private List<WaypointAction> currentGeneralActions = new ArrayList<>(); //航点通用动作
 
-    public WaypointsMission(String mName) {
+    public MultiPointsModel(String mName) {
         missionName = mName;
-        missionType = MissionType.WaypointMission;
-        FLAG_ISSAVED = false;
+        modelType = ModelType.MultiPoints;
         altitude = 5f;
         speed = 3f;
-        finishedAction = WaypointMissionFinishedAction.AUTO_LAND;
-        headingMode = WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
         //init actions
         currentGeneralActions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
         builder = new WaypointMission.Builder();
@@ -80,7 +75,6 @@ public class WaypointsMission extends BaseMission {
             builder.waypointCount(waypointList.size());
             builder.autoFlightSpeed(speed);
             builder.maxFlightSpeed(speed);
-            builder.finishedAction(finishedAction);
             builder.headingMode(headingMode);
             builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
             return builder;
@@ -96,9 +90,6 @@ public class WaypointsMission extends BaseMission {
         return currentGeneralActions;
     }
 
-    public WaypointMissionFinishedAction getFinishedAction() {
-        return finishedAction;
-    }
 
     public WaypointMissionHeadingMode getHeadingMode() {
         return headingMode;
@@ -116,9 +107,6 @@ public class WaypointsMission extends BaseMission {
         this.speed = speed;
     }
 
-    public void setFinishedAction(WaypointMissionFinishedAction finishedAction) {
-        this.finishedAction = finishedAction;
-    }
 
     public void setCurrentGeneralActions(List<WaypointAction> currentGeneralActions) {
         this.currentGeneralActions = currentGeneralActions;
@@ -178,14 +166,12 @@ public class WaypointsMission extends BaseMission {
         this.altitude = alt;
     }
 
-    @Override
     public boolean saveMission() {
 //        Log.e("rhys","in save class");
         File dir = new File(AutoPatrolApplication.MISSION_DIR);
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 Log.e("rhys", "dirs failed");
-                FLAG_ISSAVED = false;
                 return false;
             }
         }
@@ -194,7 +180,7 @@ public class WaypointsMission extends BaseMission {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             // root elements
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("WaypointsMission");
+            Element rootElement = doc.createElement("MultiPointsModel");
             doc.appendChild(rootElement);
             //general parameter
             Element eName = doc.createElement("missionName");
@@ -208,10 +194,6 @@ public class WaypointsMission extends BaseMission {
             Element eAlt = doc.createElement("altitude");
             eAlt.appendChild(doc.createTextNode(String.valueOf(altitude)));
             rootElement.appendChild(eAlt);
-
-            Element eFinishedAction = doc.createElement("finishedAction");
-            eFinishedAction.appendChild(doc.createTextNode(finishedAction.name()));
-            rootElement.appendChild(eFinishedAction);
 
             Element eHeadingMode = doc.createElement("headingMode");
             eHeadingMode.appendChild(doc.createTextNode(headingMode.name()));
@@ -251,14 +233,11 @@ public class WaypointsMission extends BaseMission {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(AutoPatrolApplication.MISSION_DIR + "/" + missionName + ".xml"));
             transformer.transform(source, result);
-            FLAG_ISSAVED = true;
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
-            FLAG_ISSAVED = false;
             return false;
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
-            FLAG_ISSAVED = false;
             return false;
         }
         return true;

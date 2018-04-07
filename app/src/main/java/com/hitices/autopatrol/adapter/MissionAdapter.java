@@ -75,7 +75,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
         // bind mission to view
         // holder.view.set(mission.name)
-        holder.nameText.setText(mission.getName());
+        holder.nameText.setText(mission.getMission().getName());
         holder.dateText.setText(mission.getStartTime().toString());
         if (mission.isDownload()) {
             holder.downloadText.setText("（ 已下载 ）");

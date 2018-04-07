@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hitices.autopatrol">
 
+    <uses-sdk
+        android:maxSdkVersion="17"
+        android:minSdkVersion="8" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,18 +17,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!--<uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />-->
+    <!-- <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" /> -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <!--<uses-permission android:name="android.permission.WRITE_SETTINGS" />-->
+    <!-- <uses-permission android:name="android.permission.WRITE_SETTINGS" /> -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!--<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />-->
+    <!-- <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" /> -->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-sdk
-        android:maxSdkVersion="17"
-        android:minSdkVersion="8" />
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -98,23 +99,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PatrolMainActivity" />
         <activity
             android:name=".activity.ShowFullImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullscreenTheme" />
         <activity
-            android:name=".activity.WaypointMissionExecuteActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".activity.PolygonMissionEcecuteActivity"
+            android:name=".activity.MissionExecuteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape" />
         <activity android:name=".activity.MissionReportActivity" />
         <activity android:name=".activity.DJIDefaultLayoutActivity" />
         <activity android:name=".activity.DJIMediaManageActivity" />
         <activity android:name=".activity.MissionSelectActivity" />
+        <activity android:name=".activity.MissionManagemantActivity" />
+        <activity android:name=".activity.MissionMainActivity" />
     </application>
 
 </manifest>

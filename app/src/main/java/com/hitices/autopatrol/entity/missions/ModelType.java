@@ -6,10 +6,11 @@ package com.hitices.autopatrol.entity.missions;
  * 接口，任务类型，waypiont 和 polygon
  */
 
-public enum MissionType {
-    WaypointMission(0),
-    PolygonMission(1);
+public enum ModelType {
+    MultiPoints(0),
+    Flatland(1),
+    Slope(2);
 
-    MissionType(int value) {
+    ModelType(int value) {
     }
 }
