@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,6 +99,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private PatrolMission mission;
     private List<BaseModel> modelList;
     private BaseModel currentModel;
+    private boolean saveFlag = true;
     //multiPoint
     private List<Marker> mMarkers = new ArrayList<>();
     //ui
@@ -171,9 +173,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 case MultiPoints:
                     markWaypoint(latLng);
                     getMultipointsModel().addPointToList(latLng);
+                    saveFlag = false;
                     break;
                 case Flatland:
                     drawPolygon(latLng);
+                    saveFlag = false;
                     break;
                 case Slope:
                     break;
@@ -209,16 +213,31 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mapView.onDestroy();
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            //;need to add new save logic
-//            saveMission();
-//            finish();
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, keyEvent);
-//    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //;need to add new save logic
+            if (!saveFlag) {
+                new AlertDialog.Builder(this).setTitle("提醒")
+                        .setMessage("当前任务可能已经被修改，是否保存这些变化？")
+                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                saveMission();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        }).create().show();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, keyEvent);
+    }
 
     @Override
     public void onClick(View view) {
@@ -419,6 +438,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                             //test
                             System.out.println("num of models:" + String.valueOf(modelList.size()));
                             refreshView();
+                            saveFlag = false;
                         }
                     }
                 })
@@ -452,10 +472,10 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView tv_altitude = multipointdSetiing.findViewById(R.id.altitude_text);
         final TextView seekBar_speed = multipointdSetiing.findViewById(R.id.seekBar_text);
         final TextView mName = multipointdSetiing.findViewById(R.id.setting_mName);
-        SeekBar sb_speed = multipointdSetiing.findViewById(R.id.speed);
-        SeekBar sb_altitude = multipointdSetiing.findViewById(R.id.altitude);
+        final SeekBar sb_speed = multipointdSetiing.findViewById(R.id.speed);
+        final SeekBar sb_altitude = multipointdSetiing.findViewById(R.id.altitude);
 
-        RadioGroup rg_heading = multipointdSetiing.findViewById(R.id.heading);
+        final RadioGroup rg_heading = multipointdSetiing.findViewById(R.id.heading);
         //init seekbar
         sb_altitude.setMax((int) (MissionConstraintHelper.getMaxAltitude() + 0.5));
         sb_speed.setMax((int) (MissionConstraintHelper.getMaxSpeed() + 0.5));
@@ -472,7 +492,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 seekBar_speed.setText(String.valueOf(i) + " m/s");
-                getMultipointsModel().setSpeed(i);
+                //getMultipointsModel().setSpeed(i);
             }
 
             @Override
@@ -486,7 +506,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         sb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                getMultipointsModel().setAltitude(i);
+                //getMultipointsModel().setAltitude(i);
                 tv_altitude.setText(String.valueOf(i) + " m");
             }
 
@@ -502,21 +522,33 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if (i == R.id.headingNext) {
-                    getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.AUTO);
-                } else if (i == R.id.headingInitDirec) {
-                    getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION);
-                } else if (i == R.id.headingRC) {
-                    getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER);
-                } else if (i == R.id.headingWP) {
-                    getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
-                }
             }
         });
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("")
                 .setView(multipointdSetiing)
                 .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        //change commit
+                        getMultipointsModel().setSpeed(sb_speed.getProgress());
+                        getMultipointsModel().setSpeed(sb_altitude.getProgress());
+                        int checkedid = rg_heading.getCheckedRadioButtonId();
+                        if (checkedid == R.id.headingNext) {
+                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.AUTO);
+                        } else if (checkedid == R.id.headingInitDirec) {
+                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION);
+                        } else if (checkedid == R.id.headingRC) {
+                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER);
+                        } else if (checkedid == R.id.headingWP) {
+                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
+                        }
+
+                        //change flag
+                        saveFlag = false;
+                    }
+                })
+                .setNegativeButton("取消更改", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -565,7 +597,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 mSpeedText.setText(String.valueOf(i) + "m/s");
-                getFlatlandModel().setSpeed(i);
+                // getFlatlandModel().setSpeed(i);
             }
 
             @Override
@@ -581,7 +613,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mOverate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                mOverateText.setText(String.valueOf(i) + " %");
+                // mOverateText.setText(String.valueOf(i) + " %");
                 getFlatlandModel().setOverlapRate(i);
             }
 
@@ -599,7 +631,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 mWidthText.setText(String.valueOf(i) + " m");
-                getFlatlandModel().setWidth(i);
+                // getFlatlandModel().setWidth(i);
             }
 
             @Override
@@ -616,7 +648,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 mAltitudeText.setText(String.valueOf(i) + " m");
-                getFlatlandModel().setAltitude(i);
+                // getFlatlandModel().setAltitude(i);
             }
 
             @Override
@@ -634,14 +666,19 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         //dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(settingView);
-        builder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-//                String altitudeStr = mAltitude.getText().toString();
-//                getCurrentPolygonMission().setAltitude(Integer.parseInt(nulltoIntgerDefault(altitudeStr)));
+                //change commit
+                getFlatlandModel().setAltitude(mAltitude.getProgress());
+                getFlatlandModel().setOverlapRate(mOverate.getProgress());
+                getFlatlandModel().setSpeed(mSpeed.getProgress());
+                getFlatlandModel().setWidth(mWidth.getProgress());
+                //change flag
+                saveFlag = false;
             }
         });
-        builder.setNeutralButton("cancel", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton("取消修改", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -818,15 +855,22 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         PatrolMission temp = DataSupport.find(PatrolMission.class, id);
         if (temp != null) {
             temp.setLastModifiedTime(date);
+            if (modelList != null) {
+                temp.setChildNums(modelList.size());
+            }
             temp.save();
         } else {
             mission.setLastModifiedTime(date);
+            if (modelList != null) {
+                mission.setChildNums(modelList.size());
+            }
             mission.save();
         }
         //update file
         if (!MissionHelper.saveMissionToFile(mission, modelList)) {
             setResultToToast("save failed");
         } else {
+            saveFlag = true;
             setResultToToast("success");
         }
     }
@@ -952,8 +996,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     getMultipointsModel().updatePoint(latLng, i);
-//                    waypoint.altitude=i;
                     tv_altitude.setText(String.valueOf(i) + " m");
+                    saveFlag = false;
                 }
 
                 @Override
@@ -988,6 +1032,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             mMarkers.remove(mMarker);
             mMarker.hideInfoWindow();
             mMarker.destroy();
+            saveFlag = false;
         }
 
         @Override

@@ -269,6 +269,7 @@ public class MissionHelper {
                     readSlopeModel(item);
                 }
             }
+            patrolMission.setChildNums(modelList.size());
         } catch (Exception e) {
             e.printStackTrace();
             return false;

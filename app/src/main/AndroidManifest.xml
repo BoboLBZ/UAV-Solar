@@ -113,6 +113,7 @@
         <activity android:name=".activity.MissionSelectActivity" />
         <activity android:name=".activity.MissionManagemantActivity" />
         <activity android:name=".activity.MissionMainActivity" />
+        <activity android:name=".activity.MissionExecutePreparedActivity"></activity>
     </application>
 
 </manifest>

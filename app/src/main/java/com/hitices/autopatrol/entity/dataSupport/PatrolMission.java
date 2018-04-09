@@ -21,6 +21,8 @@ public class PatrolMission extends DataSupport {
     private String name;
     // 其他属性：
     private String filePath;
+    @Column(defaultValue = "0")
+    private int childNums;
     private Date lastModifiedTime;
     // 外键：巡检任务所在电站
     private PowerStation powerStation;
@@ -75,5 +77,13 @@ public class PatrolMission extends DataSupport {
 
     public void setRecords(List<FlightRecord> records) {
         this.records = records;
+    }
+
+    public int getChildNums() {
+        return childNums;
+    }
+
+    public void setChildNums(int nums) {
+        this.childNums = nums;
     }
 }
