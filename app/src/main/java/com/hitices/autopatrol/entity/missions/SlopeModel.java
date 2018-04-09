@@ -5,4 +5,8 @@ package com.hitices.autopatrol.entity.missions;
  * email: bozliu@outlook.com
  */
 public class SlopeModel extends BaseModel {
+    public SlopeModel(String name) {
+        this.missionName = name;
+        this.modelType = ModelType.Slope;
+    }
 }

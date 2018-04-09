@@ -1,10 +1,8 @@
 package com.hitices.autopatrol.helper;
 
-import android.support.v4.math.MathUtils;
 import android.util.Log;
-import android.widget.Switch;
 
-import com.hitices.autopatrol.AutoPatrolApplication;
+import com.amap.api.maps2d.model.LatLng;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.entity.missions.BaseModel;
 import com.hitices.autopatrol.entity.missions.FlatlandModel;
@@ -18,6 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,7 +28,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMission;
+import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
  * Created by Rhys on 2018/4/4.
@@ -40,11 +43,11 @@ public class MissionHelper {
     private String filePath;
     private PatrolMission patrolMission;
     private List<BaseModel> modelList;
-    private boolean flag = false;
 
     public MissionHelper(String path, PatrolMission patrolMission) {
         this.filePath = path;
         this.patrolMission = patrolMission;
+        this.modelList = new ArrayList<>();
         init();
     }
 
@@ -54,9 +57,11 @@ public class MissionHelper {
 
     public static boolean saveMissionToFile(PatrolMission patrolMission, List<BaseModel> modelList) {
         try {
-            File file = new File(patrolMission.getFilePath());
-            if (file == null) {
-                return false;
+            File file = new File(MissionConstraintHelper.MISSION_DIR);
+            if (!file.exists()) {
+                if (!file.mkdirs()) {
+                    return false;
+                }
             }
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -65,7 +70,7 @@ public class MissionHelper {
             Element root = doc.createElement("PatrolMission");
             doc.appendChild(root);
             Element name = doc.createElement("missionName");
-            name.setNodeValue(patrolMission.getName());
+            name.appendChild(doc.createTextNode(patrolMission.getName()));
             root.appendChild(name);
             //child mission
             for (int i = 0; i < modelList.size(); i++) {
@@ -84,7 +89,9 @@ public class MissionHelper {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(file);
+            System.out.println("path:" + patrolMission.getFilePath());
+            File file1 = new File(patrolMission.getFilePath());
+            StreamResult result = new StreamResult(file1);
             transformer.transform(source, result);
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
@@ -105,12 +112,66 @@ public class MissionHelper {
         return true;
     }
 
+    public static boolean deleteMission(String path) {
+        File f = new File(path);
+        if (f.exists()) {
+            f.delete();
+            return true;
+        }
+        return false;
+    }
     private static void createElementOfMultiPoint(Document doc, Element root, MultiPointsModel multiPointsModel) {
         Element localRoot = doc.createElement("ChildMission");
         localRoot.setAttribute("type", "MultiPoints");
+        //name
         Element name = doc.createElement("modelName");
-        name.setNodeValue(multiPointsModel.getMissionName());
+        name.appendChild(doc.createTextNode(multiPointsModel.getMissionName()));
         localRoot.appendChild(name);
+        //camera angle
+        Element cameraAngle = doc.createElement("cameraAngle");
+        cameraAngle.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getCameraAngel())));
+        localRoot.appendChild(cameraAngle);
+        //headingMode
+        Element headingMode = doc.createElement("headingMode");
+        headingMode.appendChild(doc.createTextNode(multiPointsModel.getHeadingMode().toString()));
+        localRoot.appendChild(headingMode);
+        //speed
+        Element eSpeed = doc.createElement("speed");
+        eSpeed.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getSpeed())));
+        localRoot.appendChild(eSpeed);
+        //speed
+        Element eAlt = doc.createElement("altitude");
+        eAlt.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getAltitude())));
+        localRoot.appendChild(eAlt);
+        // waypoint elements
+        Element waypoints = doc.createElement("Waypoints");
+        List<Waypoint> waypointList = multiPointsModel.getWaypointList();
+        waypoints.setAttribute("nums", String.valueOf(waypointList.size()));
+        for (int i = 0; i < waypointList.size(); i++) {
+            Waypoint w = waypointList.get(i);
+            Element eWaypoint = doc.createElement("waypoint");
+            eWaypoint.setAttribute("id", String.valueOf(i));
+            //lat & lng & altitude
+            Element lat = doc.createElement("latitude");
+            lat.appendChild(doc.createTextNode(String.valueOf(w.coordinate.getLatitude())));
+            eWaypoint.appendChild(lat);
+            Element lng = doc.createElement("longitude");
+            lng.appendChild(doc.createTextNode(String.valueOf(w.coordinate.getLongitude())));
+            eWaypoint.appendChild(lng);
+            Element alt = doc.createElement("altitude");
+            alt.appendChild(doc.createTextNode(String.valueOf(w.altitude)));
+            eWaypoint.appendChild(alt);
+            //waypoint actions
+            Element eActions = doc.createElement("actions");
+            eActions.setAttribute("nums", String.valueOf(w.waypointActions.size()));
+            for (int j = 0; j < w.waypointActions.size(); j++) {
+                Element a = doc.createElement(w.waypointActions.get(j).actionType.toString());
+                eActions.appendChild(a);
+            }
+            eWaypoint.appendChild(eActions);
+            waypoints.appendChild(eWaypoint);
+        }
+        localRoot.appendChild(waypoints);
 
         root.appendChild(localRoot);
     }
@@ -121,8 +182,52 @@ public class MissionHelper {
         root.appendChild(localRoot);
 
         Element name = doc.createElement("modelName");
-        name.setNodeValue(flatlandModel.getMissionName());
+        name.appendChild(doc.createTextNode(flatlandModel.getMissionName()));
         localRoot.appendChild(name);
+
+        Element eAngle = doc.createElement("cameraAngel");
+        eAngle.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getCameraAngel())));
+        localRoot.appendChild(eAngle);
+
+        Element headingMode = doc.createElement("headingMode");
+        headingMode.appendChild(doc.createTextNode(flatlandModel.getHeadingMode().toString()));
+        localRoot.appendChild(headingMode);
+
+        Element eSpeed = doc.createElement("speed");
+        eSpeed.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getSpeed())));
+        localRoot.appendChild(eSpeed);
+
+        Element eAltitude = doc.createElement("altitude");
+        eAltitude.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getAltitude())));
+        localRoot.appendChild(eAltitude);
+
+        Element eHorRate = doc.createElement("OverlapRate");
+        eHorRate.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getOverlapRate())));
+        localRoot.appendChild(eHorRate);
+
+        Element eVerRate = doc.createElement("width");
+        eVerRate.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getWidth())));
+        localRoot.appendChild(eVerRate);
+
+        // vertex elements
+        Element eVertexs = doc.createElement("Vertexs");
+        List<LatLng> vertexs = flatlandModel.getVertexs();
+        eVertexs.setAttribute("nums", String.valueOf(vertexs.size()));
+        localRoot.appendChild(eVertexs);
+        for (int i = 0; i < vertexs.size(); i++) {
+            LatLng latLng = vertexs.get(i);
+            Element eVertex = doc.createElement("vertex");
+            eVertex.setAttribute("id", String.valueOf(i));
+            //lat & lng
+            Element lat = doc.createElement("latitude");
+            lat.appendChild(doc.createTextNode(String.valueOf(latLng.latitude)));
+            eVertex.appendChild(lat);
+            Element lng = doc.createElement("longitude");
+            lng.appendChild(doc.createTextNode(String.valueOf(latLng.longitude)));
+            eVertex.appendChild(lng);
+
+            eVertexs.appendChild(eVertex);
+        }
     }
 
     private static void createElementOfSlope(Document doc, Element root, SlopeModel slopeModel) {
@@ -130,7 +235,7 @@ public class MissionHelper {
         localRoot.setAttribute("type", "Slope");
         root.appendChild(localRoot);
         Element name = doc.createElement("modelName");
-        name.setNodeValue(slopeModel.getMissionName());
+        name.appendChild(doc.createTextNode(slopeModel.getMissionName()));
         localRoot.appendChild(name);
     }
 
@@ -155,7 +260,7 @@ public class MissionHelper {
             NodeList nodeList = doc.getElementsByTagName("ChildMission");
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node item = nodeList.item(i);
-                String type = item.getAttributes().getNamedItem("type").toString();
+                String type = item.getAttributes().getNamedItem("type").getNodeValue();
                 if (type.equals("MultiPoints")) {
                     readMultiPointsModel(item);
                 } else if (type.equals("Flatland")) {
@@ -184,6 +289,58 @@ public class MissionHelper {
             Element element = (Element) item;
             String name = element.getElementsByTagName("modelName").item(0).getTextContent();
             MultiPointsModel multiPointsModel = new MultiPointsModel(name);
+            //cameraAngle
+            NodeList nodes = element.getElementsByTagName("cameraAngle");
+            if (nodes.item(0) != null) {
+                multiPointsModel.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+            }
+            //headingMode
+            nodes = element.getElementsByTagName("headingMode");
+            if (nodes.item(0) != null) {
+                multiPointsModel.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("speed");
+            if (nodes.item(0) != null) {
+                multiPointsModel.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            //general altitude
+            nodes = element.getElementsByTagName("altitude");
+            if (nodes.item(0) != null) {
+                multiPointsModel.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+
+            //Waypoints
+            nodes = element.getElementsByTagName("Waypoints");
+            Node node = nodes.item(0);
+            //single waypoint
+            NodeList nWaypointList = ((Element) node).getElementsByTagName("waypoint");
+            for (int temp = 0; temp < nWaypointList.getLength(); temp++) {
+                Node nNode = nWaypointList.item(temp);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    LatLng ll = new LatLng(
+                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
+                    Waypoint w = new Waypoint(
+                            ll.latitude, ll.longitude,
+                            Float.parseFloat(eElement.getElementsByTagName("altitude").item(0).getTextContent()));
+                    NodeList eActions = eElement.getElementsByTagName("actions");
+                    for (int j = 0; j < eActions.getLength(); j++) {
+                        Node n = eActions.item(j);
+                        if (n.getNodeType() == Node.ELEMENT_NODE) {
+                            Element e = (Element) n;
+                            NodeList t = e.getChildNodes();
+                            for (int k = 0; k < t.getLength(); k++) {
+                                WaypointActionType type = getAction(t.item(k).getNodeName());
+                                w.addAction(new WaypointAction(type, k));
+                            }
+                        }
+                    }
+                    multiPointsModel.addWaypointToList(w);
+                    multiPointsModel.getWaypoints().put(ll, w);
+                }
+            }
+
             modelList.add(multiPointsModel);
         }
     }
@@ -193,6 +350,45 @@ public class MissionHelper {
             Element element = (Element) item;
             String name = element.getElementsByTagName("modelName").item(0).getTextContent();
             FlatlandModel model = new FlatlandModel(name);
+
+            NodeList nodes = element.getElementsByTagName("cameraAngle");
+            if (nodes.item(0) != null) {
+                model.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+            }
+            //headingMode
+            nodes = element.getElementsByTagName("headingMode");
+            if (nodes.item(0) != null) {
+                model.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("speed");
+            if (nodes.item(0) != null) {
+                model.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("altitude");
+            if (nodes.item(0) != null) {
+                model.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("OverlapRate");
+            if (nodes.item(0) != null) {
+                model.setOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("width");
+            if (nodes.item(0) != null) {
+                model.setWidth(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("Vertexs");
+            Node node = nodes.item(0);
+            NodeList nVertexList = ((Element) node).getElementsByTagName("vertex");
+            for (int temp = 0; temp < nVertexList.getLength(); temp++) {
+                Node nNode = nVertexList.item(temp);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    LatLng ll = new LatLng(
+                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
+                    model.addVertex(ll);
+                }
+            }
             modelList.add(model);
         }
     }
@@ -201,8 +397,40 @@ public class MissionHelper {
         if (item.getNodeType() == Node.ELEMENT_NODE) {
             Element element = (Element) item;
             String name = element.getElementsByTagName("modelName").item(0).getTextContent();
-            SlopeModel model = new SlopeModel();
+            SlopeModel model = new SlopeModel(name);
             modelList.add(model);
         }
+    }
+
+    private WaypointMissionHeadingMode getHeadingMode(String s) {
+        if (s.equals(WaypointMissionHeadingMode.AUTO.toString())) {
+            return WaypointMissionHeadingMode.AUTO;
+        } else if (s.equals(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION.toString())) {
+            return WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+        } else if (s.equals(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER.toString())) {
+            return WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
+        } else {
+            return WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
+        }
+    }
+
+    private WaypointActionType getAction(String s) {
+        if (WaypointActionType.STAY.toString().equals(s))
+            return WaypointActionType.STAY;
+        else if (WaypointActionType.CAMERA_ZOOM.toString().equals(s))
+            return WaypointActionType.CAMERA_ZOOM;
+        else if (WaypointActionType.CAMERA_FOCUS.toString().equals(s))
+            return WaypointActionType.CAMERA_FOCUS;
+        else if (WaypointActionType.GIMBAL_PITCH.toString().equals(s))
+            return WaypointActionType.GIMBAL_PITCH;
+        else if (WaypointActionType.START_RECORD.toString().equals(s))
+            return WaypointActionType.START_RECORD;
+        else if (WaypointActionType.STOP_RECORD.toString().equals(s))
+            return WaypointActionType.STOP_RECORD;
+        else if (WaypointActionType.ROTATE_AIRCRAFT.toString().equals(s))
+            return WaypointActionType.ROTATE_AIRCRAFT;
+        else if (WaypointActionType.START_TAKE_PHOTO.toString().equals(s))
+            return WaypointActionType.START_TAKE_PHOTO;
+        else return null;
     }
 }

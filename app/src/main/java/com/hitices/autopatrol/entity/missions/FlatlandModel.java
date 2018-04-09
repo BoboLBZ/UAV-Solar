@@ -46,13 +46,16 @@ public class FlatlandModel extends BaseModel {
     private int OverlapRate; //重叠率
 
     public FlatlandModel(String name) {
-        //使用默认参数，后续根据类型做不同初始化
+        //base
         missionName = name;
         modelType = ModelType.Flatland;
-        altitude = 5.0f;
-        speed = 3f;
-        OverlapRate = 50;
-        width = altitude;
+        cameraAngel = 0;
+        headingMode = WaypointMissionHeadingMode.AUTO;
+        //flatland
+        altitude = 20.0f;
+        speed = 9f;
+        OverlapRate = 20;
+        width = 15;
     }
 
     public boolean saveMission() {

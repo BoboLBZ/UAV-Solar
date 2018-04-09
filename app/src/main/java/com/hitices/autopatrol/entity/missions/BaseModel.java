@@ -15,7 +15,7 @@ public abstract class BaseModel {
     protected ModelType modelType; //任务类型
     protected WaypointMissionHeadingMode headingMode;
     protected int cameraAngel;
-    protected LatLng startPoint, lastPoint;//
+    protected LatLng startPoint, lastPoint;//use to connect models,does not need to write to file
     protected float safeAltitude;//安全高度，使用该安全高度进入任务
 
     public BaseModel(String name, ModelType type) {

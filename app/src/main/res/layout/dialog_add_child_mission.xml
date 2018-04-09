@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="子任务名称" />
+
+    <EditText
+        android:id="@+id/edit_name_mission_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="子任务类型" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/child_type_mission_main"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/multipoints_mission_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="航点"
+                android:textSize="10pt" />
+
+            <RadioButton
+                android:id="@+id/flatland_mission_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="平面"
+                android:textSize="10pt" />
+
+            <RadioButton
+                android:id="@+id/slope_mission_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="斜面"
+                android:textSize="10pt" />
+
+        </RadioGroup>
+    </LinearLayout>
+</LinearLayout>

@@ -1,5 +1,7 @@
 package com.hitices.autopatrol.entity.dataSupport;
 
+import com.hitices.autopatrol.helper.MissionConstraintHelper;
+
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
@@ -40,6 +42,7 @@ public class PatrolMission extends DataSupport {
 
     public void setName(String name) {
         this.name = name;
+        setFilePath(MissionConstraintHelper.MISSION_DIR + "/" + name + ".xml");
     }
 
     public String getFilePath() {

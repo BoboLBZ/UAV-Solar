@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:text="Waypoint Configuration"></TextView>
+        android:text="航点模型参数设置" />
 
     <View
         android:layout_width="match_parent"
@@ -26,28 +26,7 @@
         android:gravity="center"
         android:text="Mission name:"
         android:textColor="@color/pink"
-        android:textSize="26dp"></TextView>
-
-    <LinearLayout
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/dialog_save"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="保存" />
-
-        <Button
-            android:id="@+id/dialog_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="删除" />
-    </LinearLayout>
+        android:textSize="26dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -61,7 +40,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Altitude:" />
+            android:text="通用高度:" />
 
         <SeekBar
             android:id="@+id/altitude"
@@ -73,8 +52,6 @@
             android:id="@+id/altitude_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-
     </LinearLayout>
 
     <LinearLayout
@@ -89,7 +66,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speed:" />
+            android:text="巡检速度:" />
 
         <SeekBar
             android:id="@+id/speed"
@@ -103,62 +80,6 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Action After Finished:" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <RadioGroup
-            android:id="@+id/actionAfterFinished"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/finishNone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="None"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/finishGoHome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GoHome"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/finishAutoLanding"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AutoLand"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/finishToFirst"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BackTo 1st"
-                android:textSize="5pt" />
-        </RadioGroup>
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -172,9 +93,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Heading:" />
+            android:text="飞机朝向:" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -215,39 +135,6 @@
                 android:text="Use Waypoint"
                 android:textSize="5pt" />
         </RadioGroup>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="General Waypoint Actions:" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp">
-
-        <GridView
-            android:id="@+id/gv_general_actions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:choiceMode="multipleChoiceModal"
-            android:numColumns="3"
-            android:scrollbars="none"
-            android:stretchMode="columnWidth"></GridView>
     </LinearLayout>
 
 </LinearLayout>

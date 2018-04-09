@@ -12,6 +12,7 @@ import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.MissionMainActivity;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ContextHelper;
+import com.hitices.autopatrol.helper.MissionHelper;
 
 import java.util.List;
 
@@ -25,20 +26,18 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
     public MissionManagementAdapter(List<PatrolMission> missions) {
         this.missionList = missions;
     }
-
     @Override
     public MissionManagementAdapter.MyViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_management_item, parent, false);
         final MissionManagementAdapter.MyViewholder holder = new MissionManagementAdapter.MyViewholder(view);
-        holder.missionView.setOnClickListener(new View.OnClickListener() {
+        holder.missionView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onLongClick(View view) {
                 int position = holder.getAdapterPosition();
-                PatrolMission mission = missionList.get(position);
-                // do something
+                //deleteMission(position);
+                return false;
             }
         });
-
         // choose adjust function
         holder.btn_adjust.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +71,12 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
         return missionList.size();
     }
 
+    private void deleteMission(int position) {
+        PatrolMission mission = missionList.get(position);
+        MissionHelper.deleteMission(mission.getFilePath());//delete from SD
+        mission.deleteAsync();
+        missionList.remove(position);
+    }
     static class MyViewholder extends RecyclerView.ViewHolder {
         View missionView;
 

@@ -45,7 +45,6 @@ import com.amap.api.maps2d.model.PolylineOptions;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
-import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.entity.missions.MultiPointsModel;
 
 import org.w3c.dom.Document;
@@ -562,27 +561,27 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 航点任务执行流程第一步
      */
     private void loadMission() {
-        setResultToToast("on load");
-        //以无人机起飞位置作为返航点
-        if (droneLocation != null) {
-            waypointsMission.addWaypointList(droneLocation);
-        }
-        //以当前人的位置作返航点
-        else {
-            if (locationLatlng != null)
-                waypointsMission.addWaypointList(AutoPatrolApplication.AmapConvertToWGS84(locationLatlng));
-        }
-        builder = waypointsMission.getMissionBuilder();
-        if (builder != null) {
-            DJIError error = getWaypointMissionOperator().loadMission(builder.build());
-            if (error == null) {
-                setResultToToast("load success");
-            } else {
-                setResultToToast("load mission failed:" + error.getDescription());
-            }
-        } else {
-            setResultToToast("builder is null");
-        }
+//        setResultToToast("on load");
+//        //以无人机起飞位置作为返航点
+//        if (droneLocation != null) {
+//            waypointsMission.addWaypointList(droneLocation);
+//        }
+//        //以当前人的位置作返航点
+//        else {
+//            if (locationLatlng != null)
+//                waypointsMission.addWaypointList(AutoPatrolApplication.AmapConvertToWGS84(locationLatlng));
+//        }
+//        builder = waypointsMission.getMissionBuilder();
+//        if (builder != null) {
+//            DJIError error = getWaypointMissionOperator().loadMission(builder.build());
+//            if (error == null) {
+//                setResultToToast("load success");
+//            } else {
+//                setResultToToast("load mission failed:" + error.getDescription());
+//            }
+//        } else {
+//            setResultToToast("builder is null");
+//        }
 
     }
 

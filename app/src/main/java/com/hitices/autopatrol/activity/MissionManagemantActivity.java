@@ -20,7 +20,6 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
     private RecyclerView recyclerView;
     private FloatingActionButton btn_create;
     private List<PatrolMission> missionList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
