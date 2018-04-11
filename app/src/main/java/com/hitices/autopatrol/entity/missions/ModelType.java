@@ -13,4 +13,5 @@ public enum ModelType {
 
     ModelType(int value) {
     }
+
 }

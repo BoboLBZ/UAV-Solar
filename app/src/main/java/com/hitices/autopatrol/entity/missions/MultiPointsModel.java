@@ -2,6 +2,7 @@ package com.hitices.autopatrol.entity.missions;
 
 
 import com.amap.api.maps2d.model.LatLng;
+import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
@@ -100,4 +101,33 @@ public class MultiPointsModel extends BaseModel {
         waypoints.remove(latLng);
     }
 
+    @Override
+    public void generateExecutablePoints(LatLng formerPoint) {
+        AntColonyAlgorithm antColonyAlgorithm = new AntColonyAlgorithm(waypointList, formerPoint);
+        List<Integer> sortedIndex = antColonyAlgorithm.getSortedWaypoints();
+        executePoints = new ArrayList<>();
+        //built new waypoint list,include convert
+        for (int i = 0; i < sortedIndex.size(); i++) {
+            executePoints.add(waypointList.get(sortedIndex.get(i)));
+        }
+        safeAltitude = findMaxAltitude();
+        int index = executePoints.size();
+        Waypoint w = executePoints.get(index - 1);
+        endPoint = new LatLng(w.coordinate.getLatitude(), w.coordinate.getLongitude());
+        w = executePoints.get(0);
+        startPoint = new LatLng(w.coordinate.getLatitude(), w.coordinate.getLongitude());
+        //add
+//        executePoints.add(0,new Waypoint(startPoint.latitude,startPoint.longitude,safeAltitude));
+//        executePoints.add(new Waypoint(endPoint.latitude,endPoint.longitude,safeAltitude));
+    }
+
+    private float findMaxAltitude() {
+        float tempMax = altitude;
+        for (int i = 0; i < waypointList.size(); i++) {
+            if (waypointList.get(i).altitude > tempMax) {
+                tempMax = waypointList.get(i).altitude;
+            }
+        }
+        return tempMax;
+    }
 }
