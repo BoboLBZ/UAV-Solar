@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.helper.PermissionHelper;
@@ -42,6 +43,10 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
 
         // 初始化权限
         PermissionHelper.checkAndRequestPermissions(this);
+
+        // 初始化ToastHelper
+        ToastHelper.getInstance();
+
         LitePal.initialize(this);
         LitePal.getDatabase();
 //        PatrolMission mission=new PatrolMission();
