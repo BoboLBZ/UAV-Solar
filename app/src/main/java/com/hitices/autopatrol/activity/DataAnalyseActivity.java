@@ -9,11 +9,13 @@ import android.view.View;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.MissionAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
+import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 
 import org.litepal.crud.DataSupport;
 
+import java.util.Date;
 import java.util.List;
 
 import dji.common.error.DJIError;
@@ -56,22 +58,61 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
+//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+//
+//        }
 //        genMissions();
         flightRecordList = DataSupport.findAll(FlightRecord.class);
 
     }
 
-//    private void genMissions() {
+    private void genMissions() {
+
+        PatrolMission mission1 = new PatrolMission();
+        mission1.setName("mission1");
+        mission1.save();
+        PatrolMission mission2 = new PatrolMission();
+        mission2.setName("mission2");
+        mission2.save();
+        PatrolMission mission3 = new PatrolMission();
+        mission3.setName("mission3");
+        mission3.save();
+
+//        FlightRecord record1 = new FlightRecord();
+//        record1.setMission(mission1);
+//        record1.setStartTime(new Date());
+//        record1.setEndTime(new Date());
+//        record1.setHasInfrared(true);
+//        record1.save();
+
+//        FlightRecord record2 = new FlightRecord();
+//        record2.setMission(mission1);
+//        record2.setStartTime(new Date());
+//        record2.setEndTime(new Date());
+//        record2.setDownload(true);
+//        record2.setHasVisible(true);
+//        record2.setHasInfrared(true);
+//        record2.save();
 //
-//        FlightRecordHelper.SaveRecord("屋顶1", new Date(118, 2, 16, 13, 11),
-//                new Date(), false, true, true, false);
-//        FlightRecordHelper.SaveRecord("乳山巡航1", new Date(118, 2, 15, 14, 21),
-//                new Date(), false, false, true, false);
-//        FlightRecordHelper.SaveRecord("乳山巡航", new Date(118, 2, 14, 11, 11),
-//                new Date(), true, false, true, true);
-//        FlightRecordHelper.SaveRecord("屋顶", new Date(118, 2, 10, 10, 5),
-//                new Date(), false, true, true, false);
-//    }
+//        FlightRecord record3 = new FlightRecord();
+//        record3.setMission(mission2);
+//        record3.setStartTime(new Date());
+//        record3.setEndTime(new Date());
+//        record3.save();
+//
+//        FlightRecord record4 = new FlightRecord();
+//        record4.setMission(mission3);
+//        record4.setStartTime(new Date());
+//        record4.setEndTime(new Date());
+//        record4.setDownload(true);
+//        record4.save();
+//
+//        FlightRecord record5 = new FlightRecord();
+//        record5.setMission(mission2);
+//        record5.setStartTime(new Date());
+//        record5.setEndTime(new Date());
+//        record5.save();
+    }
 
     private void initUI() {
 
