@@ -58,10 +58,10 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
-//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
-//
-//        }
-//        genMissions();
+        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+            genMissions();
+        }
+
         flightRecordList = DataSupport.findAll(FlightRecord.class);
 
     }
@@ -78,12 +78,12 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         mission3.setName("mission3");
         mission3.save();
 
-//        FlightRecord record1 = new FlightRecord();
-//        record1.setMission(mission1);
-//        record1.setStartTime(new Date());
-//        record1.setEndTime(new Date());
-//        record1.setHasInfrared(true);
-//        record1.save();
+        FlightRecord record1 = new FlightRecord();
+        record1.setMission(mission1);
+        record1.setStartTime(new Date());
+        record1.setEndTime(new Date());
+        record1.setHasInfrared(true);
+        record1.save();
 
 //        FlightRecord record2 = new FlightRecord();
 //        record2.setMission(mission1);

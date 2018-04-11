@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
+import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ContextHelper;
 
 import java.util.List;
@@ -86,8 +87,12 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         FlightRecord record = flightRecordList.get(position);
 
         // bind mission to view
-        // holder.view.set(mission.name)
-        holder.missionNameText.setText(record.getMission().getName());
+        try {
+            holder.missionNameText.setText(record.getMission().getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         holder.executeDateText.setText(record.getStartTime().toString());
         if (record.isDownload()) {
             holder.isDownloadText.setText("（ 已下载 ）");
