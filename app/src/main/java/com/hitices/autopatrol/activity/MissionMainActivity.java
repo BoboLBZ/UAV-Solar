@@ -152,7 +152,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(locationLatlng);
                     markerOptions.title("marker");
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_marker)));
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_human_location_marker)));
                     if (location != null)
                         location.destroy();
                     location = aMap.addMarker(markerOptions);
@@ -233,6 +233,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                                 finish();
                             }
                         }).create().show();
+            } else {
+                finish();
             }
             return true;
         }
