@@ -61,6 +61,10 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_app_main);
         // 初始化权限
         PermissionHelper.checkAndRequestPermissions(this);
+
+        // 初始化ToastHelper
+        ToastHelper.getInstance();
+
         LitePal.initialize(this);
         LitePal.getDatabase();
         // 初始化界面
