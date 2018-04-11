@@ -69,7 +69,7 @@ public class DJIMissionMediaHelper extends DJIMediaHelper {
             }
             fileIndex++;
         }
-        ToastHelper.showShortToast("本次任务一共拍摄 " + missionFileList.size() + " 张照片");
+        ToastHelper.getInstance().showShortToast("本次任务一共拍摄 " + missionFileList.size() + " 张照片");
         if (null != completeListener) {
             // 添加handler？？？
             completeListener.onComplete();

@@ -1,5 +1,6 @@
 package com.hitices.autopatrol.adapter;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
+import com.hitices.autopatrol.helper.ContextHelper;
 
 import java.util.List;
 
@@ -18,46 +21,55 @@ import java.util.List;
 
 public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
 
-    private List<FlightRecord> mMissionList;
+    private List<FlightRecord> flightRecordList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View missionView;
+        View flightRecordView;
 
-        ImageView missionImg;
-        TextView nameText;
-        TextView dateText;
-        TextView downloadText;
-        TextView visiblePicView;
-        TextView infraredPicView;
+        ImageView powerStationImg;
+        TextView missionNameText;
+        TextView executeDateText;
+        TextView isDownloadText;
+        TextView hasVisiblePicView;
+        TextView hasInfraredPicView;
 
         public ViewHolder(View view) {
             super(view);
-            missionView = view;
+            flightRecordView = view;
 
-            missionImg = view.findViewById(R.id.image_view_mission);
-            nameText = view.findViewById(R.id.text_view_mission_name);
-            dateText = view.findViewById(R.id.text_view_mission_date);
-            downloadText = view.findViewById(R.id.text_view_mission_is_download);
-            visiblePicView = view.findViewById(R.id.view_hasVisible);
-            infraredPicView = view.findViewById(R.id.view_hasInfrared);
+            powerStationImg = view.findViewById(R.id.img_station_thumb);
+            missionNameText = view.findViewById(R.id.tv_mission_name);
+            executeDateText = view.findViewById(R.id.tv_execute_date);
+            isDownloadText = view.findViewById(R.id.tv_is_download);
+            hasVisiblePicView = view.findViewById(R.id.view_hasVisible);
+            hasInfraredPicView = view.findViewById(R.id.view_hasInfrared);
 
         }
     }
 
     public MissionAdapter(List<FlightRecord> missionList) {
-        this.mMissionList = missionList;
+        this.flightRecordList = missionList;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_item, parent, false);
         final ViewHolder holder = new ViewHolder(view);
-        holder.missionView.setOnClickListener(new View.OnClickListener() {
+        holder.flightRecordView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
-                FlightRecord selectedMission = mMissionList.get(position);
-                // do something
+                FlightRecord selectedRecord = flightRecordList.get(position);
+                if (selectedRecord.isDownload()) {
+                    // 跳转页面
+                    Intent intent = new Intent(parent.getContext(), DataAnalyseMapActivity.class);
+                    intent.putExtra(ContextHelper.getApplicationContext().getResources().getString(R.string.selected_flight_record),
+                            selectedRecord);
+                    parent.getContext().startActivity(intent);
+                } else {
+                    // 判断是否连接无人机，
+                    // 弹出提示或者开始下载
+                }
             }
         });
 
@@ -71,31 +83,31 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FlightRecord mission = mMissionList.get(position);
+        FlightRecord record = flightRecordList.get(position);
 
         // bind mission to view
         // holder.view.set(mission.name)
-        holder.nameText.setText(mission.getMission().getName());
-        holder.dateText.setText(mission.getStartTime().toString());
-        if (mission.isDownload()) {
-            holder.downloadText.setText("（ 已下载 ）");
+        holder.missionNameText.setText(record.getMission().getName());
+        holder.executeDateText.setText(record.getStartTime().toString());
+        if (record.isDownload()) {
+            holder.isDownloadText.setText("（ 已下载 ）");
         } else {
-            holder.downloadText.setText("（ 未下载 ）");
+            holder.isDownloadText.setText("（ 未下载 ）");
         }
-        if (mission.isHasVisible()) {
-            holder.visiblePicView.setVisibility(View.VISIBLE);
+        if (record.isHasVisible()) {
+            holder.hasVisiblePicView.setVisibility(View.VISIBLE);
         } else {
-            holder.visiblePicView.setVisibility(View.GONE);
+            holder.hasVisiblePicView.setVisibility(View.GONE);
         }
-        if (mission.isHasInfrared()) {
-            holder.infraredPicView.setVisibility(View.VISIBLE);
+        if (record.isHasInfrared()) {
+            holder.hasInfraredPicView.setVisibility(View.VISIBLE);
         } else {
-            holder.infraredPicView.setVisibility(View.GONE);
+            holder.hasInfraredPicView.setVisibility(View.GONE);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mMissionList.size();
+        return flightRecordList.size();
     }
 }

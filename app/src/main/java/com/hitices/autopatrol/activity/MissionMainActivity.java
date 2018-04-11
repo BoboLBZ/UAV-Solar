@@ -323,7 +323,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             //read mission
             mission = DataSupport.find(PatrolMission.class, id);
             if (mission == null) {
-                ToastHelper.showShortToast("can not open current mission");
+                ToastHelper.getInstance().showShortToast("can not open current mission");
                 finish();
             }
             if (path == null) {
@@ -389,7 +389,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                             alertDialog.dismiss();
 
                         } else {
-                            ToastHelper.showShortToast("任务名不能为空");
+                            ToastHelper.getInstance().showShortToast("任务名不能为空");
                         }
                     }
                 });

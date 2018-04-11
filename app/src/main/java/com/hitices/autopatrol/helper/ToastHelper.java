@@ -9,27 +9,39 @@ import android.widget.Toast;
 
 public class ToastHelper {
 
-    public static void showShortToast(String msg) {
-        Toast.makeText(ContextHelper.getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    private static ToastHelper mToastHelper;
+    private static Toast mToast;
+
+    private ToastHelper() {
+        if (null == mToast) {
+            mToast = Toast.makeText(ContextHelper.getApplicationContext(), "", Toast.LENGTH_SHORT);
+        }
     }
 
-    public static void showLongToast(String msg) {
-        Toast.makeText(ContextHelper.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+    public static ToastHelper getInstance() {
+        if (null == mToastHelper) {
+            mToastHelper = new ToastHelper();
+        }
+        return mToastHelper;
     }
 
-    public static void showShortToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+    public void showShortToast(String mString) {
+        if (mToast == null) {
+            return;
+        }
+        mToast.setText(mString);
+        mToast.setDuration(Toast.LENGTH_SHORT);
+        // mToast.setGravity(Gravity.CENTER, 0, 0);
+        mToast.show();
     }
 
-    public static void showLongToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    public void showLongToast(String mString) {
+        if (mToast == null) {
+            return;
+        }
+        mToast.setText(mString);
+        mToast.setDuration(Toast.LENGTH_LONG);
+        // mToast.setGravity(Gravity.CENTER, 0, 0);
+        mToast.show();
     }
-
-//    public static void showShortToast(Activity activity, String msg) {
-//        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-//    }
-//
-//    public static void showLongToast(Activity activity, String msg) {
-//        Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
-//    }
 }

@@ -59,7 +59,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, MissionManagemantActivity.class));
                 break;
             case R.id.app_func2_button:
-                startActivity(new Intent(this, MissionSelectActivity.class));
+                startActivity(new Intent(this, DataAnalyseActivity.class));
                 break;
             case R.id.app_func3_button:
                 //test
@@ -85,7 +85,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                ToastHelper.showShortToast(this, "再按一次退出程序");
+                ToastHelper.getInstance().showShortToast("再按一次退出程序");
                 mExitTime = System.currentTimeMillis();
             } else {
                 System.exit(0);

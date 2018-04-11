@@ -9,7 +9,6 @@ import android.view.View;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.MissionAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.helper.DJIMissionMediaHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 
@@ -24,24 +23,21 @@ import dji.sdk.camera.FetchMediaTaskContent;
 import dji.sdk.camera.MediaFile;
 
 // 该Activity用于选择任务，同时下载本次任务采集图片，跳转到结果展示界面
-public class MissionSelectActivity extends AppCompatActivity implements View.OnClickListener {
+public class DataAnalyseActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final String TAG = MissionSelectActivity.class.getName();
+    private final String TAG = DataAnalyseActivity.class.getName();
 
-    private DJIMissionMediaHelper missionMediaHelper;
+    private List<FlightRecord> flightRecordList;
 
-    private List<FlightRecord> missionList;
-    private FlightRecord selectedMission;
-
-    private RecyclerView missionListRecycleView;
+    private RecyclerView flightRecordsRecycleView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mission_select);
+        setContentView(R.layout.activity_data_analyse);
 
-        ToastHelper.showShortToast("select the mission");
-        missionMediaHelper = new DJIMissionMediaHelper(this, this, taskCallback);
+        ToastHelper.getInstance().showShortToast("select the mission");
+//        missionMediaHelper = new DJIMissionMediaHelper(this, this, taskCallback);
         initMissionList();
         initUI();
     }
@@ -61,7 +57,7 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
     private void initMissionList() {
 
 //        genMissions();
-        missionList = DataSupport.findAll(FlightRecord.class);
+        flightRecordList = DataSupport.findAll(FlightRecord.class);
 
     }
 
@@ -79,11 +75,11 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
 
     private void initUI() {
 
-        missionListRecycleView = findViewById(R.id.recycle_view_missions);
+        flightRecordsRecycleView = findViewById(R.id.lv_flight_records);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        missionListRecycleView.setLayoutManager(layoutManager);
-        MissionAdapter adapter = new MissionAdapter(missionList);
-        missionListRecycleView.setAdapter(adapter);
+        flightRecordsRecycleView.setLayoutManager(layoutManager);
+        MissionAdapter adapter = new MissionAdapter(flightRecordList);
+        flightRecordsRecycleView.setAdapter(adapter);
     }
 
     // FetchMediaTask.Callback示例
@@ -129,7 +125,7 @@ public class MissionSelectActivity extends AppCompatActivity implements View.OnC
 //
 //                    @Override
 //                    public void onComplete() {
-//                        Intent intent = new Intent(MissionSelectActivity.this, MissionReportActivity.class);
+//                        Intent intent = new Intent(DataAnalyseActivity.this, MissionReportActivity.class);
 //                        intent.putExtra("path", missionMediaHelper.getMissionDir().getPath());
 //                        startActivity(intent);
 //                    }

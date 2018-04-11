@@ -6,15 +6,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
-import com.hitices.autopatrol.activity.MissionSelectActivity;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import dji.common.camera.SettingsDefinitions;
@@ -151,7 +147,7 @@ public class DJIMediaHelper {
         @Override
         public void onFailure(DJIError error) {
             HideDownloadProgressDialog();
-            ToastHelper.showShortToast("Download File Failed" + error.getDescription());
+            ToastHelper.getInstance().showShortToast("Download File Failed" + error.getDescription());
             currentProgress = -1;
         }
 
@@ -177,7 +173,7 @@ public class DJIMediaHelper {
         @Override
         public void onSuccess(String filePath) {
             HideDownloadProgressDialog();
-            ToastHelper.showShortToast("Download File Success" + ":" + filePath);
+            ToastHelper.getInstance().showShortToast("Download File Success" + ":" + filePath);
             currentProgress = -1;
         }
     };
@@ -210,11 +206,11 @@ public class DJIMediaHelper {
         if (AutoPatrolApplication.getProductInstance() == null) {
             mediaFileList.clear();
 //            mListAdapter.notifyDataSetChanged();
-            ToastHelper.showShortToast("Product disconnected");
+            ToastHelper.getInstance().showShortToast("Product disconnected");
             DJILog.e(TAG, "Product disconnected");
             return;
         } else {
-            ToastHelper.showShortToast("Product connected");
+            ToastHelper.getInstance().showShortToast("Product connected");
             if (null != AutoPatrolApplication.getCameraInstance() &&
                     AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
                 mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
@@ -225,12 +221,12 @@ public class DJIMediaHelper {
                         @Override
                         public void onResult(DJIError error) {
                             if (error == null) {
-                                ToastHelper.showShortToast("Set cameraMode success");
+                                ToastHelper.getInstance().showShortToast("Set cameraMode success");
                                 DJILog.e(TAG, "Set cameraMode success");
                                 showProgressDialog();
                                 getFileList();
                             } else {
-                                ToastHelper.showShortToast("Set cameraMode failed");
+                                ToastHelper.getInstance().showShortToast("Set cameraMode failed");
                             }
                         }
                     });
@@ -244,7 +240,7 @@ public class DJIMediaHelper {
 
             } else if (null != AutoPatrolApplication.getCameraInstance()
                     && !AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
-                ToastHelper.showShortToast("Media Download Mode not Supported");
+                ToastHelper.getInstance().showShortToast("Media Download Mode not Supported");
             }
         }
         return;
@@ -293,7 +289,7 @@ public class DJIMediaHelper {
                             });
                         } else {
                             hideProgressDialog();
-                            ToastHelper.showShortToast("Get Media File List Failed:" + error.getDescription());
+                            ToastHelper.getInstance().showShortToast("Get Media File List Failed:" + error.getDescription());
                         }
                     }
                 });
@@ -303,7 +299,7 @@ public class DJIMediaHelper {
 
     private void getThumbnails() {
         if (mediaFileList.size() <= 0) {
-            ToastHelper.showShortToast("No File info for downloading thumbnails");
+            ToastHelper.getInstance().showShortToast("No File info for downloading thumbnails");
             return;
         }
         for (int i = 0; i < mediaFileList.size(); i++) {
@@ -313,7 +309,7 @@ public class DJIMediaHelper {
 
     private void getPreviews() {
         if (mediaFileList.size() <= 0) {
-            ToastHelper.showShortToast("No File info for downloading previews");
+            ToastHelper.getInstance().showShortToast("No File info for downloading previews");
             return;
         }
         for (int i = 0; i < mediaFileList.size(); i++) {

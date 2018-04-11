@@ -137,7 +137,7 @@ public class MissionReportActivity extends AppCompatActivity {
         //获得intent传递的path信息
         String path = getIntent().getStringExtra("path");
         if (path.isEmpty()) {
-            ToastHelper.showLongToast("获得照片存储路径失败");
+            ToastHelper.getInstance().showLongToast("获得照片存储路径失败");
         } else {
             File f = new File(path);
             if (!f.exists()) {//判断路径是否存在

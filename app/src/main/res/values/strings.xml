@@ -30,4 +30,6 @@
 
     <string name="mission_select_title">选择任务</string>
 
+    <string name="selected_flight_record">SELECTED_RECORD</string>
+
 </resources>

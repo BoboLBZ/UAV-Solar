@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.hitices.autopatrol.activity.MissionSelectActivity">
+    tools:context="com.hitices.autopatrol.activity.DataAnalyseActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:textSize="@dimen/text_size_title" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycle_view_missions"
+        android:id="@+id/lv_flight_records"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="20dp" />

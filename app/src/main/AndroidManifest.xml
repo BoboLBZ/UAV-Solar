@@ -110,10 +110,13 @@
         <activity android:name=".activity.MissionReportActivity" />
         <activity android:name=".activity.DJIDefaultLayoutActivity" />
         <activity android:name=".activity.DJIMediaManageActivity" />
-        <activity android:name=".activity.MissionSelectActivity" />
+        <activity android:name=".activity.DataAnalyseActivity" />
         <activity android:name=".activity.MissionManagemantActivity" />
         <activity android:name=".activity.MissionMainActivity" />
-        <activity android:name=".activity.MissionExecutePreparedActivity"></activity>
+        <activity android:name=".activity.MissionExecutePreparedActivity" />
+        <activity android:name=".activity.DataAnalyseMapActivity" />
+        <activity android:name=".activity.DataDownloadActivity" />
+        <activity android:name=".activity.DataAnalyseReportActivity"></activity>
     </application>
 
 </manifest>

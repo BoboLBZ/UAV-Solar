@@ -3,6 +3,7 @@ package com.hitices.autopatrol.entity.dataSupport;
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
  * email: bozliu@outlook.com
  */
 
-public class FlightRecord extends DataSupport {
+public class FlightRecord extends DataSupport implements Serializable{
     @Column(unique = true, defaultValue = "unknown")
     private int id;
 
