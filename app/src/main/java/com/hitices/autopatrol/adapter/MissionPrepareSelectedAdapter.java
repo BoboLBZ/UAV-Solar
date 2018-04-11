@@ -45,8 +45,8 @@ public class MissionPrepareSelectedAdapter extends RecyclerView.Adapter<MissionP
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 Intent intent = new Intent(ContextHelper.getApplicationContext(), MissionExecuteActivity.class);
-                                intent.putExtra("NAME", mission.getName());
-                                intent.putExtra("PTAH", mission.getFilePath());
+                                //intent.putExtra("NAME", mission.getName());
+                                intent.putExtra("PATH", mission.getFilePath());
                                 intent.putExtra("ID", mission.getId());
                                 ContextHelper.getApplicationContext().startActivity(intent);
                             }

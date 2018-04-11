@@ -2,6 +2,9 @@ package com.hitices.autopatrol.entity.missions;
 
 import com.amap.api.maps2d.model.LatLng;
 
+import java.util.List;
+
+import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
@@ -15,8 +18,10 @@ public abstract class BaseModel {
     protected ModelType modelType; //任务类型
     protected WaypointMissionHeadingMode headingMode;
     protected int cameraAngel;
-    protected LatLng startPoint, lastPoint;//use to connect models,does not need to write to file
+    protected LatLng startPoint, endPoint;//use to connect models,does not need to write to file
     protected float safeAltitude;//安全高度，使用该安全高度进入任务
+
+    protected List<Waypoint> executePoints;
 
     public BaseModel(String name, ModelType type) {
         //初始化，需指明 名称和类型
@@ -67,12 +72,12 @@ public abstract class BaseModel {
         this.cameraAngel = cameraAngel;
     }
 
-    public LatLng getLastPoint() {
-        return lastPoint;
+    public LatLng getEndPoint() {
+        return endPoint;
     }
 
-    public void setLastPoint(LatLng lastPoint) {
-        this.lastPoint = lastPoint;
+    public void setEndPoint(LatLng endPoint) {
+        this.endPoint = endPoint;
     }
 
     public LatLng getStartPoint() {
@@ -83,4 +88,9 @@ public abstract class BaseModel {
         this.startPoint = startPoint;
     }
 
+    public List<Waypoint> getExecutePoints() {
+        return executePoints;
+    }
+
+    public abstract void generateExecutablePoints(LatLng formerPoint);
 }
