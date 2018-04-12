@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ContextHelper;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
  * Created by dusz7 on 20180330.
  */
 
-public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
+public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightRecord2AnalyseAdapter.ViewHolder> {
 
     private List<FlightRecord> flightRecordList;
 
@@ -48,13 +47,13 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         }
     }
 
-    public MissionAdapter(List<FlightRecord> missionList) {
+    public FlightRecord2AnalyseAdapter(List<FlightRecord> missionList) {
         this.flightRecordList = missionList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_flight_record, parent, false);
         final ViewHolder holder = new ViewHolder(view);
         holder.flightRecordView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +87,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
         // bind mission to view
         try {
-            holder.missionNameText.setText(record.getMission().getName());
+            holder.missionNameText.setText(record.getExecuteMission().getName());
         } catch (Exception e) {
             e.printStackTrace();
         }

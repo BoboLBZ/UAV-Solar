@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.adapter.MissionAdapter;
+import com.hitices.autopatrol.adapter.FlightRecord2AnalyseAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ToastHelper;
@@ -119,7 +119,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         flightRecordsRecycleView = findViewById(R.id.lv_flight_records);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         flightRecordsRecycleView.setLayoutManager(layoutManager);
-        MissionAdapter adapter = new MissionAdapter(flightRecordList);
+        FlightRecord2AnalyseAdapter adapter = new FlightRecord2AnalyseAdapter(flightRecordList);
         flightRecordsRecycleView.setAdapter(adapter);
     }
 
