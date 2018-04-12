@@ -107,7 +107,6 @@
             android:name=".activity.MissionExecuteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape" />
-        <activity android:name=".activity.MissionReportActivity" />
         <activity android:name=".activity.DJIDefaultLayoutActivity" />
         <activity android:name=".activity.DJIMediaManageActivity" />
         <activity android:name=".activity.DataAnalyseActivity" />

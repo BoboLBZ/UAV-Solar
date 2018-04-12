@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.adapter.MissionAdapter;
+import com.hitices.autopatrol.adapter.FlightRecord2AnalyseAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ToastHelper;
@@ -58,10 +58,10 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
-//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
-//
-//        }
-//        genMissions();
+        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+            genMissions();
+        }
+
         flightRecordList = DataSupport.findAll(FlightRecord.class);
 
     }
@@ -78,40 +78,40 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         mission3.setName("mission3");
         mission3.save();
 
-//        FlightRecord record1 = new FlightRecord();
-//        record1.setMission(mission1);
-//        record1.setStartTime(new Date());
-//        record1.setEndTime(new Date());
-//        record1.setHasInfrared(true);
-//        record1.save();
+        FlightRecord record1 = new FlightRecord();
+        record1.setMission(mission1);
+        record1.setStartTime(new Date());
+        record1.setEndTime(new Date());
+        record1.setHasInfrared(true);
+        record1.save();
 
-//        FlightRecord record2 = new FlightRecord();
-//        record2.setMission(mission1);
-//        record2.setStartTime(new Date());
-//        record2.setEndTime(new Date());
-//        record2.setDownload(true);
-//        record2.setHasVisible(true);
-//        record2.setHasInfrared(true);
-//        record2.save();
-//
-//        FlightRecord record3 = new FlightRecord();
-//        record3.setMission(mission2);
-//        record3.setStartTime(new Date());
-//        record3.setEndTime(new Date());
-//        record3.save();
-//
-//        FlightRecord record4 = new FlightRecord();
-//        record4.setMission(mission3);
-//        record4.setStartTime(new Date());
-//        record4.setEndTime(new Date());
-//        record4.setDownload(true);
-//        record4.save();
-//
-//        FlightRecord record5 = new FlightRecord();
-//        record5.setMission(mission2);
-//        record5.setStartTime(new Date());
-//        record5.setEndTime(new Date());
-//        record5.save();
+        FlightRecord record2 = new FlightRecord();
+        record2.setMission(mission1);
+        record2.setStartTime(new Date());
+        record2.setEndTime(new Date());
+        record2.setDownload(true);
+        record2.setHasVisible(true);
+        record2.setHasInfrared(true);
+        record2.save();
+
+        FlightRecord record3 = new FlightRecord();
+        record3.setMission(mission2);
+        record3.setStartTime(new Date());
+        record3.setEndTime(new Date());
+        record3.save();
+
+        FlightRecord record4 = new FlightRecord();
+        record4.setMission(mission3);
+        record4.setStartTime(new Date());
+        record4.setEndTime(new Date());
+        record4.setDownload(true);
+        record4.save();
+
+        FlightRecord record5 = new FlightRecord();
+        record5.setMission(mission2);
+        record5.setStartTime(new Date());
+        record5.setEndTime(new Date());
+        record5.save();
     }
 
     private void initUI() {
@@ -119,7 +119,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         flightRecordsRecycleView = findViewById(R.id.lv_flight_records);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         flightRecordsRecycleView.setLayoutManager(layoutManager);
-        MissionAdapter adapter = new MissionAdapter(flightRecordList);
+        FlightRecord2AnalyseAdapter adapter = new FlightRecord2AnalyseAdapter(flightRecordList);
         flightRecordsRecycleView.setAdapter(adapter);
     }
 
