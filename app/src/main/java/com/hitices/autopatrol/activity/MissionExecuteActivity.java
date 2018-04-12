@@ -470,7 +470,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             if (droneLocation == null) {
                 formerPoint = humanLocation;
             } else {
-                formerPoint = droneLocation;
+                formerPoint = GoogleMapHelper.WGS84ConvertToAmap(droneLocation);
             }
             for (int i = 0; i < executeModelList.size(); i++) {
                 BaseModel model = executeModelList.get(i);
