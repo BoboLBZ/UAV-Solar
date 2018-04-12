@@ -20,8 +20,10 @@
     <color name="pink">#e91e63</color>
     <color name="pink_pressed">#ec407a</color>
     <color name="fillColor">#4Dec407a</color>
+    <color name="fillColorSlope">#4d85e459</color>
     <color name="blue_semi_transparent">#805677fc</color>
     <color name="blue_semi_transparent_pressed">#80738ffe</color>
     <color name="blue_gv_background">#3498DB</color>
     <color name="my_item_background">#3498DB</color>
+    <color name="baseline">#E51815</color>
 </resources>
