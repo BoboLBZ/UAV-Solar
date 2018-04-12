@@ -12,6 +12,7 @@ import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.ContextHelper;
+import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.util.List;
 
@@ -97,6 +98,7 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
             holder.isDownloadText.setText("（ 已下载 ）");
         } else {
             holder.isDownloadText.setText("（ 未下载 ）");
+            // 显示暗
         }
         if (record.isHasVisible()) {
             holder.hasVisiblePicView.setVisibility(View.VISIBLE);

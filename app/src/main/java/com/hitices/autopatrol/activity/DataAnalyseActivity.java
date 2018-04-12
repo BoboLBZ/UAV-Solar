@@ -85,33 +85,33 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record1.setHasInfrared(true);
         record1.save();
 
-//        FlightRecord record2 = new FlightRecord();
-//        record2.setMission(mission1);
-//        record2.setStartTime(new Date());
-//        record2.setEndTime(new Date());
-//        record2.setDownload(true);
-//        record2.setHasVisible(true);
-//        record2.setHasInfrared(true);
-//        record2.save();
-//
-//        FlightRecord record3 = new FlightRecord();
-//        record3.setMission(mission2);
-//        record3.setStartTime(new Date());
-//        record3.setEndTime(new Date());
-//        record3.save();
-//
-//        FlightRecord record4 = new FlightRecord();
-//        record4.setMission(mission3);
-//        record4.setStartTime(new Date());
-//        record4.setEndTime(new Date());
-//        record4.setDownload(true);
-//        record4.save();
-//
-//        FlightRecord record5 = new FlightRecord();
-//        record5.setMission(mission2);
-//        record5.setStartTime(new Date());
-//        record5.setEndTime(new Date());
-//        record5.save();
+        FlightRecord record2 = new FlightRecord();
+        record2.setMission(mission1);
+        record2.setStartTime(new Date());
+        record2.setEndTime(new Date());
+        record2.setDownload(true);
+        record2.setHasVisible(true);
+        record2.setHasInfrared(true);
+        record2.save();
+
+        FlightRecord record3 = new FlightRecord();
+        record3.setMission(mission2);
+        record3.setStartTime(new Date());
+        record3.setEndTime(new Date());
+        record3.save();
+
+        FlightRecord record4 = new FlightRecord();
+        record4.setMission(mission3);
+        record4.setStartTime(new Date());
+        record4.setEndTime(new Date());
+        record4.setDownload(true);
+        record4.save();
+
+        FlightRecord record5 = new FlightRecord();
+        record5.setMission(mission2);
+        record5.setStartTime(new Date());
+        record5.setEndTime(new Date());
+        record5.save();
     }
 
     private void initUI() {

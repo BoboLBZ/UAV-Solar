@@ -33,7 +33,7 @@ public class DJIMediaHelper {
     private final String TAG = DJIMediaHelper.class.getName();
 
     // 应用照片存储路径
-    private File photoDir = new File(AutoPatrolApplication.PHOTO_DIR);
+    private File photoDir = new File(MissionConstraintHelper.PHOTO_DIR);
 
     private FetchMediaTaskScheduler scheduler;
     FetchMediaTask.Callback fetchMediaTaskCallback;
