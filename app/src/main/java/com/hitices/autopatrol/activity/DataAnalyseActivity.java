@@ -83,6 +83,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record1.setStartTime(new Date());
         record1.setEndTime(new Date());
         record1.setHasInfrared(true);
+        record1.setDownload(true);
         record1.save();
 
         FlightRecord record2 = new FlightRecord();
@@ -98,6 +99,8 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record3.setMission(mission2);
         record3.setStartTime(new Date());
         record3.setEndTime(new Date());
+        record3.setDownload(true);
+        record3.setHasVisible(true);
         record3.save();
 
         FlightRecord record4 = new FlightRecord();
