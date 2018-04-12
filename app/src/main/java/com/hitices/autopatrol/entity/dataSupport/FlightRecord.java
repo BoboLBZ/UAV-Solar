@@ -11,7 +11,7 @@ import java.util.Date;
  * email: bozliu@outlook.com
  */
 
-public class FlightRecord extends DataSupport implements Serializable{
+public class FlightRecord extends DataSupport implements Serializable {
     @Column(unique = true, defaultValue = "unknown")
     private int id;
 
@@ -81,5 +81,9 @@ public class FlightRecord extends DataSupport implements Serializable{
 
     public void setMission(PatrolMission mission) {
         this.mission = mission;
+    }
+
+    public PatrolMission getExecuteMission() {
+        return DataSupport.find(FlightRecord.class, id, true).getMission();
     }
 }

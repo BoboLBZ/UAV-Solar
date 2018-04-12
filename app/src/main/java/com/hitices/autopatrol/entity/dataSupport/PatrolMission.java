@@ -18,12 +18,14 @@ public class PatrolMission extends DataSupport {
     private int id;
 
     // 任务名称
+    @Column(defaultValue = "unknown")
     private String name;
     // 其他属性：
     private String filePath;
     @Column(defaultValue = "0")
     private int childNums;
     private Date lastModifiedTime;
+
     // 外键：巡检任务所在电站
     private PowerStation powerStation;
 
