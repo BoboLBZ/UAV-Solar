@@ -94,7 +94,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, MissionExecutePreparedActivity.class));
                 break;
             case R.id.app_func4_button:
-                startActivity(new Intent(this, MissionReportActivity.class));
+                //startActivity(new Intent(this, MissionReportActivity.class));
                 break;
         }
     }
