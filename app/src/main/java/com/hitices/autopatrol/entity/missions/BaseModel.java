@@ -32,65 +32,35 @@ public abstract class BaseModel {
     public BaseModel() {
     }
 
-    public String getMissionName() {
-        return missionName;
-    }
+    public abstract   String getMissionName();
 
-    public void setMissionName(String missionName) {
-        this.missionName = missionName;
-    }
+    public abstract void setMissionName(String missionName);
 
-    public ModelType getModelType() {
-        return modelType;
-    }
+    public abstract ModelType getModelType();
 
-    public void setModelType(ModelType modelType) {
-        this.modelType = modelType;
-    }
+    public abstract void setModelType(ModelType modelType);
 
-    public WaypointMissionHeadingMode getHeadingMode() {
-        return headingMode;
-    }
+    public abstract WaypointMissionHeadingMode getHeadingMode();
 
-    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
-        this.headingMode = headingMode;
-    }
+    public abstract void setHeadingMode(WaypointMissionHeadingMode headingMode);
 
-    public float getSafeAltitude() {
-        return safeAltitude;
-    }
+    public abstract float getSafeAltitude();
 
-    public void setSafeAltitude(float safeAltitude) {
-        this.safeAltitude = safeAltitude;
-    }
+    public abstract void setSafeAltitude(float safeAltitude);
 
-    public int getCameraAngel() {
-        return cameraAngel;
-    }
+    public abstract int getCameraAngel();
 
-    public void setCameraAngel(int cameraAngel) {
-        this.cameraAngel = cameraAngel;
-    }
+    public abstract void setCameraAngel(int cameraAngel);
 
-    public LatLng getEndPoint() {
-        return endPoint;
-    }
+    public abstract LatLng getEndPoint();
 
-    public void setEndPoint(LatLng endPoint) {
-        this.endPoint = endPoint;
-    }
+    public abstract void setEndPoint(LatLng endPoint);
 
-    public LatLng getStartPoint() {
-        return startPoint;
-    }
+    public abstract LatLng getStartPoint();
 
-    public void setStartPoint(LatLng startPoint) {
-        this.startPoint = startPoint;
-    }
+    public abstract void setStartPoint(LatLng startPoint);
 
-    public List<Waypoint> getExecutePoints() {
-        return executePoints;
-    }
+    public abstract List<Waypoint> getExecutePoints();
 
     public abstract void generateExecutablePoints(LatLng formerPoint);
 }

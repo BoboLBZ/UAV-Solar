@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
@@ -69,6 +70,81 @@ public class MultiPointsModel extends BaseModel {
         return waypoints;
     }
 
+    @Override
+    public String getMissionName() {
+        return missionName;
+    }
+
+    @Override
+    public void setMissionName(String missionName) {
+        this.missionName = missionName;
+    }
+
+    @Override
+    public ModelType getModelType() {
+        return modelType;
+    }
+
+    @Override
+    public void setModelType(ModelType modelType) {
+        this.modelType = modelType;
+    }
+
+    @Override
+    public WaypointMissionHeadingMode getHeadingMode() {
+        return headingMode;
+    }
+
+    @Override
+    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
+        this.headingMode = headingMode;
+    }
+
+    @Override
+    public float getSafeAltitude() {
+        return safeAltitude;
+    }
+
+    @Override
+    public void setSafeAltitude(float safeAltitude) {
+        this.safeAltitude = safeAltitude;
+    }
+
+    @Override
+    public int getCameraAngel() {
+        return cameraAngel;
+    }
+
+    @Override
+    public void setCameraAngel(int cameraAngel) {
+        this.cameraAngel = cameraAngel;
+    }
+
+    @Override
+    public LatLng getEndPoint() {
+        return endPoint;
+    }
+
+    @Override
+    public void setEndPoint(LatLng endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    @Override
+    public LatLng getStartPoint() {
+        return startPoint;
+    }
+
+    @Override
+    public void setStartPoint(LatLng startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    @Override
+    public List<Waypoint> getExecutePoints() {
+        return executePoints;
+    }
+
     public int findWaypoint(LatLng latLng) {
         //返回航点索引
         Waypoint waypoint = waypoints.get(latLng);
@@ -90,6 +166,7 @@ public class MultiPointsModel extends BaseModel {
         Waypoint w = waypointList.get(i);
         w.altitude = altitude;
     }
+
     public void addWaypointToList(Waypoint waypoint) {
         this.waypointList.add(waypoint);
     }
@@ -110,15 +187,19 @@ public class MultiPointsModel extends BaseModel {
         for (int i = 0; i < sortedIndex.size(); i++) {
             executePoints.add(waypointList.get(sortedIndex.get(i)));
         }
-        safeAltitude = findMaxAltitude();
+        safeAltitude = findMaxAltitude() + 1;
         int index = executePoints.size();
         Waypoint w = executePoints.get(index - 1);
         endPoint = new LatLng(w.coordinate.getLatitude(), w.coordinate.getLongitude());
         w = executePoints.get(0);
         startPoint = new LatLng(w.coordinate.getLatitude(), w.coordinate.getLongitude());
-        //add
-//        executePoints.add(0,new Waypoint(startPoint.latitude,startPoint.longitude,safeAltitude));
-//        executePoints.add(new Waypoint(endPoint.latitude,endPoint.longitude,safeAltitude));
+        //以安全高度进入子任务区域
+        Waypoint waypoint = new Waypoint(startPoint.latitude, startPoint.longitude, safeAltitude);
+        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel);
+        waypoint.addAction(action);
+        executePoints.add(0, waypoint);
+        //以安全高度离开子任务区域
+        executePoints.add(new Waypoint(endPoint.latitude, endPoint.longitude, safeAltitude));
     }
 
     private float findMaxAltitude() {

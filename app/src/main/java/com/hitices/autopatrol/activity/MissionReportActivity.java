@@ -49,7 +49,7 @@ public class MissionReportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_mission_report);
         initUI();
         initMapView(savedInstanceState);
-        markImages();
+        //markImages();
     }
 
     @Override
@@ -82,10 +82,10 @@ public class MissionReportActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
         if (aMap == null) {
             aMap = mapView.getMap();
-            GoogleMapHelper.useGoogleMapSatelliteData(aMap);
-            aMap.setOnMapClickListener(onMapClickListener);
-            aMap.setOnMarkerClickListener(markerClickListener);
         }
+        GoogleMapHelper.useGoogleMapSatelliteData(aMap);
+        aMap.setOnMapClickListener(onMapClickListener);
+        aMap.setOnMarkerClickListener(markerClickListener);
         UiSettings settings = aMap.getUiSettings();
         settings.setZoomControlsEnabled(false);
         settings.setScaleControlsEnabled(true);

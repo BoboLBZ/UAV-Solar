@@ -21,7 +21,9 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 public class FlatlandModel extends BaseModel {
     private List<LatLng> vertexs = new ArrayList<>();  //polygon 定点集合
-    private float altitude, speed, width;   //飞行高度和速度,扫描宽度
+    private float altitude;   //飞行高度，高度为面相对于飞行器起点的高度
+    private float speed;    //飞行速度
+    private float width;   //扫描宽度
     private int OverlapRate; //重叠率
 
     public FlatlandModel(String name) {
@@ -80,6 +82,81 @@ public class FlatlandModel extends BaseModel {
         vertexs = vs;
     }
 
+    @Override
+    public String getMissionName() {
+        return missionName;
+    }
+
+    @Override
+    public void setMissionName(String missionName) {
+        this.missionName = missionName;
+    }
+
+    @Override
+    public ModelType getModelType() {
+        return modelType;
+    }
+
+    @Override
+    public void setModelType(ModelType modelType) {
+        this.modelType = modelType;
+    }
+
+    @Override
+    public WaypointMissionHeadingMode getHeadingMode() {
+        return headingMode;
+    }
+
+    @Override
+    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
+        this.headingMode = headingMode;
+    }
+
+    @Override
+    public float getSafeAltitude() {
+        return safeAltitude;
+    }
+
+    @Override
+    public void setSafeAltitude(float safeAltitude) {
+        this.safeAltitude = safeAltitude;
+    }
+
+    @Override
+    public int getCameraAngel() {
+        return cameraAngel;
+    }
+
+    @Override
+    public void setCameraAngel(int cameraAngel) {
+        this.cameraAngel = cameraAngel;
+    }
+
+    @Override
+    public LatLng getEndPoint() {
+        return endPoint;
+    }
+
+    @Override
+    public void setEndPoint(LatLng endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    @Override
+    public LatLng getStartPoint() {
+        return startPoint;
+    }
+
+    @Override
+    public void setStartPoint(LatLng startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    @Override
+    public List<Waypoint> getExecutePoints() {
+        return executePoints;
+    }
+
     public void addVertex(LatLng latLng) {
         //添加顶点
         vertexs.add(latLng);
@@ -102,6 +179,8 @@ public class FlatlandModel extends BaseModel {
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             executePoints.add(waypoint);
         }
-
+        Waypoint waypoint = executePoints.get(0);
+        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel);
+        waypoint.waypointActions.add(0, action);
     }
 }

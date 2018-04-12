@@ -94,6 +94,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, MissionExecutePreparedActivity.class));
                 break;
             case R.id.app_func4_button:
+                startActivity(new Intent(this, MissionReportActivity.class));
                 break;
         }
     }
@@ -108,8 +109,8 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         appFunc3Button.setOnClickListener(this);
         appFunc4Button.setOnClickListener(this);
 
-        appFunc3Button.setClickable(false);
-        appFunc4Button.setClickable(false);
+        appFunc3Button.setClickable(true);
+        appFunc4Button.setClickable(true);
     }
 
     @Override
@@ -135,13 +136,13 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 appFunc3Button.setClickable(true);
                 appFunc4Button.setClickable(true);
             } else {
-                appFunc3Button.setClickable(false);
-                appFunc4Button.setClickable(false);
+                appFunc3Button.setClickable(true);
+                appFunc4Button.setClickable(true);
             }
 
         } else {
-            appFunc3Button.setClickable(false);
-            appFunc4Button.setClickable(false);
+            appFunc3Button.setClickable(true);
+            appFunc4Button.setClickable(true);
         }
     }
 

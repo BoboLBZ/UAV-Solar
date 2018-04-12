@@ -298,7 +298,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
         setResultToToast("num of waypoint is " + String.valueOf(waypoints.size()));
     }
-
+    private void markHomePoint(LatLng latLng){
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_home_point_marker)));
+        aMap.addMarker(markerOptions);
+       // cameraUpdate(ll);
+    }
     private void markRangeOfExecuteModel() {
         for (int i = 0; i < executeModelList.size(); i++) {
             switch (executeModelList.get(i).getModelType()) {
@@ -526,11 +533,13 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         //以无人机起飞位置作为返航点
         if (droneLocation != null) {
             list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
+            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
         }
         //以当前人的位置作返航点
         else {
             if (humanLocation != null) {
                 list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
+
             }
         }
         builder = new WaypointMission.Builder();

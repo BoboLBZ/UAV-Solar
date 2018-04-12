@@ -22,6 +22,8 @@ public class MissionConstraintHelper {
     private static int maxFlatlandOverRate = 50;
     private static int maxFlatlandWidth = 30;
 
+    private static int maxAngle=90;
+
     public static List<WaypointAction> getGeneralWaypointActions() {
         List<WaypointAction> actions = new ArrayList<>();
         actions.add(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
@@ -42,5 +44,9 @@ public class MissionConstraintHelper {
 
     public static int getMaxFlatlandWidth() {
         return maxFlatlandWidth;
+    }
+
+    public static int getMaxAngle() {
+        return maxAngle;
     }
 }
