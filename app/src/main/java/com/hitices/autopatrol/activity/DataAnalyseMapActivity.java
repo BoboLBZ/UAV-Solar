@@ -1,8 +1,10 @@
 package com.hitices.autopatrol.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
@@ -10,9 +12,14 @@ import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
 import com.amap.api.maps2d.UiSettings;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
+import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.maps2d.model.Tile;
+import com.amap.api.maps2d.model.TileOverlayOptions;
+import com.amap.api.maps2d.model.TileProvider;
+import com.amap.api.maps2d.model.UrlTileProvider;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
@@ -20,10 +27,13 @@ import com.hitices.autopatrol.helper.RecordImageHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataAnalyseMapActivity extends AppCompatActivity {
+
+    private static final String TAG = DataAnalyseMapActivity.class.getName();
 
     private static final int NORMAL_MARKER_TYPE = 0;
     private static final int ERROR_MARKER_TYPE = 1;
@@ -76,8 +86,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity {
         if (aMap == null) {
             aMap = mapView.getMap();
         }
-        GoogleMapHelper.useGoogleMapSatelliteData(aMap);
         aMap.setOnMarkerClickListener(markerClickListener);
+        GoogleMapHelper.useGoogleMapSatelliteData(aMap);
 
         UiSettings settings = aMap.getUiSettings();
         settings.setZoomControlsEnabled(false);
@@ -85,8 +95,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity {
     }
 
     private void markImageLocation(FlightRecord record) {
-        // 清除当前屏幕所有marker
-        aMap.clear();
         // 获取图片路径
         imageUrls.clear();
         imageUrls = getImageUrls(record);
@@ -136,6 +144,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity {
 
     private void showMakerImage(int index) {
         File image = new File(imageUrls.get(index));
+        ToastHelper.getInstance().showShortToast("image_index: " + index);
     }
 
     AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
@@ -152,7 +161,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity {
 
         markerOptions.title(String.valueOf(index));
         markerOptions.position(location);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         return markerOptions;
     }
