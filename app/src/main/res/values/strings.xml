@@ -28,7 +28,7 @@
     <string name="app_func1">执行巡检任务</string>
     <string name="app_func2">巡检结果分析</string>
 
-    <string name="mission_select_title">选择任务</string>
+    <string name="record_select_title">选择巡检记录</string>
 
     <string name="selected_flight_record">SELECTED_RECORD</string>
 
@@ -36,5 +36,7 @@
     <string name="show_infrared">红外光图像</string>
     <string name="gen_report">生成巡检</string>
     <string name="run_analysis">运行分析</string>
+
+    <string name="photo_download_title">正在下载图片</string>
 
 </resources>

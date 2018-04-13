@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
 
@@ -88,6 +89,10 @@ public class DJIMediaHelper {
         return this.mediaFileList;
     }
 
+    public MediaManager getmMediaManager() {
+        return mMediaManager;
+    }
+
     /**
      * @param index    要删除照片的index
      * @param callback 删除完照片后的callback
@@ -128,6 +133,8 @@ public class DJIMediaHelper {
 //            };
 
     /**
+     * 下载图片到默认位置
+     *
      * @param index 要下载图片的index
      */
     public void downloadFileByIndex(final int index) {
@@ -143,10 +150,10 @@ public class DJIMediaHelper {
         mediaFileList.get(index).fetchFileData(storePath, null, listener);
     }
 
-    public DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
+    private DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
         @Override
         public void onFailure(DJIError error) {
-            HideDownloadProgressDialog();
+            hideDownloadProgressDialog();
             ToastHelper.getInstance().showShortToast("Download File Failed" + error.getDescription());
             currentProgress = -1;
         }
@@ -167,12 +174,12 @@ public class DJIMediaHelper {
         @Override
         public void onStart() {
             currentProgress = -1;
-            ShowDownloadProgressDialog();
+            showDownloadProgressDialog();
         }
 
         @Override
         public void onSuccess(String filePath) {
-            HideDownloadProgressDialog();
+            hideDownloadProgressDialog();
             ToastHelper.getInstance().showShortToast("Download File Success" + ":" + filePath);
             currentProgress = -1;
         }
@@ -205,12 +212,9 @@ public class DJIMediaHelper {
     private void initMediaManager() {
         if (AutoPatrolApplication.getProductInstance() == null) {
             mediaFileList.clear();
-//            mListAdapter.notifyDataSetChanged();
-            ToastHelper.getInstance().showShortToast("Product disconnected");
             DJILog.e(TAG, "Product disconnected");
             return;
         } else {
-            ToastHelper.getInstance().showShortToast("Product connected");
             if (null != AutoPatrolApplication.getCameraInstance() &&
                     AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
                 mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
@@ -221,12 +225,10 @@ public class DJIMediaHelper {
                         @Override
                         public void onResult(DJIError error) {
                             if (error == null) {
-                                ToastHelper.getInstance().showShortToast("Set cameraMode success");
-                                DJILog.e(TAG, "Set cameraMode success");
                                 showProgressDialog();
                                 getFileList();
                             } else {
-                                ToastHelper.getInstance().showShortToast("Set cameraMode failed");
+                                DJILog.e(TAG, "Set cameraMode failed");
                             }
                         }
                     });
@@ -240,7 +242,7 @@ public class DJIMediaHelper {
 
             } else if (null != AutoPatrolApplication.getCameraInstance()
                     && !AutoPatrolApplication.getCameraInstance().isMediaDownloadModeSupported()) {
-                ToastHelper.getInstance().showShortToast("Media Download Mode not Supported");
+                DJILog.e(TAG, "Media Download Mode not Supported");
             }
         }
         return;
@@ -249,7 +251,6 @@ public class DJIMediaHelper {
     private void getFileList() {
         mMediaManager = AutoPatrolApplication.getCameraInstance().getMediaManager();
         if (mMediaManager != null) {
-
             if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)) {
                 DJILog.e(TAG, "Media Manager is busy.");
             } else {
@@ -338,7 +339,6 @@ public class DJIMediaHelper {
     }
 
     private void hideProgressDialog() {
-
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 if (null != mLoadingDialog && mLoadingDialog.isShowing()) {
@@ -348,7 +348,7 @@ public class DJIMediaHelper {
         });
     }
 
-    private void ShowDownloadProgressDialog() {
+    private void showDownloadProgressDialog() {
         if (mDownloadDialog != null) {
             activity.runOnUiThread(new Runnable() {
                 public void run() {
@@ -359,8 +359,7 @@ public class DJIMediaHelper {
         }
     }
 
-    private void HideDownloadProgressDialog() {
-
+    private void hideDownloadProgressDialog() {
         if (null != mDownloadDialog && mDownloadDialog.isShowing()) {
             activity.runOnUiThread(new Runnable() {
                 public void run() {

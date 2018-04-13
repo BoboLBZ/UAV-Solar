@@ -87,12 +87,7 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
         FlightRecord record = flightRecordList.get(position);
 
         // bind mission to view
-        try {
-            holder.missionNameText.setText(record.getExecuteMission().getName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        holder.missionNameText.setText(record.getExecuteMission().getName());
         holder.executeDateText.setText(record.getStartTime().toString());
         if (record.isDownload()) {
             holder.isDownloadText.setText("（ 已下载 ）");

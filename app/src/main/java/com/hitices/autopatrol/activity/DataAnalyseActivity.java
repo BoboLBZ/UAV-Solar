@@ -39,7 +39,6 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_data_analyse);
 
         ToastHelper.getInstance().showShortToast("select the mission");
-//        missionMediaHelper = new DJIMissionMediaHelper(this, this, taskCallback);
         initMissionList();
         initUI();
     }
@@ -77,6 +76,9 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         PatrolMission mission3 = new PatrolMission();
         mission3.setName("mission3");
         mission3.save();
+        PatrolMission downloadMission = new PatrolMission();
+        downloadMission.setName("downTestMission");
+        downloadMission.save();
 
         FlightRecord record1 = new FlightRecord();
         record1.setMission(mission1);
@@ -107,7 +109,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record4.setMission(mission3);
         record4.setStartTime(new Date());
         record4.setEndTime(new Date());
-        record4.setDownload(true);
+        record4.setDownload(false);
         record4.save();
 
         FlightRecord record5 = new FlightRecord();
@@ -115,6 +117,12 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record5.setStartTime(new Date());
         record5.setEndTime(new Date());
         record5.save();
+
+        FlightRecord record6 = new FlightRecord();
+        record6.setMission(downloadMission);
+        record6.setStartTime(new Date(2017 - 1900, 1, 1, 1, 1, 1));
+        record6.setEndTime(new Date());
+        record6.save();
     }
 
     private void initUI() {
@@ -154,30 +162,6 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.btn_select_mission:
-//
-//                ToastHelper.showShortToast("start download");
-//
-//                selectedMission = DataSupport.findLast(FlightRecord.class);
-//
-//                missionMediaHelper.analyseMission(selectedMission);
-//                missionMediaHelper.setCompleteListener(new DJIMissionMediaHelper.FilesDownloadCompleteListener() {
-//                    @Override
-//                    public void onStart() {
-//
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//                        Intent intent = new Intent(DataAnalyseActivity.this, MissionReportActivity.class);
-//                        intent.putExtra("path", missionMediaHelper.getMissionDir().getPath());
-//                        startActivity(intent);
-//                    }
-//                });
-//
-//                missionMediaHelper.downloadFilesByMission();
-//
-//                break;
             default:
                 break;
         }

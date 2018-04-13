@@ -28,12 +28,14 @@ import dji.sdk.useraccount.UserAccountManager;
 
 public class AppMainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = AppMainActivity.class.getName();
+
     // opencv
     static {
         if (!OpenCVLoader.initDebug()) {
-            Log.d("PatrolMainActivity", "OpenCV not loaded");
+            Log.d(TAG, "OpenCV not loaded");
         } else {
-            Log.d("PatrolMainActivity", "OpenCV loaded！");
+            Log.d(TAG, "OpenCV loaded！");
         }
 
         // ndk support test
@@ -94,7 +96,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(this, MissionExecutePreparedActivity.class));
                 break;
             case R.id.app_func4_button:
-                //startActivity(new Intent(this, MissionReportActivity.class));
+                startActivity(new Intent(this, DataDownloadActivity.class));
                 break;
         }
     }
