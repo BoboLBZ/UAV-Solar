@@ -30,7 +30,7 @@ public class FlatlandModel extends BaseModel {
         //base
         missionName = name;
         modelType = ModelType.Flatland;
-        cameraAngel = 0;
+        cameraAngel = 90;
         headingMode = WaypointMissionHeadingMode.AUTO;
         //flatland
         altitude = 20.0f;

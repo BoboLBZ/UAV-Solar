@@ -1,6 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="斜面模型设置" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="拍照高度:" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_distance"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_distance_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="飞行高度:" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_altitude"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_altitude_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="飞行速度:" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_speed"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_speed_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m/s" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="拍照间隔:" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_width"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_width_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重 复 率  :" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_overrate"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_overrate_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="云台俯角:" />
+
+        <SeekBar
+            android:id="@+id/slope_setting_pitch"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/slope_setting_pitch_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="任务区域顶点:" />
+
+    <GridView
+        android:id="@+id/slope_setting_vertexs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:horizontalSpacing="3dp"
+        android:numColumns="3"
+        android:scrollbars="none"
+        android:verticalSpacing="3dp" />
 </LinearLayout>

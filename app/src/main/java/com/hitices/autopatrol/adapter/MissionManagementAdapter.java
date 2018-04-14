@@ -1,5 +1,8 @@
 package com.hitices.autopatrol.adapter;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,9 +25,11 @@ import java.util.List;
  */
 public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManagementAdapter.MyViewholder> {
     private List<PatrolMission> missionList;
+    private Context context;
 
-    public MissionManagementAdapter(List<PatrolMission> missions) {
+    public MissionManagementAdapter(List<PatrolMission> missions, Context context) {
         this.missionList = missions;
+        this.context = context;
     }
     @Override
     public MissionManagementAdapter.MyViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -53,7 +58,26 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
                 ContextHelper.getApplicationContext().startActivity(intent);
             }
         });
-
+        holder.btn_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //删除当前任务
+                new AlertDialog.Builder(context)
+                        .setTitle("提醒")
+                        .setMessage("确认删除该任务？")
+                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteMission(holder.getAdapterPosition());
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        }).create().show();
+            }
+        });
         return holder;
     }
 
@@ -73,9 +97,10 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
 
     private void deleteMission(int position) {
         PatrolMission mission = missionList.get(position);
-        MissionHelper.deleteMission(mission.getFilePath());//delete from SD
-        mission.deleteAsync();
+        MissionHelper.deleteMission(mission, mission.getFilePath());//delete from SD and database
+        //mission.deleteAsync();
         missionList.remove(position);
+        notifyDataSetChanged();
     }
     static class MyViewholder extends RecyclerView.ViewHolder {
         View missionView;
@@ -83,6 +108,7 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
         TextView missionName;
         TextView date;
         Button btn_adjust;
+        Button btn_delete;
 
         public MyViewholder(View view) {
             super(view);
@@ -90,6 +116,7 @@ public class MissionManagementAdapter extends RecyclerView.Adapter<MissionManage
             missionName = view.findViewById(R.id.management_mission_name);
             date = view.findViewById(R.id.management_mission_date);
             btn_adjust = view.findViewById(R.id.management_mission_adjust);
+            btn_delete = view.findViewById(R.id.management_mission_delete);
         }
     }
 }

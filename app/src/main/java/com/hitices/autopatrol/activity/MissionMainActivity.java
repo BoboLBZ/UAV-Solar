@@ -63,7 +63,6 @@ import com.hitices.autopatrol.helper.ToastHelper;
 import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -72,24 +71,6 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 
 public class MissionMainActivity extends AppCompatActivity implements View.OnClickListener {
-    AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
-        LatLng tempLatlng;
-
-        @Override
-        public void onMarkerDragStart(Marker arg0) {
-            tempLatlng = arg0.getPosition();
-        }
-
-        @Override
-        public void onMarkerDragEnd(Marker arg0) {
-//            getMultipointsModel().getWaypointList().remove(new Waypoint(tempLatlng.latitude, tempLatlng.longitude, getMultipointsModel().getAltitude()));
-//            getMultipointsModel().addWaypointList(arg0.getPosition());
-        }
-
-        @Override
-        public void onMarkerDrag(Marker arg0) {
-        }
-    };
     AMap.OnInfoWindowClickListener onInfoWindowClickListener = new AMap.OnInfoWindowClickListener() {
         @Override
         public void onInfoWindowClick(Marker marker) {
@@ -100,6 +81,24 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private PatrolMission mission;
     private List<BaseModel> modelList;
     private BaseModel currentModel;
+    AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
+        String type;
+
+        @Override
+        public void onMarkerDragStart(Marker arg0) {
+            type = arg0.getTitle();
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker arg0) {
+            if (currentModel.getModelType() == ModelType.Slope) {
+            }
+        }
+
+        @Override
+        public void onMarkerDrag(Marker arg0) {
+        }
+    };
     private boolean saveFlag = true;
     //multiPoint
     private List<Marker> mMarkers = new ArrayList<>();
@@ -115,6 +114,28 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     //location about
     private LatLng locationLatlng;
     private Marker location;
+    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(locationLatlng);
+                    markerOptions.title("marker");
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_human_location_marker)));
+                    if (location != null)
+                        location.destroy();
+                    location = aMap.addMarker(markerOptions);
+                } else {
+                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError", "location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
     private Marker currentMarker;
     private boolean flag_isShow = false;
     AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
@@ -150,31 +171,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private Marker s_base_A;
     private Marker s_base_B;
     private Polyline s_baseline;
-
-    private int status_of_slopemodel;//设置不同状态，主要用于标记baseline(1:添加边界; 2:绘制baseline)
-    
-    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
-        @Override
-        public void onLocationChanged(AMapLocation amapLocation) {
-            if (amapLocation != null) {
-                if (amapLocation.getErrorCode() == 0) {
-                    locationLatlng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(locationLatlng);
-                    markerOptions.title("marker");
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_human_location_marker)));
-                    if (location != null)
-                        location.destroy();
-                    location = aMap.addMarker(markerOptions);
-                } else {
-                    //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                    Log.e("AmapError", "location Error, ErrCode:"
-                            + amapLocation.getErrorCode() + ", errInfo:"
-                            + amapLocation.getErrorInfo());
-                }
-            }
-        }
-    };
+    private int status_of_slopemodel = 1;//设置不同状态，主要用于标记baseline(1:添加边界; 2:绘制baseline)
     //listener
     AMap.OnMapClickListener onMapClickListener = new AMap.OnMapClickListener() {
         @Override
@@ -190,14 +187,15 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                     saveFlag = false;
                     break;
                 case Slope:
-                    switch (status_of_slopemodel){
+                    switch (status_of_slopemodel) {
                         case 1:
                             drawSlopeBorder(latLng);
-                            saveFlag=false;
+                            saveFlag = false;
                             break;
                         case 2:
-                            drawBaseline(latLng);
-                            saveFlag=false;
+                            //drawBaseline();
+                            addline(latLng);
+                            saveFlag = false;
                             break;
                     }
                     break;
@@ -454,7 +452,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                                 case R.id.slope_mission_main:
                                     SlopeModel mode2 = new SlopeModel(n);
                                     currentModel = mode2;
-                                    status_of_slopemodel=1;
+                                    status_of_slopemodel = 2;
                                     modelList.add(mode2);
                                     break;
                             }
@@ -495,7 +493,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView altitude_text = multipointdSetiing.findViewById(R.id.altitude_text);
         final TextView speed_text = multipointdSetiing.findViewById(R.id.seekBar_text);
         final TextView mName = multipointdSetiing.findViewById(R.id.setting_mName);
-        final TextView pitchText=multipointdSetiing.findViewById(R.id.pitch_text);
+        final TextView pitchText = multipointdSetiing.findViewById(R.id.pitch_text);
 
         final SeekBar sb_speed = multipointdSetiing.findViewById(R.id.speed);
         final SeekBar sb_altitude = multipointdSetiing.findViewById(R.id.altitude);
@@ -505,7 +503,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         //init seekbar
         sb_altitude.setMax((int) (MissionConstraintHelper.getMaxAltitude() + 0.5));
         sb_speed.setMax((int) (MissionConstraintHelper.getMaxSpeed() + 0.5));
-        sb_pitch.setMax(MissionConstraintHelper.getMaxAngle());
+        sb_pitch.setMax(MissionConstraintHelper.getMaxPitch());
         //update data
         //通用高度
         sb_altitude.setProgress((int) (getMultipointsModel().getAltitude()));
@@ -513,7 +511,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         //任务名称
         mName.setText(getMultipointsModel().getMissionName());
         //通用速度
-        sb_speed.setProgress(10);
+        sb_speed.setProgress((int) (getMultipointsModel().getSpeed() + 0.5));
         speed_text.setText(String.valueOf(getMultipointsModel().getSpeed()) + " m/s");
         //朝向
         rg_heading.check(R.id.headingWP);
@@ -524,7 +522,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         sb_pitch.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                pitchText.setText(String.valueOf(i) + " m/s");
+                pitchText.setText(String.valueOf(i));
             }
 
             @Override
@@ -645,8 +643,9 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mWidth.setProgress((int) (getFlatlandModel().getWidth() + 0.5));
         mWidthText.setText(String.valueOf((int) (getFlatlandModel().getWidth() + 0.5)) + " m");
 
-        mPitch.setMax(MissionConstraintHelper.getMaxAngle());
+        mPitch.setMax(MissionConstraintHelper.getMaxPitch());
         mPitch.setProgress(getFlatlandModel().getCameraAngel());
+        ToastHelper.getInstance().showShortToast("flat " + String.valueOf(getFlatlandModel().getCameraAngel()));
         mPitchText.setText(String.valueOf(getFlatlandModel().getCameraAngel()));
 
         mSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -669,8 +668,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mOverate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                // mOverateText.setText(String.valueOf(i) + " %");
-                getFlatlandModel().setOverlapRate(i);
+                mOverateText.setText(String.valueOf(i) + " %");
+//                getFlatlandModel().setOverlapRate(i);
             }
 
             @Override
@@ -761,7 +760,179 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showSlopeModelSettingDialog() {
+        //status_of_slopemodel=2;
+        LinearLayout settingView = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_slope_setting, null);
 
+        final SeekBar mAltitude = settingView.findViewById(R.id.slope_setting_altitude);
+        final SeekBar mSpeed = settingView.findViewById(R.id.slope_setting_speed);
+        final SeekBar mOverate = settingView.findViewById(R.id.slope_setting_overrate);
+        final SeekBar mWidth = settingView.findViewById(R.id.slope_setting_width);
+        final SeekBar mPitch = settingView.findViewById(R.id.slope_setting_pitch);
+        final SeekBar mDistance = settingView.findViewById(R.id.slope_setting_distance);
+
+        final TextView mSpeedText = settingView.findViewById(R.id.slope_setting_speed_text);
+        final TextView mOverateText = settingView.findViewById(R.id.slope_setting_overrate_text);
+        final TextView mWidthText = settingView.findViewById(R.id.slope_setting_width_text);
+        final TextView mAltitudeText = settingView.findViewById(R.id.slope_setting_altitude_text);
+        final TextView mPitchText = settingView.findViewById(R.id.slope_setting_pitch_text);
+        final TextView mDistanceText = settingView.findViewById(R.id.slope_setting_distance_text);
+
+        GridView vertexs = settingView.findViewById(R.id.slope_setting_vertexs);
+        //init
+        mDistance.setMax(MissionConstraintHelper.getMaxShotDistance());
+        //mDistance.setMin(MissionConstraintHelper.getMinShotDistance());
+        mDistance.setProgress((int) (getSlopeModel().getDistanceToPanel() + 0.5));
+        mDistanceText.setText(String.valueOf((int) (getSlopeModel().getDistanceToPanel() + 0.5)) + " m");
+
+        mAltitude.setMax((int) MissionConstraintHelper.getMaxAltitude());
+        mAltitude.setProgress((int) (getSlopeModel().getAltitude() + 0.5));
+        mAltitudeText.setText(String.valueOf((int) (getSlopeModel().getAltitude() + 0.5)) + " m");
+
+        mSpeed.setMax((int) MissionConstraintHelper.getMaxSpeed());
+        mSpeed.setProgress((int) (getSlopeModel().getSpeed()));
+        mSpeedText.setText(String.valueOf((int) (getSlopeModel().getSpeed() + 0.5)) + " m/s");
+
+        mOverate.setMax(MissionConstraintHelper.getMaxFlatlandOverRate());
+        //mOverate.setMin(10);
+        mOverate.setProgress(getSlopeModel().getOverlapRate());
+        mOverateText.setText(String.valueOf(getSlopeModel().getOverlapRate()) + " %");
+
+        mWidth.setMax(MissionConstraintHelper.getMaxFlatlandWidth());
+        mWidth.setProgress((int) (getSlopeModel().getWidth() + 0.5));
+        mWidthText.setText(String.valueOf((int) (getSlopeModel().getWidth() + 0.5)) + " m");
+
+        mPitch.setMax(MissionConstraintHelper.getMaxPitch());
+        mPitch.setProgress(getSlopeModel().getCameraAngel());
+        ToastHelper.getInstance().showShortToast("flat " + String.valueOf(getSlopeModel().getCameraAngel()));
+
+        mPitchText.setText(String.valueOf(getSlopeModel().getCameraAngel()));
+
+        mDistance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mDistanceText.setText(String.valueOf(i) + " m");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mSpeedText.setText(String.valueOf(i) + "m/s");
+                // getSlopeModel().setSpeed(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mOverate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mOverateText.setText(String.valueOf(i) + " %");
+//                getSlopeModel().setOverlapRate(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mWidthText.setText(String.valueOf(i) + " m");
+                // getSlopeModel().setWidth(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mAltitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mAltitudeText.setText(String.valueOf(i) + " m");
+                // getSlopeModel().setAltitude(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        mPitch.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mPitchText.setText(String.valueOf(i));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        vertexs.setAdapter(new FlatlandSettingGridviewAdapter(this, getSlopeModel().getVertexs()));
+        //dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(settingView);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //change commit
+                getSlopeModel().setAltitude(mAltitude.getProgress());
+                getSlopeModel().setOverlapRate(mOverate.getProgress());
+                getSlopeModel().setSpeed(mSpeed.getProgress());
+                getSlopeModel().setWidth(mWidth.getProgress());
+                getSlopeModel().setCameraAngel(mPitch.getProgress());
+                getSlopeModel().setDistanceToPanel(mDistance.getProgress());
+                //change flag
+                saveFlag = false;
+            }
+        });
+        builder.setNeutralButton("取消修改", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.create().show();
     }
 
     //multi point
@@ -772,7 +943,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        markerOptions.draggable(true);
+        markerOptions.draggable(false);
         markerOptions.title("point");
         aMap.addMarker(markerOptions);
         Marker marker = aMap.addMarker(markerOptions);
@@ -816,8 +987,9 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         if (f_startPoint != null)
             f_startPoint.destroy();
     }
+
     //slope model about
-    private void drawSlopeBorder(LatLng latLng){
+    private void drawSlopeBorder(LatLng latLng) {
         getSlopeModel().addVertex(latLng);
         if (s_polyline != null) {
             s_polyline.remove();
@@ -853,29 +1025,61 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             s_startPoint.destroy();
     }
 
-    private void drawBaseline(LatLng latLng){
-         if(s_base_A == null){
-             MarkerOptions markerOptions = new MarkerOptions();
-             markerOptions.position(latLng);
-             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_a)));
-             markerOptions.draggable(true);
-             markerOptions.title("base");
-             aMap.addMarker(markerOptions);
-            s_base_A = aMap.addMarker(markerOptions);
-         }else if(s_base_B == null){
-             MarkerOptions markerOptions = new MarkerOptions();
-             markerOptions.position(latLng);
-             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_b)));
-             markerOptions.draggable(true);
-             markerOptions.title("base");
-             aMap.addMarker(markerOptions);
-             s_base_B = aMap.addMarker(markerOptions);
-         }else {
-             s_baseline=aMap.addPolyline(
-                     new PolylineOptions().add(s_base_A.getPosition(),s_base_B.getPosition())
-                             .color(getResources().getColor(R.color.baseline)));
-         }
+    private void drawBaseline(Marker a, Marker b) {
+//         if(s_base_A == null){
+//             MarkerOptions markerOptions = new MarkerOptions();
+//             markerOptions.position(latLng);
+//             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_a)));
+//             markerOptions.draggable(true);
+//             markerOptions.title("base");
+//             aMap.addMarker(markerOptions);
+//            s_base_A = aMap.addMarker(markerOptions);
+//         }else if(s_base_B == null){
+//             MarkerOptions markerOptions = new MarkerOptions();
+//             markerOptions.position(latLng);
+//             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_b)));
+//             markerOptions.draggable(true);
+//             markerOptions.title("base");
+//             aMap.addMarker(markerOptions);
+//             s_base_B = aMap.addMarker(markerOptions);
+//         }else {
+//             s_baseline.remove();
+//             s_baseline=aMap.addPolyline(
+//                     new PolylineOptions().add(s_base_A.getPosition(),s_base_B.getPosition())
+//                             .color(getResources().getColor(R.color.baseline)));
+//         }
+
+        //s_baseline.remove();
+        s_baseline = aMap.addPolyline(
+                new PolylineOptions().add(a.getPosition(), b.getPosition())
+                        .color(getResources().getColor(R.color.baseline)));
     }
+
+    private void addline(LatLng latLng) {
+        if (s_base_A == null) {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_a)));
+            markerOptions.draggable(true);
+            markerOptions.title("baseA");
+            aMap.addMarker(markerOptions);
+            s_base_A = aMap.addMarker(markerOptions);
+        } else if (s_base_B == null) {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_b)));
+            markerOptions.draggable(true);
+            markerOptions.title("baseB");
+            aMap.addMarker(markerOptions);
+            s_base_B = aMap.addMarker(markerOptions);
+        } else {
+            //s_baseline.remove();
+            s_baseline = aMap.addPolyline(
+                    new PolylineOptions().add(s_base_A.getPosition(), s_base_B.getPosition())
+                            .color(getResources().getColor(R.color.baseline)));
+        }
+    }
+
     //child model change about
     private void refreshView() {
         btn_childlist.setText(mission.getName());
@@ -922,7 +1126,18 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void clearSlopeDisplay() {
-
+        if (s_polygon != null)
+            s_polygon.remove();
+        if (s_polyline != null)
+            s_polyline.remove();
+        if (s_startPoint != null)
+            s_startPoint.destroy();
+        if (s_base_A != null)
+            s_base_A.destroy();
+        if (s_base_B != null)
+            s_base_B.destroy();
+        if (s_baseline != null)
+            s_baseline.remove();
     }
 
     private void showMultiPointsView() {
@@ -933,7 +1148,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                     getMultipointsModel().getWaypointList().get(i).coordinate.getLongitude());
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-            markerOptions.draggable(true);
+            markerOptions.draggable(false);
             markerOptions.title("waypoint");
             aMap.addMarker(markerOptions);
             cameraUpdate(ll, aMap.getCameraPosition().zoom);
@@ -957,6 +1172,21 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showSlopeView() {
+        //参数调整
+        status_of_slopemodel = 1;
+        //show border
+        PolylineOptions options = new PolylineOptions().addAll(getSlopeModel().getVertexs());
+        if (getSlopeModel().getVertexs().size() > 0)
+            options.add(getSlopeModel().getVertexs().get(0));
+        f_polyline = aMap.addPolyline(options);
+        f_polygon = aMap.addPolygon(new PolygonOptions().addAll(getSlopeModel().getVertexs())
+                .fillColor(getResources().getColor(R.color.fillColor)));
+        if (getSlopeModel().getVertexs().size() > 0) {
+            cameraUpdate(getSlopeModel().getVertexs().get(0), aMap.getCameraPosition().zoom);
+        } else {
+            cameraUpdate(locationLatlng, 18f);
+        }
+        //show baseline
 
     }
 
@@ -977,6 +1207,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(pos, zoomLevel);
         aMap.moveCamera(cameraupdate);
     }
+
     /**
      * save mission to database and files
      */

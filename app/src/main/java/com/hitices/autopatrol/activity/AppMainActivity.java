@@ -14,11 +14,18 @@ import android.widget.Toast;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
+import com.hitices.autopatrol.helper.MissionConstraintHelper;
+import com.hitices.autopatrol.helper.MissionHelper;
 import com.hitices.autopatrol.helper.PermissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.LitePal;
 import org.opencv.android.OpenCVLoader;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import dji.common.error.DJIError;
 import dji.common.useraccount.UserAccountState;
@@ -71,7 +78,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         LitePal.getDatabase();
         // 初始化界面
         initUI();
-
+        scanLocalMission();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AutoPatrolApplication.FLAG_CONNECTION_CHANGE);
         this.registerReceiver(mReceiver, filter);
@@ -162,6 +169,33 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                                 + error.getDescription());
                     }
                 });
+    }
+
+    private void scanLocalMission() {
+        List<PatrolMission> patrolMissions = MissionHelper.readMissionsFromDataBase();
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < patrolMissions.size(); i++) {
+            names.add(patrolMissions.get(i).getName());
+//            System.out.println("testNameA:"+names.get(i));
+        }
+        File file = new File(MissionConstraintHelper.MISSION_DIR);
+        if (file.exists()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    File f = files[i];
+                    if (f.getName().endsWith("xml")) {
+                        MissionHelper helper = new MissionHelper(f.getAbsolutePath(), new PatrolMission());
+                        PatrolMission patrolMission = helper.getPatrolMission();
+//                        System.out.println("testNameB:"+patrolMission.getName());
+                        if (!names.contains(patrolMission.getName())) {
+                            patrolMission.save();
+                        }
+                    }
+                }
+            }
+        }
+
     }
     /**
      * A native method that is implemented by the 'native-lib' native library,

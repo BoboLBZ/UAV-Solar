@@ -21,8 +21,10 @@ public class MissionConstraintHelper {
     private static float maxAltitude = 150f;
     private static int maxFlatlandOverRate = 50;
     private static int maxFlatlandWidth = 30;
+    private static int MaxShotDistance = 30;
+    private static int MinShotDistance = 5;
 
-    private static int maxAngle=90;
+    private static int maxPitch = 90;
 
     public static List<WaypointAction> getGeneralWaypointActions() {
         List<WaypointAction> actions = new ArrayList<>();
@@ -46,7 +48,15 @@ public class MissionConstraintHelper {
         return maxFlatlandWidth;
     }
 
-    public static int getMaxAngle() {
-        return maxAngle;
+    public static int getMaxPitch() {
+        return maxPitch;
+    }
+
+    public static int getMaxShotDistance() {
+        return MaxShotDistance;
+    }
+
+    public static int getMinShotDistance() {
+        return MinShotDistance;
     }
 }

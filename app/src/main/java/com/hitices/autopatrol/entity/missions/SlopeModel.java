@@ -32,6 +32,7 @@ public class SlopeModel extends BaseModel {
         this.distanceToPanel = 10;
         this.width = 15;
         this.overlapRate = 20;
+        this.altitude = 2;
     }
 
     @Override

@@ -38,7 +38,6 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
 
         super.onDestroy();
     }
-
     private void initUI() {
         btn_create = findViewById(R.id.btn_create_mission_management);
         btn_create.setOnClickListener(this);
@@ -50,7 +49,7 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
 
     private void initAdapter() {
         getMissionList();
-        MissionManagementAdapter adapter = new MissionManagementAdapter(missionList);
+        MissionManagementAdapter adapter = new MissionManagementAdapter(missionList, this);
         recyclerView.setAdapter(adapter);
     }
 
