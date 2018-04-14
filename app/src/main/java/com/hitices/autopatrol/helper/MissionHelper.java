@@ -268,6 +268,47 @@ public class MissionHelper {
         Element eDistance = doc.createElement("distanceToPanel");
         eDistance.appendChild(doc.createTextNode(String.valueOf(slopeModel.getDistanceToPanel())));
         localRoot.appendChild(eDistance);
+        //base line
+        if (slopeModel.getBaselineA() != null && slopeModel.getBaselineB() != null) {
+            Element baseline = doc.createElement("baseline");
+
+            Element linepointA = doc.createElement("linePoint");
+            linepointA.setAttribute("name", "A");
+
+            Element a_lat = doc.createElement("latitude");
+            a_lat.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineA().coordinate.getLatitude())));
+            linepointA.appendChild(a_lat);
+
+            Element a_lng = doc.createElement("longitude");
+            a_lng.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineA().coordinate.getLongitude())));
+            linepointA.appendChild(a_lng);
+
+            Element a_alt = doc.createElement("altitude");
+            a_alt.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineA().altitude)));
+            linepointA.appendChild(a_alt);
+
+            baseline.appendChild(linepointA);
+
+            Element linepointB = doc.createElement("linePoint");
+            linepointB.setAttribute("name", "B");
+
+            Element b_lat = doc.createElement("latitude");
+            b_lat.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineB().coordinate.getLatitude())));
+            linepointB.appendChild(b_lat);
+
+            Element b_lng = doc.createElement("longitude");
+            b_lng.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineB().coordinate.getLongitude())));
+            linepointB.appendChild(b_lng);
+
+            Element b_alt = doc.createElement("altitude");
+            b_alt.appendChild(doc.createTextNode(String.valueOf(slopeModel.getBaselineB().altitude)));
+            linepointB.appendChild(b_alt);
+
+            baseline.appendChild(linepointB);
+
+            localRoot.appendChild(baseline);
+        }
+
         // vertex elements
         Element eVertexs = doc.createElement("Vertexs");
         List<LatLng> vertexs = slopeModel.getVertexs();
@@ -479,6 +520,25 @@ public class MissionHelper {
             nodes = element.getElementsByTagName("distanceToPanel");
             if (nodes.item(0) != null) {
                 model.setDistanceToPanel(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("baseline");
+            if (nodes.item(0) != null) {
+                NodeList list = ((Element) nodes.item(0)).getElementsByTagName("linePoint");
+                for (int i = 0; i < list.getLength(); i++) {
+                    Node nNode = list.item(i);
+                    String type = nNode.getAttributes().getNamedItem("name").getNodeValue();
+                    Element temp = (Element) nNode;
+                    Waypoint ll = new Waypoint(
+                            Double.parseDouble(temp.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(temp.getElementsByTagName("longitude").item(0).getTextContent()),
+                            Float.parseFloat(temp.getElementsByTagName("altitude").item(0).getTextContent()));
+                    if (type.equals("A")) {
+                        model.setBaselineA(ll);
+                    } else if (type.equals("B")) {
+                        model.setBaselineB(ll);
+                    }
+
+                }
             }
             nodes = element.getElementsByTagName("Vertexs");
             Node node = nodes.item(0);

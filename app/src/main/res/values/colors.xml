@@ -26,4 +26,6 @@
     <color name="blue_gv_background">#3498DB</color>
     <color name="my_item_background">#3498DB</color>
     <color name="baseline">#E51815</color>
+
+    <color name="bg">#4De5ffff</color>
 </resources>
