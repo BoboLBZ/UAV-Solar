@@ -20,7 +20,7 @@ public class SlopeModel extends BaseModel {
     private float width;
     private int overlapRate;
     private float altitude; //斜面最低点到起飞点的垂直高度
-    private LatLng baselineA,baselineB;   //标识斜面走向
+    private Waypoint baselineA, baselineB;   //标识斜面走向,A低点，B高点
     public SlopeModel(String name) {
         //base
         this.missionName = name;
@@ -60,19 +60,19 @@ public class SlopeModel extends BaseModel {
         this.speed = speed;
     }
 
-    public LatLng getBaselineA() {
+    public Waypoint getBaselineA() {
         return baselineA;
     }
 
-    public void setBaselineA(LatLng baselineA) {
+    public void setBaselineA(Waypoint baselineA) {
         this.baselineA = baselineA;
     }
 
-    public LatLng getBaselineB() {
+    public Waypoint getBaselineB() {
         return baselineB;
     }
 
-    public void setBaselineB(LatLng baselineB) {
+    public void setBaselineB(Waypoint baselineB) {
         this.baselineB = baselineB;
     }
 
