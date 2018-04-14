@@ -66,7 +66,7 @@ public class MissionHelper {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            //root,patrolmission
+            //root,patrol mission
             Element root = doc.createElement("PatrolMission");
             doc.appendChild(root);
             Element name = doc.createElement("missionName");
@@ -107,18 +107,21 @@ public class MissionHelper {
         return DataSupport.findAll(PatrolMission.class);
     }
 
-    public static boolean saveMissionToDatabase(PatrolMission patrolMission) {
+    public static boolean saveMissionLisToDatabase(PatrolMission patrolMission) {
         patrolMission.save();
         return true;
     }
 
-    public static boolean deleteMission(String path) {
+    public static boolean deleteMission(PatrolMission mission, String path) {
+        //需要确认删除成功
         File f = new File(path);
         if (f.exists()) {
             f.delete();
-            return true;
+            //return true;
         }
-        return false;
+        DataSupport.delete(PatrolMission.class, mission.getId());
+        return true;
+        //return false;
     }
     private static void createElementOfMultiPoint(Document doc, Element root, MultiPointsModel multiPointsModel) {
         Element localRoot = doc.createElement("ChildMission");
@@ -185,7 +188,7 @@ public class MissionHelper {
         name.appendChild(doc.createTextNode(flatlandModel.getMissionName()));
         localRoot.appendChild(name);
 
-        Element eAngle = doc.createElement("cameraAngel");
+        Element eAngle = doc.createElement("cameraAngle");
         eAngle.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getCameraAngel())));
         localRoot.appendChild(eAngle);
 
@@ -237,11 +240,59 @@ public class MissionHelper {
         Element name = doc.createElement("modelName");
         name.appendChild(doc.createTextNode(slopeModel.getMissionName()));
         localRoot.appendChild(name);
+
+        Element eAngle = doc.createElement("cameraAngle");
+        eAngle.appendChild(doc.createTextNode(String.valueOf(slopeModel.getCameraAngel())));
+        localRoot.appendChild(eAngle);
+
+        Element headingMode = doc.createElement("headingMode");
+        headingMode.appendChild(doc.createTextNode(slopeModel.getHeadingMode().toString()));
+        localRoot.appendChild(headingMode);
+
+        Element eSpeed = doc.createElement("speed");
+        eSpeed.appendChild(doc.createTextNode(String.valueOf(slopeModel.getSpeed())));
+        localRoot.appendChild(eSpeed);
+
+        Element eAltitude = doc.createElement("altitude");
+        eAltitude.appendChild(doc.createTextNode(String.valueOf(slopeModel.getAltitude())));
+        localRoot.appendChild(eAltitude);
+
+        Element eHorRate = doc.createElement("OverlapRate");
+        eHorRate.appendChild(doc.createTextNode(String.valueOf(slopeModel.getOverlapRate())));
+        localRoot.appendChild(eHorRate);
+
+        Element eWidth = doc.createElement("width");
+        eWidth.appendChild(doc.createTextNode(String.valueOf(slopeModel.getWidth())));
+        localRoot.appendChild(eWidth);
+
+        Element eDistance = doc.createElement("distanceToPanel");
+        eDistance.appendChild(doc.createTextNode(String.valueOf(slopeModel.getDistanceToPanel())));
+        localRoot.appendChild(eDistance);
+        // vertex elements
+        Element eVertexs = doc.createElement("Vertexs");
+        List<LatLng> vertexs = slopeModel.getVertexs();
+        eVertexs.setAttribute("nums", String.valueOf(vertexs.size()));
+        localRoot.appendChild(eVertexs);
+        for (int i = 0; i < vertexs.size(); i++) {
+            LatLng latLng = vertexs.get(i);
+            Element eVertex = doc.createElement("vertex");
+            eVertex.setAttribute("id", String.valueOf(i));
+            //lat & lng
+            Element lat = doc.createElement("latitude");
+            lat.appendChild(doc.createTextNode(String.valueOf(latLng.latitude)));
+            eVertex.appendChild(lat);
+            Element lng = doc.createElement("longitude");
+            lng.appendChild(doc.createTextNode(String.valueOf(latLng.longitude)));
+            eVertex.appendChild(lng);
+
+            eVertexs.appendChild(eVertex);
+        }
     }
 
     private boolean init() {
         try {
             File file = new File(filePath);
+//            System.out.println("filePath:"+filePath);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
@@ -253,11 +304,11 @@ public class MissionHelper {
             }
 
 //            patrolMission = new PatrolMission();
-//            NodeList nodeList = doc.getElementsByTagName("missionName");
-//            if (nodeList.item(0) != null) {
-//                patrolMission.setName(nodeList.item(0).getTextContent());
-//            }
-            NodeList nodeList = doc.getElementsByTagName("ChildMission");
+            NodeList nodeList = doc.getElementsByTagName("missionName");
+            if (nodeList.item(0) != null) {
+                patrolMission.setName(nodeList.item(0).getTextContent());
+            }
+            nodeList = doc.getElementsByTagName("ChildMission");
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node item = nodeList.item(i);
                 String type = item.getAttributes().getNamedItem("type").getNodeValue();
@@ -399,6 +450,50 @@ public class MissionHelper {
             Element element = (Element) item;
             String name = element.getElementsByTagName("modelName").item(0).getTextContent();
             SlopeModel model = new SlopeModel(name);
+
+            NodeList nodes = element.getElementsByTagName("cameraAngle");
+            if (nodes.item(0) != null) {
+                model.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+            }
+            //headingMode
+            nodes = element.getElementsByTagName("headingMode");
+            if (nodes.item(0) != null) {
+                model.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("speed");
+            if (nodes.item(0) != null) {
+                model.setSpeed(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("altitude");
+            if (nodes.item(0) != null) {
+                model.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("OverlapRate");
+            if (nodes.item(0) != null) {
+                model.setOverlapRate(Integer.parseInt(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("width");
+            if (nodes.item(0) != null) {
+                model.setWidth(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("distanceToPanel");
+            if (nodes.item(0) != null) {
+                model.setDistanceToPanel(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            nodes = element.getElementsByTagName("Vertexs");
+            Node node = nodes.item(0);
+            NodeList nVertexList = ((Element) node).getElementsByTagName("vertex");
+            for (int temp = 0; temp < nVertexList.getLength(); temp++) {
+                Node nNode = nVertexList.item(temp);
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) nNode;
+                    LatLng ll = new LatLng(
+                            Double.parseDouble(eElement.getElementsByTagName("latitude").item(0).getTextContent()),
+                            Double.parseDouble(eElement.getElementsByTagName("longitude").item(0).getTextContent()));
+                    model.addVertex(ll);
+                }
+            }
+
             modelList.add(model);
         }
     }
