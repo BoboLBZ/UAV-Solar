@@ -14,11 +14,13 @@ import android.widget.Toast;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.PermissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.LitePal;
 import org.opencv.android.OpenCVLoader;
+import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import dji.common.error.DJIError;
 import dji.common.useraccount.UserAccountState;
@@ -75,6 +77,9 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         IntentFilter filter = new IntentFilter();
         filter.addAction(AutoPatrolApplication.FLAG_CONNECTION_CHANGE);
         this.registerReceiver(mReceiver, filter);
+
+        TensorFlowInferenceInterface inferenceInterface =
+                new TensorFlowInferenceInterface(ContextHelper.getApplicationContext().getAssets(),"frozen_har.pb");
     }
 
     @Override

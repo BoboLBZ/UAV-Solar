@@ -77,4 +77,5 @@ dependencies {
     compileOnly files('libs/AMap_Location_V3.7.0_20171218.jar')
     implementation project(':openCVLibrary341')
     implementation 'org.litepal.android:core:1.6.1'
+    implementation 'org.tensorflow:tensorflow-android:+'
 }
