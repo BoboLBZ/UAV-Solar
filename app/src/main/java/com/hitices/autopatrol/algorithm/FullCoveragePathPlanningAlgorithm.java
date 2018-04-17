@@ -1,5 +1,7 @@
 package com.hitices.autopatrol.algorithm;
 
+import android.support.annotation.NonNull;
+
 import com.amap.api.maps2d.model.LatLng;
 
 import java.util.ArrayList;
@@ -19,7 +21,12 @@ public class FullCoveragePathPlanningAlgorithm {
     private Point startPoint;
     private Convert convert;
 
-    public FullCoveragePathPlanningAlgorithm(List<LatLng> waypoints, double width, double speed, double time, LatLng startPoint) {
+    public FullCoveragePathPlanningAlgorithm(
+            @NonNull List<LatLng> waypoints,
+            @NonNull double width,
+            @NonNull double speed,
+            double time,
+            @NonNull LatLng startPoint) {
         //convert Latlng to Point
         convert = new Convert(waypoints.get(0), waypoints.get(1));
         ConvexHull convexHull = new ConvexHull(convert.LatlngToPoint(waypoints));
@@ -116,8 +123,10 @@ public class FullCoveragePathPlanningAlgorithm {
                 times[i] = times[i] + getDistance(tempList.get(j), tempList.get(j - 1)) / speed;
             }
             times[i] = times[i] + waypointTime * tempList.size();
-            times[i] = times[i] + (getDistance(tempList.get(0), startPoint) +
-                    getDistance(tempList.get(tempList.size() - 1), startPoint)) / speed;
+            //之前是计算完整路径，现在只考虑从起点到巡检完成，不考虑归途
+//            times[i] = times[i] + (getDistance(tempList.get(0), startPoint) +
+//                    getDistance(tempList.get(tempList.size() - 1), startPoint)) / speed;
+            times[i] = times[i] + (getDistance(tempList.get(0), startPoint)) / speed;
         }
         int index1 = getMin(times);
         double minTime = times[index1];
@@ -138,8 +147,9 @@ public class FullCoveragePathPlanningAlgorithm {
                 timesReverse[i] = timesReverse[i] + getDistance(tempList.get(j), tempList.get(j - 1)) / speed;
             }
             timesReverse[i] = timesReverse[i] + waypointTime * tempList.size();
-            timesReverse[i] = timesReverse[i] + (getDistance(tempList.get(0), startPoint) +
-                    getDistance(tempList.get(tempList.size() - 1), startPoint)) / speed;
+//            timesReverse[i] = timesReverse[i] + (getDistance(tempList.get(0), startPoint) +
+//                    getDistance(tempList.get(tempList.size() - 1), startPoint)) / speed;
+            timesReverse[i] = timesReverse[i] + (getDistance(tempList.get(0), startPoint)) / speed;
         }
         index1 = getMin(timesReverse);
         //need to check whether all points can be photoed
@@ -166,7 +176,9 @@ public class FullCoveragePathPlanningAlgorithm {
                     templist.add(new Point(start.getX() + interval * cos, start.getY() + interval * sin));
                     interval += width;
                 }
-                templist.add(end);
+                if (interval > dis && interval - dis < width / 2) {
+                    templist.add(end);
+                }
             }
 
         }

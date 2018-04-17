@@ -15,6 +15,11 @@ public class Point {
         this.y = y;
     }
 
+    public Point(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.arCos = z;
+    }
     public Point() {
     }
 
