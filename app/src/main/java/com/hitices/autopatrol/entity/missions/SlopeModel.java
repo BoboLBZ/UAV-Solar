@@ -1,11 +1,15 @@
 package com.hitices.autopatrol.entity.missions;
 
 import com.amap.api.maps2d.model.LatLng;
+import com.hitices.autopatrol.algorithm.Point;
+import com.hitices.autopatrol.algorithm.SlopePathPlanningAlgorithm;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
@@ -37,6 +41,28 @@ public class SlopeModel extends BaseModel {
 
     @Override
     public void generateExecutablePoints(LatLng formerPoint) {
+        executePoints = new ArrayList<>();
+        LatLng a = new LatLng(baselineA.coordinate.getLatitude(), baselineA.coordinate.getLongitude());
+        LatLng b = new LatLng(baselineB.coordinate.getLatitude(), baselineB.coordinate.getLongitude());
+        SlopePathPlanningAlgorithm algorithm = new SlopePathPlanningAlgorithm(vertexs, width, a, b);
+        List<Point> points = algorithm.generateWaypoints(baselineA.altitude, baselineB.altitude);
+
+        //convert to waypoint
+        startPoint = new LatLng(points.get(0).getX(), points.get(0).getY());
+        int size = points.size();
+        endPoint = new LatLng(points.get(size - 1).getX(), points.get(size - 1).getY());
+        safeAltitude = (float) points.get(size - 1).getArCos() + altitude + distanceToPanel;
+        //以安全高度进入斜面区域，并调整云台角度
+        Waypoint w = new Waypoint(startPoint.latitude, startPoint.longitude, safeAltitude);
+        w.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel));
+        executePoints.add(w);
+        for (int i = 0; i < points.size(); i++) {
+            Point point = points.get(i);
+            double alt = point.getArCos() + altitude + distanceToPanel;
+            Waypoint waypoint = new Waypoint(point.getX(), point.getY(), (float) alt);
+            waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
+            executePoints.add(waypoint);
+        }
 
     }
     public void addVertex(LatLng latLng) {

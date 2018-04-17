@@ -315,6 +315,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     showFlatlandView((FlatlandModel) executeModelList.get(i));
                     break;
                 case Slope:
+                    showSlopeView((SlopeModel) executeModelList.get(i));
                     break;
             }
         }
@@ -353,7 +354,17 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     }
 
     private void showSlopeView(SlopeModel model) {
-
+        PolylineOptions options = new PolylineOptions().addAll(model.getVertexs());
+        if (model.getVertexs().size() > 0)
+            options.add(model.getVertexs().get(0));
+        aMap.addPolyline(options);
+        aMap.addPolygon(new PolygonOptions().addAll(model.getVertexs())
+                .fillColor(getResources().getColor(R.color.fillColorSlope)));
+        if (model.getVertexs().size() > 0) {
+            cameraUpdate(model.getVertexs().get(0));
+        } else {
+            cameraUpdate(humanLocation);
+        }
     }
 
     /**
@@ -539,7 +550,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         else {
             if (humanLocation != null) {
                 list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
-
             }
         }
         builder = new WaypointMission.Builder();
