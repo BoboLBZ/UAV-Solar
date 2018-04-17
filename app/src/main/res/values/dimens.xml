@@ -3,4 +3,11 @@
     <dimen name="text_margin">16dp</dimen>
 
     <dimen name="text_size_title">20dp</dimen>
+
+    <dimen name="drone_logo_size">120dp</dimen>
+    <dimen name="drone_state_light_size">10dp</dimen>
+    <dimen name="drone_state_text_size">14sp</dimen>
+    <dimen name="drone_info_text_size">16sp</dimen>
+
+    <dimen name="app_func_text_size">16sp</dimen>
 </resources>

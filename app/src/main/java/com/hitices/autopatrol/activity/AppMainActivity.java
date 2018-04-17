@@ -9,7 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hitices.autopatrol.AutoPatrolApplication;
@@ -51,18 +54,25 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         System.loadLibrary("native-lib");
     }
 
+    private Button missionManageButton, missionRunButton, dataAnalysisButton, dataDownloadButton;
+    private TextView droneStateLightText, droneStateText, droneInfoName, droneInfoCamera;
+    private ViewGroup droneInfoGroup, droneFunc2Group;
+    private ImageView droneLogoImage;
+
+    private boolean isDroneConnected;
+
     private long mExitTime = 0;
-    private Button appFunc1Button, appFunc2Button, appFunc3Button, appFunc4Button;
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(AutoPatrolApplication.FLAG_CONNECTION_CHANGE)) {
                 loginAccount();
-                refreshSDKRelativeUI();
+                refreshDroneState();
             }
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +96,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         this.registerReceiver(mReceiver, filter);
 
         TensorFlowInferenceInterface inferenceInterface =
-                new TensorFlowInferenceInterface(ContextHelper.getApplicationContext().getAssets(),"frozen_har.pb");
+                new TensorFlowInferenceInterface(ContextHelper.getApplicationContext().getAssets(), "frozen_har.pb");
     }
 
     @Override
@@ -94,37 +104,84 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         this.unregisterReceiver(mReceiver);
         super.onDestroy();
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.app_func1_button:
+            case R.id.btn_app_func_mission_manage:
                 startActivity(new Intent(this, MissionManagemantActivity.class));
                 break;
-            case R.id.app_func2_button:
+            case R.id.btn_app_func_data_analysis:
                 startActivity(new Intent(this, DataAnalyseActivity.class));
                 break;
-            case R.id.app_func3_button:
+            case R.id.btn_app_func_mission_run:
                 //test
                 startActivity(new Intent(this, MissionExecutePreparedActivity.class));
                 break;
-            case R.id.app_func4_button:
+            case R.id.btn_app_func_data_download:
                 startActivity(new Intent(this, DataDownloadActivity.class));
                 break;
         }
     }
 
     private void initUI() {
-        appFunc1Button = findViewById(R.id.app_func1_button);
-        appFunc2Button = findViewById(R.id.app_func2_button);
-        appFunc3Button = findViewById(R.id.app_func3_button);
-        appFunc4Button = findViewById(R.id.app_func4_button);
-        appFunc1Button.setOnClickListener(this);
-        appFunc2Button.setOnClickListener(this);
-        appFunc3Button.setOnClickListener(this);
-        appFunc4Button.setOnClickListener(this);
+        droneLogoImage = findViewById(R.id.iv_drone_logo);
+        droneStateLightText = findViewById(R.id.tv_drone_state_light);
+        droneStateText = findViewById(R.id.tv_drone_state);
+        droneInfoGroup = findViewById(R.id.ll_drone_info);
+        droneInfoName = findViewById(R.id.tv_drone_info_name);
+        droneInfoCamera = findViewById(R.id.tv_drone_info_camera);
 
-        appFunc3Button.setClickable(true);
-        appFunc4Button.setClickable(true);
+        missionManageButton = findViewById(R.id.btn_app_func_mission_manage);
+        missionRunButton = findViewById(R.id.btn_app_func_mission_run);
+        dataAnalysisButton = findViewById(R.id.btn_app_func_data_analysis);
+        dataDownloadButton = findViewById(R.id.btn_app_func_data_download);
+        missionManageButton.setOnClickListener(this);
+        missionRunButton.setOnClickListener(this);
+        dataAnalysisButton.setOnClickListener(this);
+        dataDownloadButton.setOnClickListener(this);
+        droneFunc2Group = findViewById(R.id.ll_func_2);
+
+        refreshDroneState();
+    }
+
+    private boolean judgeDroneConnected() {
+
+        boolean isConnected = false;
+
+        BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
+
+        if (null != mProduct && mProduct.isConnected()) {
+            Log.v(TAG, "refreshSDK: True");
+            isConnected = true;
+            if (null != mProduct.getModel()) {
+
+            } else {
+
+            }
+
+        } else {
+            isConnected = false;
+        }
+
+        return isConnected;
+    }
+
+    private void refreshDroneState() {
+        isDroneConnected = judgeDroneConnected();
+        if (isDroneConnected) {
+            droneLogoImage.setAlpha(255);
+            droneStateLightText.setActivated(true);
+            droneStateText.setText(getResources().getString(R.string.drone_state_on));
+            droneInfoGroup.setVisibility(View.VISIBLE);
+            droneFunc2Group.setVisibility(View.VISIBLE);
+        } else {
+            droneLogoImage.setAlpha(100);
+            droneStateLightText.setActivated(false);
+            droneStateText.setText(getResources().getString(R.string.drone_state_off));
+            droneInfoGroup.setVisibility(View.INVISIBLE);
+            droneFunc2Group.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -139,25 +196,6 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
             return true;
         }
         return super.onKeyDown(keyCode, keyEvent);
-    }
-
-    private void refreshSDKRelativeUI() {
-        BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
-
-        if (null != mProduct && mProduct.isConnected()) {
-            Log.v("connection", "refreshSDK: True");
-            if (null != mProduct.getModel()) {
-                appFunc3Button.setClickable(true);
-                appFunc4Button.setClickable(true);
-            } else {
-                appFunc3Button.setClickable(true);
-                appFunc4Button.setClickable(true);
-            }
-
-        } else {
-            appFunc3Button.setClickable(true);
-            appFunc4Button.setClickable(true);
-        }
     }
 
     private void loginAccount() {
@@ -202,6 +240,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         }
 
     }
+
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.

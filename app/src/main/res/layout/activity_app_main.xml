@@ -6,48 +6,153 @@
     android:orientation="vertical"
     tools:context="com.hitices.autopatrol.activity.AppMainActivity">
 
-    <Button
-        android:id="@+id/app_func1_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="300dp"
-        android:text="@string/app_func1" />
+    <ImageView
+        android:id="@+id/iv_drone_logo"
+        android:layout_width="@dimen/drone_logo_size"
+        android:layout_height="@dimen/drone_logo_size"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/drone_logo" />
 
-    <Button
-        android:id="@+id/app_func2_button"
+    <LinearLayout
+        android:id="@+id/ll_drone_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="300dp"
-        android:text="@string/app_func2" />
+        android:layout_below="@+id/iv_drone_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/app_func3_button"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="400dp"
-        android:text="执行任务" />
+        <TextView
+            android:id="@+id/tv_drone_state_light"
+            android:layout_width="@dimen/drone_state_light_size"
+            android:layout_height="@dimen/drone_state_light_size"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_drone_state" />
 
-    <Button
-        android:id="@+id/app_func4_button"
+        <TextView
+            android:id="@+id/tv_drone_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/drone_state_off"
+            android:textSize="@dimen/drone_state_text_size" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_drone_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="400dp"
-        android:text="@string/app_func2" />
+        android:layout_below="@+id/ll_drone_state"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_drone_info"
+        android:orientation="vertical"
+        android:padding="15dp"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@string/drone_info_name"
+                android:textSize="@dimen/drone_info_text_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_drone_info_name"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:gravity="start"
+                android:text="DJI M100"
+                android:textSize="@dimen/drone_info_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@string/drone_info_camera"
+                android:textSize="@dimen/drone_info_text_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_drone_info_camera"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:gravity="start"
+                android:text="DJI M100"
+                android:textSize="@dimen/drone_info_text_size" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_func_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_drone_info"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_app_func_mission_manage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_app_func_button"
+            android:text="@string/app_func_mission_manage"
+            android:textSize="@dimen/app_func_text_size" />
+
+        <Button
+            android:id="@+id/btn_app_func_data_analysis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:background="@drawable/bg_app_func_button"
+            android:text="@string/app_func_data_analysis"
+            android:textSize="@dimen/app_func_text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_func_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_func_1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_app_func_mission_run"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_app_func_button"
+            android:text="@string/app_func_mission_run"
+            android:textSize="@dimen/app_func_text_size" />
+
+        <Button
+            android:id="@+id/btn_app_func_data_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:background="@drawable/bg_app_func_button"
+            android:text="@string/app_func_data_download"
+            android:textSize="@dimen/app_func_text_size" />
+    </LinearLayout>
 
 </RelativeLayout>
