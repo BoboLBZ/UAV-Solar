@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
@@ -21,6 +20,7 @@ import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.gimbal.Gimbal;
 import dji.sdk.products.Aircraft;
@@ -90,6 +90,13 @@ public class AutoPatrolApplication extends Application {
         if (getProductInstance() == null) return null;
 
         return getProductInstance().getGimbal();
+    }
+
+    public static synchronized Battery getBattery() {
+        if (getProductInstance() == null) {
+            return null;
+        }
+        return getProductInstance().getBattery();
     }
 
     public static boolean isAircraftConnected() {
