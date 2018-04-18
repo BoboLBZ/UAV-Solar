@@ -51,13 +51,19 @@ public class DataDownloadActivity extends AppCompatActivity {
 
     }
 
-    public void downloadSelectedRecordImg(FlightRecord record) {
+    public void downloadSelectedRecordImg(final FlightRecord record) {
         downloadHelper.downloadFilesByMissionRecord(record, new RecordImageDownloadHelper.FilesDownloadCompleteListener() {
             @Override
             public void onComplete() {
                 ToastHelper.getInstance().showShortToast("下载完成");
-//                record.setDownload(true);
-//                adapter.notifyDataSetChanged();
+                record.setDownload(true);
+                record.save();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
