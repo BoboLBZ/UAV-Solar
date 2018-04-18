@@ -47,6 +47,7 @@ import com.hitices.autopatrol.entity.missions.MultiPointsModel;
 import com.hitices.autopatrol.entity.missions.SlopeModel;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
 import com.hitices.autopatrol.helper.MissionHelper;
+import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.crud.DataSupport;
 
@@ -144,10 +145,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            ToastHelper.getInstance().showLongToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
                 record.setEndTime(new Date());
                 record.save();
+                ToastHelper.getInstance().showLongToast("save record success");
             }
         }
     };
@@ -241,13 +243,25 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
                             //简单安全处理
                             //djiFlightControllerCurrentState.get
+                            //simpleSafetyMeasures(djiFlightControllerCurrentState);
                         }
                     });
+            //简单安全处理
+            mFlightController.setLowBatteryWarningThreshold(20, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+
+                }
+            });
             setResultToToast("in flight control");
         }
 
     }
 
+    private void simpleSafetyMeasures(FlightController controller) {
+//        state.
+
+    }
     /**
      * 根据传入的任务信息读取子任务列表
      */
@@ -584,7 +598,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 BaseModel model = executeModelList.get(i);
                 switch (model.getModelType()) {
                     case Slope:
-
+                        if (((SlopeModel) model).getSpeed() > speed)
+                            speed = ((SlopeModel) model).getSpeed();
                         break;
                     case Flatland:
                         if (((FlatlandModel) model).getSpeed() > speed)
@@ -601,21 +616,26 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     }
 
     private float getAltitude() {
+        //选择所有任务安全高度之最作为返航高度
         float altitude = 15f;
         if (!executeModelList.isEmpty()) {
             for (int i = 0; i < executeModelList.size(); i++) {
                 BaseModel model = executeModelList.get(i);
                 switch (model.getModelType()) {
                     case Slope:
-
+                        if (((SlopeModel) model).getSafeAltitude() > altitude) {
+                            altitude = ((SlopeModel) model).getSafeAltitude();
+                        }
                         break;
                     case Flatland:
-                        if (((FlatlandModel) model).getSafeAltitude() > altitude)
-                            altitude = ((FlatlandModel) model).getSpeed();
+                        if (((FlatlandModel) model).getSafeAltitude() > altitude) {
+                            altitude = ((FlatlandModel) model).getSafeAltitude();
+                        }
                         break;
                     case MultiPoints:
-                        if (((MultiPointsModel) model).getSafeAltitude() > altitude)
-                            altitude = ((MultiPointsModel) model).getSpeed();
+                        if (((MultiPointsModel) model).getSafeAltitude() > altitude) {
+                            altitude = ((MultiPointsModel) model).getSafeAltitude();
+                        }
                         break;
                 }
             }
