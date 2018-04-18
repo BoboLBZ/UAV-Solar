@@ -6,7 +6,8 @@ import com.amap.api.maps2d.model.LatLng;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 
 import java.io.File;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by dusz7 on 20180412.
@@ -16,12 +17,12 @@ public class RecordImageHelper {
 
     public static File getRecordVisibleImagePath(FlightRecord record) {
         return new File(MissionConstraintHelper.MISSION_PHOTO_DIR + "/" +
-                record.getExecuteMission().getName() + "/Visible/" + record.getStartTime());
+                record.getMissionName() + "/Visible/" + RecordInfoHelper.getRecordStartDateDir(record));
     }
 
     public static File getRecordInfraredImagePath(FlightRecord record) {
         return new File(MissionConstraintHelper.MISSION_PHOTO_DIR + "/" +
-                record.getExecuteMission().getName() + "/Infrared/" + record.getStartTime());
+                record.getMissionName() + "/Infrared/" + RecordInfoHelper.getRecordStartDateDir(record));
     }
 
     public static File getRecordTestImagePath() {

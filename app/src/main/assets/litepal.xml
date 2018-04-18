@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="AutoPatrolStore" />
-    <version value="1" />
+    <version value="2" />
     <list>
         <mapping class="com.hitices.autopatrol.entity.dataSupport.FlightRecord" />
         <mapping class="com.hitices.autopatrol.entity.dataSupport.PatrolMission" />

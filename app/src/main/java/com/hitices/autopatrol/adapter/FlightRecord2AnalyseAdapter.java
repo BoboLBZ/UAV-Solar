@@ -12,6 +12,8 @@ import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.ContextHelper;
+import com.hitices.autopatrol.helper.RecordImageHelper;
+import com.hitices.autopatrol.helper.RecordInfoHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.util.List;
@@ -87,8 +89,8 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
         FlightRecord record = flightRecordList.get(position);
 
         // bind mission to view
-        holder.missionNameText.setText(record.getExecuteMission().getName());
-        holder.executeDateText.setText(record.getStartTime().toString());
+        holder.missionNameText.setText(record.getMissionName());
+        holder.executeDateText.setText(RecordInfoHelper.getRecordStartDateShowName(record));
         if (record.isDownload()) {
             holder.isDownloadText.setText("（ 已下载 ）");
         } else {

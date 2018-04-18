@@ -653,7 +653,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private void startMission() {
         setResultToToast("on start");
         record = new FlightRecord();
-        record.setMission(patrolMission);
+        record.setMissionName(patrolMission.getName());
+//        record.setPowerStationName(patrolMission.getPowerStation().getName());
+//        record.setPowerStationThumb(patrolMission.getPowerStation().getThumbUrl());
         if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.READY_TO_EXECUTE) {
             getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
                 @Override

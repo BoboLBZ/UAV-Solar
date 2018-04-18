@@ -61,6 +61,8 @@ public class RecordImageDownloadHelper {
             // get missionDate
             executeStartDate = record.getStartTime();
             executeEndDate = record.getEndTime();
+        } else {
+            Log.d(TAG, "record is null");
         }
     }
 
@@ -69,6 +71,7 @@ public class RecordImageDownloadHelper {
     }
 
     public void downloadFilesByMissionRecord(FlightRecord record, FilesDownloadCompleteListener listener) {
+        Log.d(TAG, "download by mission record");
         setFlightRecord(record);
         setCompleteListener(listener);
 

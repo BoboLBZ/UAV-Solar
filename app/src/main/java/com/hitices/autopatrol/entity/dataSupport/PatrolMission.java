@@ -30,7 +30,7 @@ public class PatrolMission extends DataSupport {
     private PowerStation powerStation;
 
     // 外建：该任务对应的执行记录
-    private List<FlightRecord> records;
+//    private List<FlightRecord> records;
 
     public int getId() {
         return id;
@@ -73,13 +73,13 @@ public class PatrolMission extends DataSupport {
         this.powerStation = powerStation;
     }
 
-    public List<FlightRecord> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<FlightRecord> records) {
-        this.records = records;
-    }
+//    public List<FlightRecord> getRecords() {
+//        return records;
+//    }
+//
+//    public void setRecords(List<FlightRecord> records) {
+//        this.records = records;
+//    }
 
     public int getChildNums() {
         return childNums;

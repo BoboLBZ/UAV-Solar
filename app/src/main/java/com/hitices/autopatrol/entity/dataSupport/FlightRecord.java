@@ -15,6 +15,11 @@ public class FlightRecord extends DataSupport implements Serializable {
     @Column(unique = true, defaultValue = "unknown")
     private int id;
 
+    // 基本信息
+    private String missionName;
+    private String powerStationName;
+    private String powerStationThumb;
+
     // 本次执行时间
     private Date startTime;
     private Date endTime;
@@ -25,7 +30,32 @@ public class FlightRecord extends DataSupport implements Serializable {
     private boolean isDownload;
 
     // 外建：所执行的任务
-    private PatrolMission mission;
+//    private PatrolMission mission;
+
+
+    public String getMissionName() {
+        return missionName;
+    }
+
+    public void setMissionName(String missionName) {
+        this.missionName = missionName;
+    }
+
+    public String getPowerStationName() {
+        return powerStationName;
+    }
+
+    public void setPowerStationName(String powerStationName) {
+        this.powerStationName = powerStationName;
+    }
+
+    public String getPowerStationThumb() {
+        return powerStationThumb;
+    }
+
+    public void setPowerStationThumb(String powerStationThumb) {
+        this.powerStationThumb = powerStationThumb;
+    }
 
     public Date getStartTime() {
         return startTime;
@@ -75,15 +105,15 @@ public class FlightRecord extends DataSupport implements Serializable {
         isDownload = download;
     }
 
-    public PatrolMission getMission() {
-        return mission;
-    }
+//    public PatrolMission getMission() {
+//        return mission;
+//    }
+//
+//    public void setMission(PatrolMission mission) {
+//        this.mission = mission;
+//    }
 
-    public void setMission(PatrolMission mission) {
-        this.mission = mission;
-    }
-
-    public PatrolMission getExecuteMission() {
-        return DataSupport.find(FlightRecord.class, id, true).getMission();
-    }
+//    public PatrolMission getExecuteMission() {
+//        return DataSupport.find(FlightRecord.class, id, true).getMission();
+//    }
 }

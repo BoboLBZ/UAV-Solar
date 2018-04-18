@@ -57,73 +57,73 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
-        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
-            genMissions();
-        }
+//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+//            genMissions();
+//        }
 
         flightRecordList = DataSupport.findAll(FlightRecord.class);
 
     }
 
-    private void genMissions() {
-
-        PatrolMission mission1 = new PatrolMission();
-        mission1.setName("mission1");
-        mission1.save();
-        PatrolMission mission2 = new PatrolMission();
-        mission2.setName("mission2");
-        mission2.save();
-        PatrolMission mission3 = new PatrolMission();
-        mission3.setName("mission3");
-        mission3.save();
-        PatrolMission downloadMission = new PatrolMission();
-        downloadMission.setName("downTestMission");
-        downloadMission.save();
-
-        FlightRecord record1 = new FlightRecord();
-        record1.setMission(mission1);
-        record1.setStartTime(new Date());
-        record1.setEndTime(new Date());
-        record1.setHasInfrared(true);
-        record1.setDownload(true);
-        record1.save();
-
-        FlightRecord record2 = new FlightRecord();
-        record2.setMission(mission1);
-        record2.setStartTime(new Date());
-        record2.setEndTime(new Date());
-        record2.setDownload(true);
-        record2.setHasVisible(true);
-        record2.setHasInfrared(true);
-        record2.save();
-
-        FlightRecord record3 = new FlightRecord();
-        record3.setMission(mission2);
-        record3.setStartTime(new Date());
-        record3.setEndTime(new Date());
-        record3.setDownload(true);
-        record3.setHasVisible(true);
-        record3.save();
-
-        FlightRecord record4 = new FlightRecord();
-        record4.setMission(mission3);
-        record4.setStartTime(new Date());
-        record4.setEndTime(new Date());
-        record4.setDownload(false);
-        record4.save();
-
-        FlightRecord record5 = new FlightRecord();
-        record5.setMission(mission2);
-        record5.setStartTime(new Date());
-        record5.setEndTime(new Date());
-        record5.save();
-
-        FlightRecord record6 = new FlightRecord();
-        record6.setMission(downloadMission);
-        record6.setStartTime(new Date(2017 - 1900, 1, 1, 1, 1, 1));
-        record6.setEndTime(new Date());
-        record6.save();
-    }
+//    private void genMissions() {
+//
+//        PatrolMission mission1 = new PatrolMission();
+//        mission1.setName("mission1");
+//        mission1.save();
+//        PatrolMission mission2 = new PatrolMission();
+//        mission2.setName("mission2");
+//        mission2.save();
+//        PatrolMission mission3 = new PatrolMission();
+//        mission3.setName("mission3");
+//        mission3.save();
+//        PatrolMission downloadMission = new PatrolMission();
+//        downloadMission.setName("downTestMission");
+//        downloadMission.save();
+//
+//        FlightRecord record1 = new FlightRecord();
+//        record1.setMission(mission1);
+//        record1.setStartTime(new Date());
+//        record1.setEndTime(new Date());
+//        record1.setHasInfrared(true);
+//        record1.setDownload(true);
+//        record1.save();
+//
+//        FlightRecord record2 = new FlightRecord();
+//        record2.setMission(mission1);
+//        record2.setStartTime(new Date());
+//        record2.setEndTime(new Date());
+//        record2.setDownload(true);
+//        record2.setHasVisible(true);
+//        record2.setHasInfrared(true);
+//        record2.save();
+//
+//        FlightRecord record3 = new FlightRecord();
+//        record3.setMission(mission2);
+//        record3.setStartTime(new Date());
+//        record3.setEndTime(new Date());
+//        record3.setDownload(true);
+//        record3.setHasVisible(true);
+//        record3.save();
+//
+//        FlightRecord record4 = new FlightRecord();
+//        record4.setMission(mission3);
+//        record4.setStartTime(new Date());
+//        record4.setEndTime(new Date());
+//        record4.setDownload(false);
+//        record4.save();
+//
+//        FlightRecord record5 = new FlightRecord();
+//        record5.setMission(mission2);
+//        record5.setStartTime(new Date());
+//        record5.setEndTime(new Date());
+//        record5.save();
+//
+//        FlightRecord record6 = new FlightRecord();
+//        record6.setMission(downloadMission);
+//        record6.setStartTime(new Date(2017 - 1900, 1, 1, 1, 1, 1));
+//        record6.setEndTime(new Date());
+//        record6.save();
+//    }
 
     private void initUI() {
 
@@ -133,31 +133,6 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         FlightRecord2AnalyseAdapter adapter = new FlightRecord2AnalyseAdapter(flightRecordList);
         flightRecordsRecycleView.setAdapter(adapter);
     }
-
-    // FetchMediaTask.Callback示例
-    private FetchMediaTask.Callback taskCallback = new FetchMediaTask.Callback() {
-        @Override
-        public void onUpdate(MediaFile file, FetchMediaTaskContent option, DJIError error) {
-            if (null == error) {
-//                if (option == FetchMediaTaskContent.PREVIEW) {
-//                    runOnUiThread(new Runnable() {
-//                        public void run() {
-//                            mListAdapter.notifyDataSetChanged();
-//                        }
-//                    });
-//                }
-//                if (option == FetchMediaTaskContent.THUMBNAIL) {
-//                    runOnUiThread(new Runnable() {
-//                        public void run() {
-//                            mListAdapter.notifyDataSetChanged();
-//                        }
-//                    });
-//                }
-            } else {
-                DJILog.e(TAG, "Fetch Media Task Failed" + error.getDescription());
-            }
-        }
-    };
 
     @Override
     public void onClick(View v) {

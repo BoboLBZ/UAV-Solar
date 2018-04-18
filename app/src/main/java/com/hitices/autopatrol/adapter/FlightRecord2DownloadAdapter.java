@@ -11,6 +11,7 @@ import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataDownloadActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.RecordImageDownloadHelper;
+import com.hitices.autopatrol.helper.RecordInfoHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.util.List;
@@ -78,8 +79,8 @@ public class FlightRecord2DownloadAdapter extends RecyclerView.Adapter<FlightRec
         FlightRecord record = flightRecordList.get(position);
 
         // bind mission to view
-        holder.missionNameText.setText(record.getExecuteMission().getName());
-        holder.executeDateText.setText(record.getStartTime().toString());
+        holder.missionNameText.setText(record.getMissionName());
+        holder.executeDateText.setText(RecordInfoHelper.getRecordStartDateShowName(record));
         holder.isDownloadText.setVisibility(View.GONE);
         if (record.isHasVisible()) {
             holder.hasVisiblePicView.setVisibility(View.VISIBLE);
