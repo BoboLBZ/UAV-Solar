@@ -18,9 +18,9 @@ import android.widget.Toast;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
+import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 import com.hitices.autopatrol.helper.MissionHelper;
-import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.PermissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
@@ -153,17 +153,18 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
 
         if (null != mProduct && mProduct.isConnected()) {
             Log.v(TAG, "refreshSDK: True");
-            isConnected = true;
-            if (null != mProduct.getModel()) {
-
+            if (null != mProduct.getModel() && null != mProduct.getCamera()) {
+                isConnected = true;
+                droneInfoName.setText(mProduct.getModel().getDisplayName());
+                droneInfoCamera.setText(mProduct.getCamera().getDisplayName());
             } else {
-
+                isConnected = false;
             }
-
         } else {
             isConnected = false;
         }
-
+        //for test
+        isConnected = true;
         return isConnected;
     }
 

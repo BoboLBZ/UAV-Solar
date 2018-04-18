@@ -144,7 +144,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private MapView mapView;
     private Button btn_childlist;
     private FloatingActionsMenu menu;
-    private FloatingActionButton btn_add, btn_save;
+    private FloatingActionButton btn_add, btn_save, btn_show;
     private RecyclerView recyclerView;
     private TextView currentChildMissionName;
     private ImageButton child_setting;
@@ -312,6 +312,9 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             case R.id.btn_setting_mission_main:
                 showSettingDialog();
                 break;
+            case R.id.show_all_mdoel_mission_main:
+                showAllModel();
+                break;
         }
     }
 
@@ -354,6 +357,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         child_setting = findViewById(R.id.btn_setting_mission_main);
         btn_add = findViewById(R.id.add_mdoel_mission_main);
         btn_save = findViewById(R.id.save_mission_main);
+        btn_show = findViewById(R.id.show_all_mdoel_mission_main);
         menu = findViewById(R.id.menu_mission_main);
         recyclerView = findViewById(R.id.view_child_mission_main);
         currentChildMissionName = findViewById(R.id.tv_child_name_mission_main);
@@ -367,6 +371,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         btn_childlist.setOnClickListener(this);
         btn_save.setOnClickListener(this);
         btn_add.setOnClickListener(this);
+        btn_show.setOnClickListener(this);
     }
 
     private void initMission() {
@@ -520,6 +525,38 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 case MultiPoints:
                     showMultiPointsModelSettingDialog();
                     break;
+            }
+        }
+    }
+
+    private void showAllModel() {
+        if (currentModel != null) {
+            switch (currentModel.getModelType()) {
+                case MultiPoints:
+                    clearMultiPointDisplay();
+                    break;
+                case Flatland:
+                    clearFlatlandDisplay();
+                    break;
+                case Slope:
+                    clearSlopeDisplay();
+                    break;
+            }
+        }
+        if (!modelList.isEmpty()) {
+            for (int i = 0; i < modelList.size(); i++) {
+
+                switch (modelList.get(i).getModelType()) {
+                    case Slope:
+                        showSlopeView((SlopeModel) modelList.get(i));
+                        break;
+                    case Flatland:
+                        showFlatlandView((FlatlandModel) modelList.get(i));
+                        break;
+                    case MultiPoints:
+                        showMultiPointsView((MultiPointsModel) modelList.get(i));
+                        break;
+                }
             }
         }
     }
@@ -1164,6 +1201,10 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         s_baseline = aMap.addPolyline(
                 new PolylineOptions().add(a.getPosition(), b.getPosition())
                         .color(getResources().getColor(R.color.baseline)));
+        if (currentModel == null)
+            return;
+        if (currentModel.getModelType() != ModelType.Slope)
+            return;
         if (getSlopeModel().getBaselineA() != null && getSlopeModel().getBaselineB() != null) {
             Waypoint baseA = new Waypoint(a.getPosition().latitude, a.getPosition().longitude, getSlopeModel().getBaselineA().altitude);
             Waypoint baseB = new Waypoint(b.getPosition().latitude, b.getPosition().longitude, getSlopeModel().getBaselineB().altitude);
@@ -1215,13 +1256,13 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         if (currentModel != null) {
             switch (currentModel.getModelType()) {
                 case Slope:
-                    showSlopeView();
+                    showSlopeView(getSlopeModel());
                     break;
                 case Flatland:
-                    showFlatlandView();
+                    showFlatlandView(getFlatlandModel());
                     break;
                 case MultiPoints:
-                    showMultiPointsView();
+                    showMultiPointsView(getMultipointsModel());
                     break;
             }
         } else {
@@ -1255,20 +1296,26 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             s_polyline.remove();
         if (s_startPoint != null)
             s_startPoint.destroy();
-        if (s_base_A != null)
+        if (s_base_A != null) {
+            s_base_A.remove();
             s_base_A.destroy();
-        if (s_base_B != null)
+            s_base_A = null;
+        }
+        if (s_base_B != null) {
+            s_base_B.remove();
             s_base_B.destroy();
+            s_base_B = null;
+        }
         if (s_baseline != null)
             s_baseline.remove();
     }
 
-    private void showMultiPointsView() {
-        for (int i = 0; i < getMultipointsModel().getWaypointList().size(); i++) {
+    private void showMultiPointsView(MultiPointsModel multiPointsModel) {
+        for (int i = 0; i < multiPointsModel.getWaypointList().size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             LatLng ll = new LatLng(
-                    getMultipointsModel().getWaypointList().get(i).coordinate.getLatitude(),
-                    getMultipointsModel().getWaypointList().get(i).coordinate.getLongitude());
+                    multiPointsModel.getWaypointList().get(i).coordinate.getLatitude(),
+                    multiPointsModel.getWaypointList().get(i).coordinate.getLongitude());
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             markerOptions.draggable(false);
@@ -1280,41 +1327,42 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void showFlatlandView() {
-        PolylineOptions options = new PolylineOptions().addAll(getFlatlandModel().getVertexs());
-        if (getFlatlandModel().getVertexs().size() > 0)
-            options.add(getFlatlandModel().getVertexs().get(0));
+    private void showFlatlandView(FlatlandModel flatlandModel) {
+        PolylineOptions options = new PolylineOptions().addAll(flatlandModel.getVertexs());
+        if (flatlandModel.getVertexs().size() > 0)
+            options.add(flatlandModel.getVertexs().get(0));
         f_polyline = aMap.addPolyline(options);
-        f_polygon = aMap.addPolygon(new PolygonOptions().addAll(getFlatlandModel().getVertexs())
+        f_polygon = aMap.addPolygon(new PolygonOptions().addAll(flatlandModel.getVertexs())
                 .fillColor(getResources().getColor(R.color.fillColor)));
-        if (getFlatlandModel().getVertexs().size() > 0) {
-            cameraUpdate(getFlatlandModel().getVertexs().get(0), aMap.getCameraPosition().zoom);
+        if (flatlandModel.getVertexs().size() > 0) {
+            cameraUpdate(flatlandModel.getVertexs().get(0), aMap.getCameraPosition().zoom);
         } else {
             cameraUpdate(locationLatlng, 18f);
         }
+
     }
 
-    private void showSlopeView() {
+    private void showSlopeView(SlopeModel slopeModel) {
         //参数调整
         status_of_slopemodel = 1;
         //show border
-        PolylineOptions options = new PolylineOptions().addAll(getSlopeModel().getVertexs());
-        if (getSlopeModel().getVertexs().size() > 0)
-            options.add(getSlopeModel().getVertexs().get(0));
+        PolylineOptions options = new PolylineOptions().addAll(slopeModel.getVertexs());
+        if (slopeModel.getVertexs().size() > 0)
+            options.add(slopeModel.getVertexs().get(0));
         s_polyline = aMap.addPolyline(options);
-        s_polygon = aMap.addPolygon(new PolygonOptions().addAll(getSlopeModel().getVertexs())
+        s_polygon = aMap.addPolygon(new PolygonOptions().addAll(slopeModel.getVertexs())
                 .fillColor(getResources().getColor(R.color.fillColor)));
-        if (getSlopeModel().getVertexs().size() > 0) {
-            cameraUpdate(getSlopeModel().getVertexs().get(0), aMap.getCameraPosition().zoom);
+        if (slopeModel.getVertexs().size() > 0) {
+            cameraUpdate(slopeModel.getVertexs().get(0), aMap.getCameraPosition().zoom);
         } else {
             cameraUpdate(locationLatlng, 18f);
         }
         //show baseline
-        if (getSlopeModel().getBaselineA() != null && getSlopeModel().getBaselineB() != null) {
-            drawBaselineMarker(new LatLng(getSlopeModel().getBaselineA().coordinate.getLatitude(),
-                    getSlopeModel().getBaselineA().coordinate.getLongitude()));
-            drawBaselineMarker(new LatLng(getSlopeModel().getBaselineB().coordinate.getLatitude(),
-                    getSlopeModel().getBaselineB().coordinate.getLongitude()));
+        if (slopeModel.getBaselineA() != null && slopeModel.getBaselineB() != null) {
+            drawBaselineMarker(new LatLng(slopeModel.getBaselineA().coordinate.getLatitude(),
+                    slopeModel.getBaselineA().coordinate.getLongitude()));
+            drawBaselineMarker(new LatLng(slopeModel.getBaselineB().coordinate.getLatitude(),
+                    slopeModel.getBaselineB().coordinate.getLongitude()));
         }
     }
 

@@ -55,6 +55,15 @@
         fab:fab_labelsPosition="left">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/show_all_mdoel_mission_main"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/pink"
+            fab:fab_colorPressed="@color/pink_pressed"
+            fab:fab_icon="@drawable/ic_mission_add"
+            fab:fab_size="mini"
+            fab:fab_title="显示所有" />
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_mdoel_mission_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

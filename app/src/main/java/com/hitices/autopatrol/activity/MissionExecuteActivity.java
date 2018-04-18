@@ -97,7 +97,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private Marker humanLocationMarker;
 
 
-
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
@@ -235,12 +234,13 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                         @Override
                         public void onUpdate(FlightControllerState
                                                      djiFlightControllerCurrentState) {
+                            //update drone location
                             droneLocation = new LatLng(djiFlightControllerCurrentState.getAircraftLocation().getLatitude(),
                                     djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
-                            // setResultToToast("before坐标" + droneLocation.latitude + "," + droneLocation.longitude);
                             //gps 坐标转换成 高德坐标系
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-                            //  setResultToToast("after坐标" + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).latitude + "," + AutoPatrolApplication.WGS84ConvertToAmap(droneLocation).longitude);
+                            //简单安全处理
+                            //djiFlightControllerCurrentState.get
                         }
                     });
             setResultToToast("in flight control");
@@ -263,6 +263,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             modelList = helper.getModelList();
         }
     }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -298,14 +299,16 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
         setResultToToast("num of waypoint is " + String.valueOf(waypoints.size()));
     }
-    private void markHomePoint(LatLng latLng){
+
+    private void markHomePoint(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),
                 R.drawable.ic_home_point_marker)));
         aMap.addMarker(markerOptions);
-       // cameraUpdate(ll);
+        // cameraUpdate(ll);
     }
+
     private void markRangeOfExecuteModel() {
         for (int i = 0; i < executeModelList.size(); i++) {
             switch (executeModelList.get(i).getModelType()) {
@@ -619,6 +622,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
         return altitude;
     }
+
     /**
      * uploadMission
      * 航点任务执行流程第二步
@@ -757,8 +761,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
 
     private class GridviewSeleteAdapter extends BaseAdapter {
-        private LayoutInflater inflater;
         List<BaseModel> oldModelList;
+        private LayoutInflater inflater;
         private boolean[] selected;
 
         GridviewSeleteAdapter(Context context, List<BaseModel> list) {
