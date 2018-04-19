@@ -232,6 +232,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                         MissionHelper helper = new MissionHelper(f.getAbsolutePath(), new PatrolMission());
                         PatrolMission patrolMission = helper.getPatrolMission();
 //                        System.out.println("testNameB:"+patrolMission.getName());
+                        Log.e("missionName", patrolMission.getName());
                         if (!names.contains(patrolMission.getName())) {
                             patrolMission.save();
                         }
