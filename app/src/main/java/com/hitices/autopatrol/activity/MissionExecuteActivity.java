@@ -82,6 +82,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
  * created by Rhys
  */
 public class MissionExecuteActivity extends Activity implements View.OnClickListener {
+    private static final String TAG = MissionExecuteActivity.class.getName();
     public WaypointMission.Builder builder;
     private PatrolMission patrolMission;
     private List<BaseModel> modelList;
@@ -145,11 +146,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            ToastHelper.getInstance().showLongToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            ToastHelper.getInstance().showShortToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
                 record.setEndTime(new Date());
                 record.save();
-                ToastHelper.getInstance().showLongToast("save record success");
+                ToastHelper.getInstance().showShortToast("save record success");
             }
         }
     };
@@ -575,8 +576,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         builder.waypointCount(list.size());
 
         float speed = getSpeed();
-        builder.autoFlightSpeed(5);
-        builder.maxFlightSpeed(5);
+        builder.autoFlightSpeed(speed);
+        builder.maxFlightSpeed(speed);
 
         builder.finishedAction(WaypointMissionFinishedAction.AUTO_LAND);
         builder.headingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
@@ -612,12 +613,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             }
         }
+        Log.e(TAG, "speed is " + String.valueOf(speed));
+        ToastHelper.getInstance().showShortToast("speed is " + String.valueOf(speed));
         return speed;
     }
 
     private float getAltitude() {
         //选择所有任务安全高度之最作为返航高度
-        float altitude = 15f;
+        float altitude = 12f;
         if (!executeModelList.isEmpty()) {
             for (int i = 0; i < executeModelList.size(); i++) {
                 BaseModel model = executeModelList.get(i);
@@ -640,6 +643,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             }
         }
+        Log.e(TAG, "safe altitude is " + String.valueOf(altitude));
+        ToastHelper.getInstance().showShortToast("safe altitude is " + String.valueOf(altitude));
         return altitude;
     }
 
