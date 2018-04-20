@@ -184,13 +184,20 @@
             android:layout_height="40dp"
             android:layout_marginBottom="2dp"
             android:src="@drawable/ic_flight_takeoff_unpressed" />
-
         <ImageButton
             android:id="@+id/execute_stopMission"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginBottom="2dp"
             android:src="@drawable/ic_mission_stop" />
+
+        <ImageButton
+            android:id="@+id/execute_exitMission"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="2dp"
+            android:src="@drawable/ic_mission_exit" />
+
         <!--<dji.ui.widget.ReturnHomeWidget-->
         <!--android:layout_width="40dp"-->
         <!--android:layout_height="40dp"-->

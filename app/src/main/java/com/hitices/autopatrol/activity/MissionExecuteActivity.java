@@ -46,6 +46,7 @@ import com.hitices.autopatrol.entity.missions.FlatlandModel;
 import com.hitices.autopatrol.entity.missions.MultiPointsModel;
 import com.hitices.autopatrol.entity.missions.SlopeModel;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
+import com.hitices.autopatrol.helper.MissionConstraintHelper;
 import com.hitices.autopatrol.helper.MissionHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
@@ -57,9 +58,6 @@ import java.util.List;
 
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
-import dji.common.gimbal.GimbalMode;
-import dji.common.gimbal.Rotation;
-import dji.common.gimbal.RotationMode;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
@@ -69,6 +67,7 @@ import dji.common.mission.waypoint.WaypointMissionFlightPathMode;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.common.mission.waypoint.WaypointMissionState;
 import dji.common.mission.waypoint.WaypointMissionUploadEvent;
+import dji.common.model.LocationCoordinate2D;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
@@ -97,8 +96,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private LatLng droneLocation;
     private LatLng humanLocation;
     private Marker humanLocationMarker;
-
-
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
@@ -123,7 +120,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
     };
-    private ImageButton uplaod, start, stop;
+    //safe
+    private boolean returnHomeSettingFlag = true;
+    private ImageButton uplaod, start, exit, pause;
     /**
      * WaypointMissionOperatorListener
      */
@@ -184,11 +183,13 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
     private void initUI() {
         uplaod = findViewById(R.id.execute_uploadMission);
-        stop = findViewById(R.id.execute_stopMission);
+        pause = findViewById(R.id.execute_stopMission);
+        exit = findViewById(R.id.execute_exitMission);
         start = findViewById(R.id.execute_startMission);
         uplaod.setOnClickListener(this);
         start.setOnClickListener(this);
-        stop.setOnClickListener(this);
+        exit.setOnClickListener(this);
+        pause.setOnClickListener(this);
     }
 
     /**
@@ -247,22 +248,87 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                             //simpleSafetyMeasures(djiFlightControllerCurrentState);
                         }
                     });
-            //简单安全处理
-            mFlightController.setLowBatteryWarningThreshold(20, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-
-                }
-            });
             setResultToToast("in flight control");
         }
 
     }
 
-    private void simpleSafetyMeasures(FlightController controller) {
-//        state.
-
+    /**
+     * 确认任务后的操作流程
+     * 生成可执行航点
+     * 地图标记
+     * 安全措施设置
+     * load mission，生成可执行的waypoint mission
+     */
+    private void missionProcessing() {
+        List<Waypoint> waypoints = generateExecutableWaypoints(executeModelList);
+        markWaypoints(waypoints);
+        markRangeOfExecuteModel();
+        simpleSafetyMeasures(mFlightController);
+        loadMission(WaypointListConvert(waypoints), getAltitude());
     }
+
+    private void simpleSafetyMeasures(FlightController controller) {
+        if (!setSmartReturnHome(controller)) {
+            ToastHelper.getInstance().showLongToast("设置智能返航失败，请注意飞行安全");
+        } else {
+            ToastHelper.getInstance().showLongToast("成功设置智能返航，请注意飞行安全");
+
+        }
+    }
+
+    /**
+     * 设置智能返航，返航条件：信号丢失，电量低于设定的阈值
+     *
+     * @param controller
+     * @return
+     */
+    private boolean setSmartReturnHome(@NonNull FlightController controller) {
+        //set home location (use drone take off location)
+        LocationCoordinate2D coordinate2D = new LocationCoordinate2D(droneLocation.latitude, droneLocation.longitude);
+        controller.setHomeLocation(coordinate2D, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
+        //set return home altitude(Range 20-500)use max safe altitude,
+        int alt = MissionConstraintHelper.getDefaultReturnHomeAltitude();
+        float myAlt = getAltitude();
+        if (myAlt > 20 && myAlt < 500) {
+            alt = (int) myAlt;
+        }
+        controller.setGoHomeHeightInMeters(alt, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
+        //enable smart return home
+        controller.setSmartReturnToHomeEnabled(true, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
+        //set
+        controller.setLowBatteryWarningThreshold(49, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
+        return returnHomeSettingFlag;
+    }
+
     /**
      * 根据传入的任务信息读取子任务列表
      */
@@ -289,6 +355,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 startMission();
                 break;
             case R.id.execute_stopMission:
+                changeStatusOfPause();
+                break;
+            case R.id.execute_exitMission:
                 stopMission();
                 break;
         }
@@ -450,33 +519,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
-    /**
-     * 调整云台，让相机竖直向下
-     */
-    private void setCameraMode(int angle) {
-        if (AutoPatrolApplication.getGimbalInstance() != null) {
-            AutoPatrolApplication.getGimbalInstance().setMode(GimbalMode.FPV, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                }
-            });
-            Rotation.Builder b = new Rotation.Builder();
-            b.mode(RotationMode.ABSOLUTE_ANGLE);
-            b.pitch(-angle);
-            AutoPatrolApplication.getGimbalInstance().rotate(b.build(), new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    if (djiError == null) {
-                        Log.i("rhys", "rotateGimbal success");
-                    } else {
-                        Log.i("rhys", "rotateGimbal error " + djiError.getDescription());
-                    }
-                }
-            });
-        }
-    }
-
-
     private void showchildSeleteDialog() {
         LinearLayout view = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_execute_select_model, null);
         GridView gridView = view.findViewById(R.id.gridview_execute_select_child);
@@ -539,19 +581,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         return temp;
     }
 
-    /**
-     * 确认任务后的操作流程
-     * 排序
-     * load mission
-     * 在地图标记航线
-     */
-    private void missionProcessing() {
-        List<Waypoint> waypoints = generateExecutableWaypoints(executeModelList);
-        markWaypoints(waypoints);
-        markRangeOfExecuteModel();
-        setCameraMode(90);
-        loadMission(WaypointListConvert(waypoints), getAltitude());
-    }
 
     /**
      * loadMission
@@ -593,7 +622,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     }
 
     private float getSpeed() {
-        float speed = 6f;
+        float speed = 3f;
         if (!executeModelList.isEmpty()) {
             for (int i = 0; i < executeModelList.size(); i++) {
                 BaseModel model = executeModelList.get(i);
@@ -712,6 +741,21 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         });
     }
 
+    private void changeStatusOfPause() {
+        WaypointMissionState state = getWaypointMissionOperator().getCurrentState();
+        if (state != null) {
+            if (state == WaypointMissionState.EXECUTING) {
+                pauseMission();
+                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_resume));
+            } else if (state == WaypointMissionState.EXECUTION_PAUSED) {
+                continueMission();
+                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_stop));
+
+            } else {
+                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_stop));
+            }
+        }
+    }
     /**
      * 任务暂停
      */
@@ -726,6 +770,17 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         });
     }
 
+    private void continueMission() {
+        if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.EXECUTION_PAUSED) {
+            getWaypointMissionOperator().resumeMission(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError error3) {
+                    setResultToToast("Mission resume: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                }
+            });
+        }
+
+    }
     /**
      * 坐标转换，高德->GPS
      */

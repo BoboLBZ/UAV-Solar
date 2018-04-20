@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.MissionManagementAdapter;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
@@ -18,7 +19,8 @@ import java.util.List;
 
 public class MissionManagemantActivity extends AppCompatActivity implements View.OnClickListener {
     private RecyclerView recyclerView;
-    private FloatingActionButton btn_create;
+    private FloatingActionButton btn_create, btn_import;
+    private FloatingActionsMenu menu;
     private List<PatrolMission> missionList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,10 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
     }
     private void initUI() {
         btn_create = findViewById(R.id.btn_create_mission_management);
+        btn_import = findViewById(R.id.btn_import_mission_management);
+        menu = findViewById(R.id.menu_mission_management);
         btn_create.setOnClickListener(this);
+        btn_import.setOnClickListener(this);
 
         recyclerView = findViewById(R.id.recycle_view_mission_management);
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -59,6 +64,10 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
         startActivity(intent);
     }
 
+    private void importMission() {
+
+    }
+
     private void getMissionList() {
         //read from database
         missionList = DataSupport.findAll(PatrolMission.class);
@@ -70,6 +79,10 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
         switch (view.getId()) {
             case R.id.btn_create_mission_management:
                 createMission();
+                break;
+            case R.id.btn_import_mission_management:
+                menu.collapse();
+                importMission();
                 break;
         }
     }

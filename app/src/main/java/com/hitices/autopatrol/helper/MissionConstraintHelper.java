@@ -18,12 +18,12 @@ public class MissionConstraintHelper {
     public static final String PHOTO_DIR = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/RawData";  //默认照片保存位置
     public static final String MISSION_PHOTO_DIR = Environment.getExternalStorageDirectory().getPath() + "/AutoPatrol/MissionPhoto";  //任务采集照片保存位置
     private static float maxSpeed = 10f;
-    private static float maxAltitude = 150f;
+    private static float maxAltitude = 500f;
     private static int maxFlatlandOverRate = 50;
     private static int maxFlatlandWidth = 30;
     private static int MaxShotDistance = 30;
     private static int MinShotDistance = 5;
-
+    private static int defaultReturnHomeAltitude = 30;
     private static int maxPitch = 90;
 
     public static List<WaypointAction> getGeneralWaypointActions() {
@@ -58,5 +58,9 @@ public class MissionConstraintHelper {
 
     public static int getMinShotDistance() {
         return MinShotDistance;
+    }
+
+    public static int getDefaultReturnHomeAltitude() {
+        return defaultReturnHomeAltitude;
     }
 }

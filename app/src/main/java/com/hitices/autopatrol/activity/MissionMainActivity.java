@@ -1,5 +1,6 @@
 package com.hitices.autopatrol.activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -81,61 +82,6 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private PatrolMission mission;
     private List<BaseModel> modelList;
     private BaseModel currentModel;
-    AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
-        String type;
-        String id;
-        @Override
-        public void onMarkerDragStart(Marker arg0) {
-            type = arg0.getTitle();
-            saveFlag = false;
-        }
-
-        @Override
-        public void onMarkerDragEnd(Marker arg0) {
-            if (currentModel.getModelType() == ModelType.Slope) {
-                if (type.equals("baseA")) {
-                    s_baseline.remove();
-                    //s_base_A=arg0;
-                    id = s_base_A.getId();
-                } else if (type.equals("baseB")) {
-                    s_baseline.remove();
-                    //s_base_B=arg0;
-                    id = s_base_B.getId();
-                }
-            }
-            drawBaseline(s_base_A, s_base_B);
-//            System.out.println("debug:ID0:"+arg0.getId());
-//            System.out.println("debug:IDA:"+s_base_A.getId());
-//            System.out.println("debug:IDB:"+s_base_B.getId());
-//            System.out.println("debug:arg0:"+arg0.getTitle().toString());
-//            System.out.println("debug:A:"+s_base_A.getTitle().toString());
-//            System.out.println("debug:B:"+s_base_B.getTitle().toString());
-            //removerRedundancy();
-
-        }
-
-        @Override
-        public void onMarkerDrag(Marker arg0) {
-        }
-
-        private void removerRedundancy() {
-            if (!id.isEmpty()) {
-                List<Marker> list = aMap.getMapScreenMarkers();
-                System.out.println("debug:" + String.valueOf(list.size()));
-                for (int i = 0; i < list.size(); i++) {
-                    Marker temp = list.get(i);
-                    if (temp.getTitle().equals(type)) {
-                        System.out.println("debug:" + id + ":" + temp.getId());
-                        if (!temp.getId().equals(id)) {
-                            System.out.println("debug:aa" + id + ":" + temp.getId());
-                            temp.destroy();
-
-                        }
-                    }
-                }
-            }
-        }
-    };
     private boolean saveFlag = true;
     //multiPoint
     private List<Marker> mMarkers = new ArrayList<>();
@@ -208,6 +154,62 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private Marker s_base_A;
     private Marker s_base_B;
     private Polyline s_baseline;
+    AMap.OnMarkerDragListener markerDragListener = new AMap.OnMarkerDragListener() {
+        String type;
+        String id;
+
+        @Override
+        public void onMarkerDragStart(Marker arg0) {
+            type = arg0.getTitle();
+            saveFlag = false;
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker arg0) {
+            if (currentModel.getModelType() == ModelType.Slope) {
+                if (type.equals("baseA")) {
+                    s_baseline.remove();
+                    //s_base_A=arg0;
+                    id = s_base_A.getId();
+                } else if (type.equals("baseB")) {
+                    s_baseline.remove();
+                    //s_base_B=arg0;
+                    id = s_base_B.getId();
+                }
+            }
+            drawBaseline(s_base_A, s_base_B);
+//            System.out.println("debug:ID0:"+arg0.getId());
+//            System.out.println("debug:IDA:"+s_base_A.getId());
+//            System.out.println("debug:IDB:"+s_base_B.getId());
+//            System.out.println("debug:arg0:"+arg0.getTitle().toString());
+//            System.out.println("debug:A:"+s_base_A.getTitle().toString());
+//            System.out.println("debug:B:"+s_base_B.getTitle().toString());
+            //removerRedundancy();
+
+        }
+
+        @Override
+        public void onMarkerDrag(Marker arg0) {
+        }
+
+        private void removerRedundancy() {
+            if (!id.isEmpty()) {
+                List<Marker> list = aMap.getMapScreenMarkers();
+                System.out.println("debug:" + String.valueOf(list.size()));
+                for (int i = 0; i < list.size(); i++) {
+                    Marker temp = list.get(i);
+                    if (temp.getTitle().equals(type)) {
+                        System.out.println("debug:" + id + ":" + temp.getId());
+                        if (!temp.getId().equals(id)) {
+                            System.out.println("debug:aa" + id + ":" + temp.getId());
+                            temp.destroy();
+
+                        }
+                    }
+                }
+            }
+        }
+    };
     private int status_of_slopemodel = 1;//设置不同状态，主要用于标记baseline(1:添加边界; 2:绘制baseline)
     //listener
     AMap.OnMapClickListener onMapClickListener = new AMap.OnMapClickListener() {
@@ -318,6 +320,9 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private Context getContext() {
+        return this;
+    }
     private void initMapView(Bundle savedInstanceState) {
         mapView = findViewById(R.id.map_mission_main);
         mapView.onCreate(savedInstanceState);
@@ -694,10 +699,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mWidthText = settingView.findViewById(R.id.polygon_setting_width_text);
         final TextView mAltitudeText = settingView.findViewById(R.id.polygon_setting_altitude_text);
         final TextView mPitchText = settingView.findViewById(R.id.polygon_setting_pitch_text);
-
+        final TextView mName = settingView.findViewById(R.id.polygon_setting_name);
 
         GridView vertexs = settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
+        mName.setText(getFlatlandModel().getMissionName());
 
         mAltitude.setMax((int) MissionConstraintHelper.getMaxAltitude());
         mAltitude.setProgress((int) (getFlatlandModel().getAltitude() + 0.5));
@@ -848,6 +854,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mAltitudeText = settingView.findViewById(R.id.slope_setting_altitude_text);
         final TextView mPitchText = settingView.findViewById(R.id.slope_setting_pitch_text);
         final TextView mDistanceText = settingView.findViewById(R.id.slope_setting_distance_text);
+        final TextView mName = settingView.findViewById(R.id.slope_setting_name);
         //base line
         final Button set = settingView.findViewById(R.id.slope_setting_set);
         final SeekBar mA = settingView.findViewById(R.id.slope_setting_A);
@@ -857,6 +864,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
         GridView vertexs = settingView.findViewById(R.id.slope_setting_vertexs);
         //init
+        mName.setText(getSlopeModel().getMissionName());
+
         mDistance.setMax(MissionConstraintHelper.getMaxShotDistance());
         //mDistance.setMin(MissionConstraintHelper.getMinShotDistance());
         mDistance.setProgress((int) (getSlopeModel().getDistanceToPanel() + 0.5));
@@ -1425,7 +1434,6 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         View view;
-
         ImageView missionImg;
         TextView nameText;
         TextView typeText;
@@ -1441,7 +1449,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
     private class ChildMissionListAdapter extends RecyclerView.Adapter<ViewHolder> {
         private List<BaseModel> modelList;
-
+        private int rowIndex = 0;
         public ChildMissionListAdapter(List<BaseModel> list) {
 
             this.modelList = list;
@@ -1455,24 +1463,14 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_main_list_item, parent, false);
             final ViewHolder holder = new ViewHolder(view);
-            holder.view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //remind to finish
 
-                    int positon = holder.getAdapterPosition();
-                    currentModel = modelList.get(positon);
-                    currentChildMissionName.setText(currentModel.getMissionName());
-                    refreshView();
-                }
-            });
             return holder;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            BaseModel model = modelList.get(position);
-            ModelType type = model.getModelType();
+        public void onBindViewHolder(ViewHolder holder, final int position) {
+            final BaseModel model = modelList.get(position);
+            final ModelType type = model.getModelType();
             holder.nameText.setText(model.getMissionName());
             holder.typeText.setText(type.toString());
             switch (type) {
@@ -1491,7 +1489,57 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 default:
                     break;
             }
+            holder.view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //remind to finish
+                    currentModel = modelList.get(position);
+                    currentChildMissionName.setText(currentModel.getMissionName());
+                    rowIndex = position;
+                    notifyDataSetChanged();
+                    refreshView();
+                }
+            });
+            holder.view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    new android.app.AlertDialog.Builder(getContext())
+                            .setTitle("提醒")
+                            .setMessage("确认删除子任务:" + model.getMissionName())
+                            .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    deletechildMission(position);
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            }).create().show();
+                    return false;
+                }
+            });
+            if (rowIndex == position) {
+                holder.nameText.setTextColor(getResources().getColor(R.color.red));
+                holder.typeText.setTextColor(getResources().getColor(R.color.red));
+            } else {
+                holder.nameText.setTextColor(getResources().getColor(R.color.black_half));
+                holder.typeText.setTextColor(getResources().getColor(R.color.black_half));
+            }
+        }
 
+        private void deletechildMission(int position) {
+            modelList.remove(position);
+            saveFlag = false;
+            notifyDataSetChanged();
+            if (!modelList.isEmpty()) {
+                currentModel = modelList.get(0);
+                currentChildMissionName.setText(currentModel.getMissionName());
+            } else {
+                currentModel = null;
+                currentChildMissionName.setText("null");
+            }
         }
 
         @Override

@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
+        android:background="@color/blue_semi_transparent"
         android:layout_marginStart="10dp"
         android:text="mission one" />
 
@@ -29,8 +30,11 @@
         android:id="@+id/tv_child_name_mission_main"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
+        android:background="@color/blue_semi_transparent"
         android:layout_toEndOf="@+id/btn_child_mission_main"
-        android:textSize="@dimen/buttonsize_height" />
+        android:gravity="center"
+        android:text="子任务"
+        android:textSize="25dp" />
 
     <ImageButton
         android:id="@+id/btn_setting_mission_main"
@@ -38,6 +42,7 @@
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
         android:enabled="false"
+        android:background="@color/blue_semi_transparent"
         android:src="@drawable/ic_mission_settings" />
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -60,7 +65,7 @@
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/pink"
             fab:fab_colorPressed="@color/pink_pressed"
-            fab:fab_icon="@drawable/ic_mission_add"
+            fab:fab_icon="@drawable/ic_mission_all"
             fab:fab_size="mini"
             fab:fab_title="显示所有" />
         <com.getbase.floatingactionbutton.FloatingActionButton
