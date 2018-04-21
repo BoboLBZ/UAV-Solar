@@ -41,6 +41,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         ToastHelper.getInstance().showShortToast("select the mission");
         initMissionList();
         initUI();
+        initDialog();
     }
 
     @Override
@@ -132,6 +133,10 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         flightRecordsRecycleView.setLayoutManager(layoutManager);
         FlightRecord2AnalyseAdapter adapter = new FlightRecord2AnalyseAdapter(flightRecordList);
         flightRecordsRecycleView.setAdapter(adapter);
+    }
+
+    private void initDialog() {
+
     }
 
     @Override

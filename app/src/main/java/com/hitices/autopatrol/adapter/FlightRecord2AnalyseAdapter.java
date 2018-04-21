@@ -2,27 +2,34 @@ package com.hitices.autopatrol.adapter;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.helper.ContextHelper;
+import com.hitices.autopatrol.helper.RecordImageDownloadHelper;
 import com.hitices.autopatrol.helper.RecordImageHelper;
 import com.hitices.autopatrol.helper.RecordInfoHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.util.List;
 
+import dji.sdk.base.BaseProduct;
+
 /**
  * Created by dusz7 on 20180330.
  */
 
 public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightRecord2AnalyseAdapter.ViewHolder> {
+
+    private static final String TAG = FlightRecord2AnalyseAdapter.class.getName();
 
     private List<FlightRecord> flightRecordList;
 
@@ -70,8 +77,17 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
                             selectedRecord);
                     parent.getContext().startActivity(intent);
                 } else {
-                    // 判断是否连接无人机，
+                    // 判断是否连接无人机
                     // 弹出提示或者开始下载
+                    BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
+                    if (null != mProduct && mProduct.isConnected() &&
+                            null != mProduct.getModel() && null != mProduct.getCamera()) {
+                        Log.d(TAG, "product connected");
+
+                    } else {
+                        Log.d(TAG, "product not connect");
+
+                    }
                 }
             }
         });

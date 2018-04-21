@@ -1,5 +1,8 @@
 package com.hitices.autopatrol.activity;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.FlightRecord2DownloadAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
+import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.RecordImageDownloadHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
@@ -32,7 +36,7 @@ public class DataDownloadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_data_download);
 
         downloadHelper = new RecordImageDownloadHelper(this, this);
-        initMissionList();
+        updateMissionList();
         initUI();
     }
 
@@ -45,7 +49,7 @@ public class DataDownloadActivity extends AppCompatActivity {
         flightRecordsRecycleView.setAdapter(adapter);
     }
 
-    private void initMissionList() {
+    private void updateMissionList() {
         String notDownload = "0";
         flightRecordList = DataSupport.where("isDownload=?", notDownload).find(FlightRecord.class);
 
@@ -61,6 +65,7 @@ public class DataDownloadActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        updateMissionList();
                         adapter.notifyDataSetChanged();
                     }
                 });
