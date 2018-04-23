@@ -48,8 +48,8 @@ public class SlopeModel extends BaseModel {
         List<Point> points = algorithm.generateWaypoints(baselineA.altitude, baselineB.altitude);
 
         //convert to waypoint
-        startPoint = new LatLng(points.get(0).getX(), points.get(0).getY());
         int size = points.size();
+        startPoint = new LatLng(points.get(0).getX(), points.get(0).getY());
         endPoint = new LatLng(points.get(size - 1).getX(), points.get(size - 1).getY());
         safeAltitude = (float) points.get(size - 1).getArCos() + altitude + distanceToPanel;
         //以安全高度进入斜面区域，并调整云台角度

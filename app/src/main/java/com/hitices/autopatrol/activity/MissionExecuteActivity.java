@@ -264,15 +264,15 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         List<Waypoint> waypoints = generateExecutableWaypoints(executeModelList);
         markWaypoints(waypoints);
         markRangeOfExecuteModel();
-        simpleSafetyMeasures(mFlightController);
         loadMission(WaypointListConvert(waypoints), getAltitude());
+        simpleSafetyMeasures(mFlightController);
     }
 
     private void simpleSafetyMeasures(FlightController controller) {
         if (!setSmartReturnHome(controller)) {
             ToastHelper.getInstance().showLongToast("设置智能返航失败，请注意飞行安全");
         } else {
-            ToastHelper.getInstance().showLongToast("成功设置智能返航，请注意飞行安全");
+            ToastHelper.getInstance().showLongToast("成功设置智能返航");
 
         }
     }
