@@ -126,6 +126,12 @@ public class SlopePathPlanningAlgorithm {
         double fenmu = Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2));
 
         int swapLineNums = 0; //用于计算高度差
+        boolean direction; //定义方向，true：Y轴正方向；false：Y轴负方向；
+        if (highPoint.getY() > lowPoint.getY()) {
+            direction = true;
+        } else {
+            direction = false;
+        }
         double dis = 0;
         while (dis < maxWidth) {
             if (swapLineNums < 1) {
@@ -139,7 +145,12 @@ public class SlopePathPlanningAlgorithm {
                 dis = dis + (maxWidth - dis) / 2;
             }
             //计算交点
-            double tempC = C + dis * fenmu;
+            double tempC;
+            if (direction) {
+                tempC = C + dis * fenmu;
+            } else {
+                tempC = C - dis * fenmu;
+            }
             boolean flag = false;
             for (int j = 1; j < points.length; j++) {
                 double A2 = points[j].getY() - points[j - 1].getY(); //y2-y1
