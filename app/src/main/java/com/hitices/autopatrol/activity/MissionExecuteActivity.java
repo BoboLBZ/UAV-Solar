@@ -27,6 +27,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
@@ -120,6 +121,10 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
     };
+    private List<Marker> markers = new ArrayList<>();
+    private List<Waypoint> unfinishedPoints = new ArrayList<>();
+    private int index = -1;
+    private LatLng homePointGPS;
     //safe
     private boolean returnHomeSettingFlag = true;
     private ImageButton uplaod, start, exit, pause;
@@ -145,11 +150,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            ToastHelper.getInstance().showShortToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
                 record.setEndTime(new Date());
                 record.save();
-                ToastHelper.getInstance().showShortToast("save record success");
+                setResultToToast("save record success");
             }
         }
     };
@@ -236,19 +241,28 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             mFlightController.setStateCallback(
                     new FlightControllerState.Callback() {
                         @Override
-                        public void onUpdate(FlightControllerState
+                        public void onUpdate(final FlightControllerState
                                                      djiFlightControllerCurrentState) {
                             //update drone location
                             droneLocation = new LatLng(djiFlightControllerCurrentState.getAircraftLocation().getLatitude(),
                                     djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
                             //gps 坐标转换成 高德坐标系
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-                            //简单安全处理
-                            //djiFlightControllerCurrentState.get
-                            //simpleSafetyMeasures(djiFlightControllerCurrentState);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (djiFlightControllerCurrentState.isFlying() &&
+                                            Math.abs(djiFlightControllerCurrentState.getVelocityX()) < 0.001 &&
+                                            Math.abs(djiFlightControllerCurrentState.getVelocityY()) < 0.001 &&
+                                            Math.abs(djiFlightControllerCurrentState.getVelocityZ()) < 0.001) {
+                                        processOfMission(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+                                    }
+                                }
+                            });
+
                         }
                     });
-            setResultToToast("in flight control");
+            ToastHelper.getInstance().showShortToast("in flight control");
         }
 
     }
@@ -277,6 +291,71 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
+    private boolean continueProcess() {
+        if (missionReload()) {
+            ToastHelper.getInstance().showLongToast("重新制订任务成功，请选择上传任务");
+            return true;
+        } else {
+            ToastHelper.getInstance().showLongToast("重新制订任务失败");
+        }
+        refreshMapview();
+        return false;
+    }
+
+    private boolean missionReload() {
+        if (unfinishedPoints.isEmpty()) {
+            ToastHelper.getInstance().showShortToast("任务已经完成，无需继续执行");
+            return false;
+        }
+        if (builder != null) {
+            List<Waypoint> list = WaypointListConvert(unfinishedPoints);
+            float alt = unfinishedPoints.get(0).altitude;
+            for (int i = 1; i < unfinishedPoints.size(); i++) {
+                float temp = unfinishedPoints.get(i).altitude;
+                if (temp > alt) {
+                    alt = temp;
+                }
+            }
+            if (homePointGPS != null) {
+                list.add(new Waypoint(homePointGPS.latitude, homePointGPS.longitude, alt));
+            } else {
+                if (humanLocation != null) {
+                    list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, alt)));
+                    markHomePoint(humanLocation);
+                }
+            }
+            builder.waypointList(list);
+            builder.waypointCount(list.size());
+            Log.e(TAG, "num of unfinished points:" + String.valueOf(unfinishedPoints.size()));
+            DJIError error = getWaypointMissionOperator().loadMission(builder.build());
+            if (error == null) {
+                ToastHelper.getInstance().showShortToast("Continue:load success");
+            } else {
+                ToastHelper.getInstance().showShortToast("Continue:load mission failed:" + error.getDescription());
+                return false;
+            }
+            //check smart return home
+            mFlightController.getSmartReturnToHomeEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    ToastHelper.getInstance().showShortToast("成功设置智能返航");
+                }
+
+                @Override
+                public void onFailure(DJIError djiError) {
+                    ToastHelper.getInstance().showShortToast("设置智能返航失败，注意飞行安全");
+                }
+            });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void refreshMapview() {
+
+    }
+
     /**
      * 设置智能返航，返航条件：信号丢失，电量低于设定的阈值
      *
@@ -285,7 +364,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      */
     private boolean setSmartReturnHome(@NonNull FlightController controller) {
         //set home location (use drone take off location)
-        LocationCoordinate2D coordinate2D = new LocationCoordinate2D(droneLocation.latitude, droneLocation.longitude);
+        LocationCoordinate2D coordinate2D = new LocationCoordinate2D(homePointGPS.latitude, homePointGPS.longitude);
         controller.setHomeLocation(coordinate2D, new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError djiError) {
@@ -358,7 +437,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 changeStatusOfPause();
                 break;
             case R.id.execute_exitMission:
-                stopMission();
+                changeStatusOfStop();
                 break;
         }
     }
@@ -376,12 +455,62 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             lines.add(ll);
             markerOptions.position(ll);
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-            aMap.addMarker(markerOptions);
+            markers.add(aMap.addMarker(markerOptions));
             cameraUpdate(ll);
         }
         //lines.add(droneLocation);
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
-        setResultToToast("num of waypoint is " + String.valueOf(waypoints.size()));
+        ToastHelper.getInstance().showShortToast("num of waypoint is " + String.valueOf(waypoints.size()));
+    }
+
+    private void processOfMission(LatLng latLng) {
+        if (!unfinishedPoints.isEmpty()) {
+            Waypoint waypoint = unfinishedPoints.get(0);
+            LatLng temp = new LatLng(waypoint.coordinate.getLatitude(), waypoint.coordinate.getLongitude());
+            //判断是否到达下一个点
+            float dis = AMapUtils.calculateLineDistance(temp, latLng);
+            Log.e(TAG, "processOfMission: " + String.valueOf(dis));
+            if (dis < 3) {
+                index = index + 1;
+                changeWaypointsMarker(index);
+                unfinishedPoints.remove(0);
+            }
+        }
+
+    }
+
+    private void changeWaypointsMarker(int index) {
+        if (index >= 0 && index < markers.size()) {
+            Marker marker = markers.get(index);
+            Log.e(TAG, "index is " + String.valueOf(index));
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(marker.getPosition());
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            marker.remove();
+            markers.set(index, aMap.addMarker(markerOptions));
+        }
+    }
+
+    /**
+     * 动态更新飞行器位置
+     *
+     * @param latLng
+     */
+    private void updateDroneLocation(LatLng latLng) {
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_location_marker)));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (droneMarker != null) {
+                    droneMarker.remove();
+                }
+                droneMarker = aMap.addMarker(markerOptions);
+            }
+        });
+
     }
 
     private void markHomePoint(LatLng latLng) {
@@ -454,27 +583,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
-    /**
-     * 动态更新飞行器位置
-     *
-     * @param latLng
-     */
-    private void updateDroneLocation(LatLng latLng) {
-        final MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),
-                R.drawable.ic_location_marker)));
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (droneMarker != null) {
-                    droneMarker.remove();
-                }
-                droneMarker = aMap.addMarker(markerOptions);
-            }
-        });
-
-    }
 
     /**
      * 更改地图缩放程度和地图中心点
@@ -493,7 +601,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             operatorInstance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
         }
         if (operatorInstance == null) {
-            setResultToToast("waypointMissionOperator is null");
+            ToastHelper.getInstance().showShortToast("waypointMissionOperator is null");
         }
         return operatorInstance;
     }
@@ -504,7 +612,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private void addListener() {
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().addListener(eventNotificationListener);
-            setResultToToast("add listener");
+            ToastHelper.getInstance().showShortToast("add listener");
         }
     }
 
@@ -515,7 +623,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().removeListener(eventNotificationListener);
-            setResultToToast("remove listener");
+            ToastHelper.getInstance().showShortToast("remove listener");
         }
     }
 
@@ -554,22 +662,10 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 BaseModel model = executeModelList.get(i);
                 model.generateExecutablePoints(formerPoint);
                 waypoints.addAll(model.getExecutePoints());
-//                switch (model.getModelType()){
-//                    case Slope:
-//
-//                        break;
-//                    case Flatland:
-//                        ((FlatlandModel)model).generateExecutablePoints(formerPoint);
-//                        waypoints.addAll(((FlatlandModel)model).getExecutePoints());
-//                        break;
-//                    case MultiPoints:
-//                        ((MultiPointsModel)model).generateExecutablePoints(formerPoint);
-//                        waypoints.addAll(((MultiPointsModel)model).getExecutePoints());
-//                        break;
-//                }
                 formerPoint = model.getEndPoint();
             }
         }
+        unfinishedPoints.addAll(waypoints);
         return waypoints;
     }
 
@@ -587,16 +683,19 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 航点任务执行流程第一步
      */
     private void loadMission(@NonNull List<Waypoint> list, @NonNull float altitude) {
-        setResultToToast("on load");
+        ToastHelper.getInstance().showShortToast("on load");
         //以无人机起飞位置作为返航点
         if (droneLocation != null) {
             list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
+            homePointGPS = new LatLng(droneLocation.latitude, droneLocation.longitude);
             markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
         }
         //以当前人的位置作返航点
         else {
             if (humanLocation != null) {
                 list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
+                homePointGPS = GoogleMapHelper.AmapConvertToWGS84(humanLocation);
+
             }
         }
         builder = new WaypointMission.Builder();
@@ -614,9 +713,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         DJIError error = getWaypointMissionOperator().loadMission(builder.build());
         if (error == null) {
-            setResultToToast("load success");
+            ToastHelper.getInstance().showShortToast("load success");
         } else {
-            setResultToToast("load mission failed:" + error.getDescription());
+            ToastHelper.getInstance().showShortToast("load mission failed:" + error.getDescription());
         }
 
     }
@@ -683,7 +782,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 上传任务到飞机
      */
     private void uploadMission() {
-        setResultToToast("on upload");
+        ToastHelper.getInstance().showShortToast("on upload");
         if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.READY_TO_UPLOAD) {
             getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
                 @Override
@@ -705,7 +804,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 任务开始执行
      */
     private void startMission() {
-        setResultToToast("on start");
+        ToastHelper.getInstance().showShortToast("on start");
         record = new FlightRecord();
         record.setMissionName(patrolMission.getName());
 //        record.setPowerStationName(patrolMission.getPowerStation().getName());
@@ -731,7 +830,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * mf,call wrong function,dashazi
      */
     private void stopMission() {
-        setResultToToast("on stop");
+        ToastHelper.getInstance().showShortToast("on stop");
 
         getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -756,11 +855,26 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
     }
+
+    private void changeStatusOfStop() {
+        WaypointMissionState state = getWaypointMissionOperator().getCurrentState();
+        if (state != null) {
+            if (state == WaypointMissionState.EXECUTING) {
+                stopMission();
+                exit.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_continue));
+            } else {
+                if (continueProcess()) {
+                    exit.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_exit));
+                }
+            }
+        }
+    }
+
     /**
      * 任务暂停
      */
     private void pauseMission() {
-        setResultToToast("on pause");
+        ToastHelper.getInstance().showShortToast("on pause");
 
         getWaypointMissionOperator().pauseMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -781,6 +895,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
 
     }
+
     /**
      * 坐标转换，高德->GPS
      */
@@ -832,11 +947,18 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
+    //    private void ToastHelper.getInstance().showShortToast(final String msg) {
+//        this.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
     private void setResultToToast(final String msg) {
         this.runOnUiThread(new Runnable() {
-            @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(), msg, Toast.LENGTH_SHORT).show();
             }
         });
     }
