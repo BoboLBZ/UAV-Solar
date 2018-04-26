@@ -32,6 +32,7 @@ import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
 import com.hitices.autopatrol.entity.imageData.AnalyzedImage;
+import com.hitices.autopatrol.entity.imageData.MyRecognition;
 import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
 import com.hitices.autopatrol.helper.RecordImageHelper;
@@ -69,10 +70,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     private List<AnalyzedImage> visibleAnalyzedImages = new ArrayList<>();
     private List<AnalyzedImage> infraredAnalyzedImages = new ArrayList<>();
-//    private List<String> visibleImageUrls = new ArrayList<>();
-//    private List<String> infraredImageUrls = new ArrayList<>();
-//    private List<MarkerOptions> visibleMarkerOptions = new ArrayList<>();
-//    private List<MarkerOptions> infraredMarkerOptions = new ArrayList<>();
 
     private ProgressDialog analysisProgressDialog;
 
@@ -176,10 +173,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                     analysisProgressDialog.setProgress(msg.arg1);
                     break;
                 case TFOD_UPDATE_MARKER:
-                    AnalyzedImage image = (AnalyzedImage)msg.obj;
+                    AnalyzedImage image = (AnalyzedImage) msg.obj;
                     LatLng location = image.getMapMarker().getPosition();
                     image.getMapMarker().remove();
-                    MarkerOptions markerOptions = genWarnMarkerOptions(location);
+                    MarkerOptions markerOptions = genWarnMarkerOptions(visibleAnalyzedImages.indexOf(image),
+                            location);
                     Marker marker = visibleAMap.addMarker(markerOptions);
                     image.setMapMarker(marker);
                     break;
@@ -360,13 +358,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     }
 
     private void initTFObjectDetection() {
-//        final float textSizePx =
-//                TypedValue.applyDimension(
-//                        TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
-//        borderedText = new BorderedText(textSizePx);
-//        borderedText.setTypeface(Typeface.MONOSPACE);
-
-        // create detector
         try {
             detector = TensorFlowObjectDetectionAPIModel.create(
                     getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
@@ -395,7 +386,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                     final int nowNum = index + 1;
                     final int nowProgress = (int) (1.0 * nowNum / visibleAnalyzedImages.size() * 100);
 
-                    runTFObjectDetection(image.getImagePath(), new OneAnalysisListener() {
+                    runTFObjectDetection(image, new OneAnalysisListener() {
                         @Override
                         public void onStart() {
 
@@ -445,28 +436,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     }
 
-    private void preProcessImageTF() {
-//        tracker = new MultiBoxTracker(this);
-
-//
-//        trackingOverlay = (OverlayView) findViewById(R.id.tracking_overlay);
-//        trackingOverlay.addCallback(
-//                new DrawCallback() {
-//                    @Override
-//                    public void drawCallback(final Canvas canvas) {
-//                        tracker.draw(canvas);
-//                        if (isDebug()) {
-//                            tracker.drawDebug(canvas);
-//                        }
-//                    }
-//                });
-    }
-
-    private void runTFObjectDetection(String imagePath, OneAnalysisListener oneAnalysisListener) {
+    private void runTFObjectDetection(AnalyzedImage image, OneAnalysisListener oneAnalysisListener) {
         // read image
         FileInputStream solarImageFS;
         try {
-            solarImageFS = new FileInputStream(imagePath);
+            solarImageFS = new FileInputStream(image.getImagePath());
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -476,10 +450,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         // pre-process image(prepare to do something)
         int previewWidth = solarImageBitmap.getWidth();
         int previewHeight = solarImageBitmap.getHeight();
-        Log.d(TAG, "prewW: " + previewWidth + ", prewH: " + previewHeight);
         int cropSize = TF_OD_API_INPUT_SIZE;
+        Log.d(TAG, "prewW: " + previewWidth + ", prewH: " + previewHeight +
+                ",  tfod_api_input_size: " + cropSize);
 
-//        Bitmap rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
+        // 创建压缩图像
         Bitmap rgbFrameBitmap = Bitmap.createBitmap(solarImageBitmap);
         Bitmap croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
 
@@ -491,34 +466,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         Matrix cropToFrameTransform = new Matrix();
         frameToCropTransform.invert(cropToFrameTransform);
 
-//        ++timestamp;
-//        final long currTimestamp = timestamp;
-//        byte[] originalLuminance = getLuminance();
-//        tracker.onFrame(
-//                previewWidth,
-//                previewHeight,
-//                getLuminanceStride(),
-//                sensorOrientation,
-//                originalLuminance,
-//                timestamp);
-//        trackingOverlay.postInvalidate();
-
-        // No mutex needed as this method is not reentrant.
-//        if (computingDetection) {
-//            readyForNextImage();
-//            return;
-//        }
-//        computingDetection = true;
-//        LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
-
-//        rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-
-//        if (luminanceCopy == null) {
-//            luminanceCopy = new byte[originalLuminance.length];
-//        }
-//        System.arraycopy(originalLuminance, 0, luminanceCopy, 0, originalLuminance.length);
-//        readyForNextImage();
-
         final Canvas canvas = new Canvas(croppedBitmap);
         canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
         // For examining the actual TF input.
@@ -526,32 +473,27 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
             ImageUtils.saveBitmap(croppedBitmap);
         }
 
-//        final long startTime = SystemClock.uptimeMillis();
+        // tfodapi 分析
         // detector recognizeImage
         final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
-//        lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
+        // recognize small size test
         Bitmap copyCroppedImageBitmap = Bitmap.createBitmap(croppedBitmap);
-
-        final Canvas canvas1 = new Canvas(copyCroppedImageBitmap);
+        final Canvas testCanvas = new Canvas(copyCroppedImageBitmap);
         final Paint paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(2.0f);
 
         // 处理结果
-        float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-        final List<Classifier.Recognition> mappedRecognitions = new LinkedList<Classifier.Recognition>();
-
         boolean hasCovered = false;
         boolean hasBroken = false;
+        final List<MyRecognition> mappedRecognitions = new LinkedList<MyRecognition>();
 
         for (final Classifier.Recognition result : results) {
 
-//            Log.d(TAG, "now Image:" + imagePath + "\n" + result.toString());
-
             final RectF location = result.getLocation();
-            if (location != null && result.getConfidence() >= minimumConfidence) {
+            if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
 
                 if (result.getTitle().equals(getResources().getString(R.string.covered_panel_title))) {
                     hasCovered = true;
@@ -560,23 +502,20 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                     hasBroken = true;
                 }
 
-                canvas1.drawRect(location, paint);
+                testCanvas.drawRect(location, paint);
 
                 // for test
                 ImageUtils.saveBitmap(copyCroppedImageBitmap);
-//                ToastHelper.getInstance().showShortToast("save bitmap");
 
-                cropToFrameTransform.mapRect(location); //location change??
+                // location change
+                cropToFrameTransform.mapRect(location);
                 result.setLocation(location);
-                mappedRecognitions.add(result);
+                mappedRecognitions.add(new MyRecognition(result));
             }
         }
 
-//        tracker.trackResults(mappedRecognitions, luminanceCopy, currTimestamp);
-//        trackingOverlay.postInvalidate();
-//
-//        requestRender();
-//        computingDetection = false;
+        // 保存结果
+        image.setRecognitions(mappedRecognitions);
 
         int thisImageState = AnalyzedImage.IS_NORMAL;
         if (hasCovered) {
@@ -601,10 +540,9 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
             AnalyzedImage image = visibleAnalyzedImages.get(i);
             LatLng location = RecordImageHelper.getImageLatlng(image.getImagePath());
             location = GoogleMapHelper.WGS84ConvertToAmap(location);
-            MarkerOptions newMarkerOptions = genNormalMarkerOptions(location);
+            MarkerOptions newMarkerOptions = genNormalMarkerOptions(i, location);
             Marker newMarker = visibleAMap.addMarker(newMarkerOptions);
             image.setMapMarker(newMarker);
-//            visibleMarkerOptions.add(newMarker);
 
             // 调整地图视角
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);
@@ -625,10 +563,9 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
             AnalyzedImage image = infraredAnalyzedImages.get(i);
             LatLng location = RecordImageHelper.getImageLatlng(image.getImagePath());
             location = GoogleMapHelper.WGS84ConvertToAmap(location);
-            MarkerOptions newMarkerOptions = genNormalMarkerOptions(location);
+            MarkerOptions newMarkerOptions = genNormalMarkerOptions(i, location);
             Marker newMarker = infraredAMap.addMarker(newMarkerOptions);
             image.setMapMarker(newMarker);
-//            infraredMarkerOptions.add(newMarker);
 
             // 调整地图视角
             CameraUpdate cameraupdate = CameraUpdateFactory.newLatLngZoom(location, 18f);
@@ -685,11 +622,14 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      */
     private void showMakerImage(int index, boolean isVisible) {
         ToastHelper.getInstance().showShortToast("image_index: " + index);
-        File showImage;
+        AnalyzedImage showImage;
         if (isVisible) {
-            showImage = new File(visibleAnalyzedImages.get(index).getImagePath());
+            showImage = visibleAnalyzedImages.get(index);
+            Intent intent = new Intent(this, AnalyzedImageActivity.class);
+            intent.putExtra(AnalyzedImageActivity.EXTRA_IMAGE, showImage);
+            startActivity(intent);
         } else {
-            showImage = new File(infraredAnalyzedImages.get(index).getImagePath());
+            showImage = infraredAnalyzedImages.get(index);
         }
     }
 
@@ -717,18 +657,18 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      * @param location
      * @return
      */
-    private MarkerOptions genNormalMarkerOptions(LatLng location) {
+    private MarkerOptions genNormalMarkerOptions(int index, LatLng location) {
         MarkerOptions markerOptions = new MarkerOptions();
-
+        markerOptions.title(String.valueOf(index));
         markerOptions.position(location);
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         return markerOptions;
     }
 
-    private MarkerOptions genWarnMarkerOptions(LatLng location) {
+    private MarkerOptions genWarnMarkerOptions(int index, LatLng location) {
         MarkerOptions markerOptions = new MarkerOptions();
-
+        markerOptions.title(String.valueOf(index));
         markerOptions.position(location);
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 

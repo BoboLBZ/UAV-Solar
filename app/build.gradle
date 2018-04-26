@@ -78,4 +78,5 @@ dependencies {
     implementation project(':openCVLibrary341')
     implementation 'org.litepal.android:core:1.6.1'
     implementation 'org.tensorflow:tensorflow-android:+'
+    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
 }

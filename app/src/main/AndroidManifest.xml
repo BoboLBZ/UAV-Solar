@@ -115,7 +115,8 @@
         <activity android:name=".activity.MissionExecutePreparedActivity" />
         <activity android:name=".activity.DataAnalyseMapActivity" />
         <activity android:name=".activity.DataDownloadActivity" />
-        <activity android:name=".activity.DataAnalyseReportActivity"/>
+        <activity android:name=".activity.DataAnalyseReportActivity" />
+        <activity android:name=".activity.AnalyzedImageActivity"></activity>
     </application>
 
 </manifest>

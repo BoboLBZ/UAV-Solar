@@ -30,7 +30,7 @@
 
     <string name="drone_info_name">无人机型号：</string>
     <string name="drone_info_camera">相机型号：</string>
-    
+
     <string name="app_func_mission_run">任务执行</string>
     <string name="app_func_mission_manage">任务管理</string>
     <string name="app_func_data_analysis">数据分析</string>
