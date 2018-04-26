@@ -57,9 +57,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import dji.common.battery.BatteryState;
+import dji.common.battery.LowVoltageBehavior;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
 import dji.common.mission.waypoint.WaypointMissionExecutionEvent;
@@ -71,6 +75,7 @@ import dji.common.mission.waypoint.WaypointMissionUploadEvent;
 import dji.common.model.LocationCoordinate2D;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.battery.Battery;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
@@ -84,26 +89,16 @@ import dji.sdk.sdkmanager.DJISDKManager;
 public class MissionExecuteActivity extends Activity implements View.OnClickListener {
     private static final String TAG = MissionExecuteActivity.class.getName();
     public WaypointMission.Builder builder;
-    private PatrolMission patrolMission;
     private List<BaseModel> modelList;
     private List<BaseModel> executeModelList;
     private FlightController mFlightController;
     private FlightRecord record;
-
-    private WaypointMissionOperator operatorInstance;
-    private MapView mapView;
-    private AMap aMap;
-    private Marker droneMarker;
-    private LatLng droneLocation;
-    private LatLng humanLocation;
-    private Marker humanLocationMarker;
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
             if (amapLocation != null) {
                 if (amapLocation.getErrorCode() == 0) {
                     humanLocation = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
-//                    LatLng harbin = new LatLng(126.640692,45.748065);-
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(humanLocation);
                     markerOptions.title("marker");
@@ -114,20 +109,33 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     humanLocationMarker = aMap.addMarker(markerOptions);
                 } else {
                     //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                    Log.e("AmapError", "humanLocationMarker Error, ErrCode:"
+                    Log.d("AmapError", "humanLocationMarker Error, ErrCode:"
                             + amapLocation.getErrorCode() + ", errInfo:"
                             + amapLocation.getErrorInfo());
                 }
             }
         }
     };
-    private List<Marker> markers = new ArrayList<>();
+    private WaypointMissionOperator operatorInstance;
+    //mission about
+    private PatrolMission patrolMission;
+    private AMap aMap;
+    private Marker droneMarker;
+    private LatLng droneLocation;
+    private LatLng humanLocation;
+    private Marker humanLocationMarker;
+    //ui
+    private MapView mapView;
+    private ImageButton uplaod, start, exit, pause;
     private List<Waypoint> unfinishedPoints = new ArrayList<>();
     private int index = -1;
     private LatLng homePointGPS;
+    //use to save the status of mission(mission stop)
+    private List<Marker> markers = new ArrayList<>();
+    private int savedHeadingDegree;
     //safe
     private boolean returnHomeSettingFlag = true;
-    private ImageButton uplaod, start, exit, pause;
+    private int savedCameraPitch;
     /**
      * WaypointMissionOperatorListener
      */
@@ -158,7 +166,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
     };
-
+    private int batteryCapacity = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -292,6 +300,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     }
 
     private boolean continueProcess() {
+        //检查无人机连接状态
+        if (!checkStatusOfDrone()) {
+            ToastHelper.getInstance().showLongToast("无人机未连接");
+            return false;
+        }
+        //不确定是否需要重新初始化
+        //initFlightController();
+        //剩余任务点重新制订飞行任务
         if (missionReload()) {
             ToastHelper.getInstance().showLongToast("重新制订任务成功，请选择上传任务");
             return true;
@@ -300,6 +316,19 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
         refreshMapview();
         return false;
+    }
+
+    private boolean checkStatusOfDrone() {
+        BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
+        if (null != mProduct && mProduct.isConnected()) {
+            if (null != mProduct.getModel() && null != mProduct.getCamera()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     private boolean missionReload() {
@@ -316,6 +345,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     alt = temp;
                 }
             }
+            //设置自动降落点
             if (homePointGPS != null) {
                 list.add(new Waypoint(homePointGPS.latitude, homePointGPS.longitude, alt));
             } else {
@@ -324,9 +354,19 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     markHomePoint(humanLocation);
                 }
             }
+            //增加航点调整飞机姿态，坐标为无人机当前位置,高度为安全位置
+//            if(savedHeadingDegree && savedCameraPitch )
+            if (droneLocation != null) {
+                Waypoint w = new Waypoint(droneLocation.latitude, droneLocation.longitude, alt);
+                WaypointAction actionRotate = new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, savedHeadingDegree);
+                WaypointAction actionPitch = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -savedCameraPitch);
+                w.addAction(actionRotate);
+                w.addAction(actionPitch);
+                list.add(0, w);
+            }
             builder.waypointList(list);
             builder.waypointCount(list.size());
-            Log.e(TAG, "num of unfinished points:" + String.valueOf(unfinishedPoints.size()));
+            Log.d(TAG, "num of unfinished points:" + String.valueOf(unfinishedPoints.size()));
             DJIError error = getWaypointMissionOperator().loadMission(builder.build());
             if (error == null) {
                 ToastHelper.getInstance().showShortToast("Continue:load success");
@@ -338,12 +378,12 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             mFlightController.getSmartReturnToHomeEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
                 @Override
                 public void onSuccess(Boolean aBoolean) {
-                    ToastHelper.getInstance().showShortToast("成功设置智能返航");
+                    setResultToToast("成功设置智能返航");
                 }
 
                 @Override
                 public void onFailure(DJIError djiError) {
-                    ToastHelper.getInstance().showShortToast("设置智能返航失败，注意飞行安全");
+                    setResultToToast("设置智能返航失败，注意飞行安全");
                 }
             });
             return true;
@@ -397,15 +437,72 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         });
         //set
-        controller.setLowBatteryWarningThreshold(49, new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                if (djiError != null) {
-                    returnHomeSettingFlag = false;
-                }
-            }
-        });
+        //这个时候遥控器会有警报，在设置smart RTH的情况下不一定会返航
+//        controller.setLowBatteryWarningThreshold(49, new CommonCallbacks.CompletionCallback() {
+//            @Override
+//            public void onResult(DJIError djiError) {
+//                if (djiError != null) {
+//                    returnHomeSettingFlag = false;
+//                }
+//            }
+//        });
+        //在低电量返航
+        returnHomeViaBattery();
         return returnHomeSettingFlag;
+    }
+
+    private void returnHomeViaBattery() {
+        final Battery battery = AutoPatrolApplication.getBattery();
+        if (battery != null) {
+            battery.getCellVoltages(new CommonCallbacks.CompletionCallbackWith<Integer[]>() {
+                @Override
+                public void onSuccess(Integer[] integers) {
+                    batteryCapacity = 0;
+                    for (int i = 0; i < integers.length; i++) {
+                        batteryCapacity += integers[i];
+                    }
+                    Log.d(TAG, "onSuccess: voltages" + String.valueOf(batteryCapacity));
+                }
+
+                @Override
+                public void onFailure(DJIError djiError) {
+
+                }
+            });
+
+            battery.setLevel1CellVoltageThreshold(4000, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError != null) {
+                        returnHomeSettingFlag = false;
+                    }
+                }
+            });
+            battery.setLevel1CellVoltageBehavior(LowVoltageBehavior.GO_HOME, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError != null) {
+                        returnHomeSettingFlag = false;
+                    }
+                }
+            });
+            battery.setStateCallback(new BatteryState.Callback() {
+                boolean flag = true;
+
+                @Override
+                public void onUpdate(BatteryState batteryState) {
+                    if (flag) {
+                        Log.d(TAG, "battery: " + String.valueOf(batteryState.getVoltage()));
+                        if (batteryState.getVoltage() < 4000) {
+                            flag = false;
+                            setResultToToast("开始返航");
+                        }
+                    }
+                }
+            });
+        } else {
+            setResultToToast("get battery failed");
+        }
     }
 
     /**
@@ -418,7 +515,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         int id = intent.getIntExtra("ID", -1);
         patrolMission = DataSupport.find(PatrolMission.class, id);
         if (patrolMission != null) {
-            Log.e("debug", path);
+            Log.d("debug", path);
             MissionHelper helper = new MissionHelper(path, patrolMission);
             modelList = helper.getModelList();
         }
@@ -469,7 +566,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             LatLng temp = new LatLng(waypoint.coordinate.getLatitude(), waypoint.coordinate.getLongitude());
             //判断是否到达下一个点
             float dis = AMapUtils.calculateLineDistance(temp, latLng);
-            Log.e(TAG, "processOfMission: " + String.valueOf(dis));
+            Log.d(TAG, "processOfMission: " + String.valueOf(dis));
             if (dis < 3) {
                 index = index + 1;
                 changeWaypointsMarker(index);
@@ -482,7 +579,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private void changeWaypointsMarker(int index) {
         if (index >= 0 && index < markers.size()) {
             Marker marker = markers.get(index);
-            Log.e(TAG, "index is " + String.valueOf(index));
+            Log.d(TAG, "index is " + String.valueOf(index));
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(marker.getPosition());
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -632,7 +729,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         GridView gridView = view.findViewById(R.id.gridview_execute_select_child);
         //init gridview GridviewSeleteAdapter
         final GridviewSeleteAdapter adapter = new GridviewSeleteAdapter(this, modelList);
-        Log.e("debug", String.valueOf(modelList.size()));
+        Log.d("debug", String.valueOf(modelList.size()));
         gridView.setAdapter(adapter);
         new AlertDialog.Builder(this)
                 .setTitle("")
@@ -741,7 +838,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             }
         }
-        Log.e(TAG, "speed is " + String.valueOf(speed));
+        Log.d(TAG, "speed is " + String.valueOf(speed));
         ToastHelper.getInstance().showShortToast("speed is " + String.valueOf(speed));
         return speed;
     }
@@ -771,7 +868,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             }
         }
-        Log.e(TAG, "safe altitude is " + String.valueOf(altitude));
+        Log.d(TAG, "safe altitude is " + String.valueOf(altitude));
         ToastHelper.getInstance().showShortToast("safe altitude is " + String.valueOf(altitude));
         return altitude;
     }
@@ -838,6 +935,27 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 setResultToToast("Mission Stop: " + (error3 == null ? "Successfully" : error3.getDescription()));
             }
         });
+        saveDroneStatus();
+    }
+
+    /**
+     * 记录飞行器朝向、云台俯仰角
+     */
+    private void saveDroneStatus() {
+        savedHeadingDegree = (int) mFlightController.getCompass().getHeading();
+        if (unfinishedPoints != null && !executeModelList.isEmpty()) {
+            int count = unfinishedPoints.size();
+            for (int i = executeModelList.size() - 1; i >= 0; i--) {
+                int pointNum = executeModelList.get(i).getExecutePoints().size();
+                if (count > pointNum) {
+                    count = count - pointNum;
+                } else {
+                    savedCameraPitch = executeModelList.get(i).getCameraAngel();
+                }
+            }
+        }
+        Log.d(TAG, "saveDroneStatus: heading" + String.valueOf(savedHeadingDegree));
+        Log.d(TAG, "saveDroneStatus: pitch" + String.valueOf(savedCameraPitch));
     }
 
     private void changeStatusOfPause() {
@@ -947,22 +1065,13 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
-    //    private void ToastHelper.getInstance().showShortToast(final String msg) {
-//        this.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
     private void setResultToToast(final String msg) {
         this.runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getApplication(), msg, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(), msg, Toast.LENGTH_LONG).show();
             }
         });
     }
-
 
     private class GridviewSeleteAdapter extends BaseAdapter {
         List<BaseModel> oldModelList;
