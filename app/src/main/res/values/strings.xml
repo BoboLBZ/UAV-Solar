@@ -44,6 +44,11 @@
     <string name="show_infrared">红外光图像</string>
     <string name="gen_report">生成巡检</string>
     <string name="run_analysis">运行分析</string>
+    <string name="run_analysis_title">正在分析</string>
+
+    <string name="normal_panel_title">normalPanel</string>
+    <string name="covered_panel_title">coveredPanel</string>
+    <string name="broken_panel_title">brokenPanel</string>
 
     <string name="photo_download_title">正在下载图片</string>
 

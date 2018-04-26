@@ -15,6 +15,10 @@ add_library(libopencv_java3 SHARED IMPORTED )
 set_target_properties(libopencv_java3 PROPERTIES
     IMPORTED_LOCATION "${libs}/${ANDROID_ABI}/libopencv_java3.so")
 
+# ==========imageUtils==========
+include_directories(src/main/cpp/imageUtils)
+add_library(imageutils_jni SHARED src/main/cpp/imageUtils/imageutils_jni.cc)
+
 # ==========本来的配置==========
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -48,7 +52,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-                       native-lib android log -ljnigraphics libopencv_java3
+                       native-lib imageutils_jni android log -ljnigraphics libopencv_java3
 
                        # Links the target library to the log library
                        # included in the NDK.

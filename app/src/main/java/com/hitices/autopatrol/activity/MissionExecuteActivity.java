@@ -410,6 +410,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
                     returnHomeSettingFlag = false;
+                    setResultToToast("hoempoint is null");
                 }
             }
         });
@@ -424,6 +425,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
                     returnHomeSettingFlag = false;
+                    setResultToToast("altitude is error");
+
                 }
             }
         });
@@ -433,19 +436,20 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
                     returnHomeSettingFlag = false;
+                    setResultToToast("srh is failed");
                 }
             }
         });
         //set
-        //这个时候遥控器会有警报，在设置smart RTH的情况下不一定会返航
-//        controller.setLowBatteryWarningThreshold(49, new CommonCallbacks.CompletionCallback() {
-//            @Override
-//            public void onResult(DJIError djiError) {
-//                if (djiError != null) {
-//                    returnHomeSettingFlag = false;
-//                }
-//            }
-//        });
+//        这个时候遥控器会有警报，在设置smart RTH的情况下不一定会返航
+        controller.setLowBatteryWarningThreshold(30, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
         //在低电量返航
         returnHomeViaBattery();
         return returnHomeSettingFlag;
@@ -466,6 +470,8 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
                 @Override
                 public void onFailure(DJIError djiError) {
+                    returnHomeSettingFlag = false;
+                    setResultToToast("via battery is failed");
 
                 }
             });

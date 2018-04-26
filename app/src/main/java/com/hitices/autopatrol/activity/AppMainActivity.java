@@ -92,8 +92,8 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
         filter.addAction(AutoPatrolApplication.FLAG_CONNECTION_CHANGE);
         this.registerReceiver(mReceiver, filter);
 
-        TensorFlowInferenceInterface inferenceInterface =
-                new TensorFlowInferenceInterface(ContextHelper.getApplicationContext().getAssets(), "frozen_har.pb");
+//        TensorFlowInferenceInterface inferenceInterface =
+//                new TensorFlowInferenceInterface(ContextHelper.getApplicationContext().getAssets(), "frozen_har.pb");
     }
 
     @Override

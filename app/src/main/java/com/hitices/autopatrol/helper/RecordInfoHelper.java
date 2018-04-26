@@ -12,16 +12,24 @@ import java.util.Date;
 public class RecordInfoHelper {
 
     public static String getRecordStartDateShowName(FlightRecord record) {
-        Date startDate = record.getStartTime();
-        SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
-        String dir = format.format(startDate);
-        return dir;
+        if (null != record.getStartTime()) {
+            Date startDate = record.getStartTime();
+            SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            String dateStr = format.format(startDate);
+            return dateStr;
+        }else {
+            return "";
+        }
     }
 
     public static String getRecordStartDateDir(FlightRecord record) {
-        Date startDate = record.getStartTime();
-        SimpleDateFormat format = new SimpleDateFormat("YYYYMMddHHmmss");
-        String dir = format.format(startDate);
-        return dir;
+        if (null != record.getStartTime()) {
+            Date startDate = record.getStartTime();
+            SimpleDateFormat format = new SimpleDateFormat("YYYYMMddHHmmss");
+            String dir = format.format(startDate);
+            return dir;
+        } else {
+            return "noDateName";
+        }
     }
 }
