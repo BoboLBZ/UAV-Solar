@@ -30,20 +30,28 @@
 
     <string name="drone_info_name">无人机型号：</string>
     <string name="drone_info_camera">相机型号：</string>
-    
+
     <string name="app_func_mission_run">任务执行</string>
     <string name="app_func_mission_manage">任务管理</string>
-    <string name="app_func_data_analysis">数据分析</string>
+    <string name="app_func_data_analysis">巡检记录</string>
     <string name="app_func_data_download">数据下载</string>
 
     <string name="record_select_title">选择巡检记录</string>
 
     <string name="selected_flight_record">SELECTED_RECORD</string>
+    
+    <string name="record_ready_func_delete">删除</string>
+    <string name="record_ready_func_check">查看</string>
 
     <string name="show_visible">可见光图像</string>
     <string name="show_infrared">红外光图像</string>
     <string name="gen_report">生成巡检</string>
     <string name="run_analysis">运行分析</string>
+    <string name="run_analysis_title">正在分析</string>
+
+    <string name="normal_panel_title">normalPanel</string>
+    <string name="covered_panel_title">coveredPanel</string>
+    <string name="broken_panel_title">brokenPanel</string>
 
     <string name="photo_download_title">正在下载图片</string>
 

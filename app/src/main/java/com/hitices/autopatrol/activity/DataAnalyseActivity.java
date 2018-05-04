@@ -15,6 +15,8 @@ import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.crud.DataSupport;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -26,8 +28,7 @@ import dji.sdk.camera.MediaFile;
 
 // 该Activity用于选择任务，同时下载本次任务采集图片，跳转到结果展示界面
 public class DataAnalyseActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private final String TAG = DataAnalyseActivity.class.getName();
+    private static final String TAG = DataAnalyseActivity.class.getName();
 
     private List<FlightRecord> flightRecordList;
 
@@ -58,73 +59,65 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
-//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
-//            genMissions();
-//        }
+        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+            genMissions();
+        }
 
-        flightRecordList = DataSupport.findAll(FlightRecord.class);
-
+        flightRecordList = DataSupport.where("isDownload=?","1")
+                .order("startTime desc")
+                .find(FlightRecord.class);
+        flightRecordList.addAll(DataSupport.where("isDownload=?","0")
+                .order("startTime desc")
+                .find(FlightRecord.class));
     }
 
-//    private void genMissions() {
-//
-//        PatrolMission mission1 = new PatrolMission();
-//        mission1.setName("mission1");
-//        mission1.save();
-//        PatrolMission mission2 = new PatrolMission();
-//        mission2.setName("mission2");
-//        mission2.save();
-//        PatrolMission mission3 = new PatrolMission();
-//        mission3.setName("mission3");
-//        mission3.save();
-//        PatrolMission downloadMission = new PatrolMission();
-//        downloadMission.setName("downTestMission");
-//        downloadMission.save();
-//
-//        FlightRecord record1 = new FlightRecord();
-//        record1.setMission(mission1);
-//        record1.setStartTime(new Date());
-//        record1.setEndTime(new Date());
-//        record1.setHasInfrared(true);
-//        record1.setDownload(true);
-//        record1.save();
-//
-//        FlightRecord record2 = new FlightRecord();
-//        record2.setMission(mission1);
-//        record2.setStartTime(new Date());
-//        record2.setEndTime(new Date());
-//        record2.setDownload(true);
-//        record2.setHasVisible(true);
-//        record2.setHasInfrared(true);
-//        record2.save();
-//
-//        FlightRecord record3 = new FlightRecord();
-//        record3.setMission(mission2);
-//        record3.setStartTime(new Date());
-//        record3.setEndTime(new Date());
-//        record3.setDownload(true);
-//        record3.setHasVisible(true);
-//        record3.save();
-//
-//        FlightRecord record4 = new FlightRecord();
-//        record4.setMission(mission3);
-//        record4.setStartTime(new Date());
-//        record4.setEndTime(new Date());
-//        record4.setDownload(false);
-//        record4.save();
-//
-//        FlightRecord record5 = new FlightRecord();
-//        record5.setMission(mission2);
-//        record5.setStartTime(new Date());
-//        record5.setEndTime(new Date());
-//        record5.save();
-//
-//        FlightRecord record6 = new FlightRecord();
-//        record6.setMission(downloadMission);
-//        record6.setStartTime(new Date(2017 - 1900, 1, 1, 1, 1, 1));
-//        record6.setEndTime(new Date());
-//        record6.save();
-//    }
+    private void genMissions() {
+
+        FlightRecord record1 = new FlightRecord();
+        record1.setMissionName("mission1");
+        record1.setStartTime(new Date());
+        record1.setEndTime(new Date());
+        record1.setHasInfrared(true);
+        record1.setDownload(true);
+        record1.save();
+
+        FlightRecord record2 = new FlightRecord();
+        record2.setMissionName("mission1");
+        record2.setStartTime(new Date());
+        record2.setEndTime(new Date());
+        record2.setDownload(true);
+        record2.setHasVisible(true);
+        record2.setHasInfrared(true);
+        record2.save();
+
+        FlightRecord record3 = new FlightRecord();
+        record3.setMissionName("mission2");
+        record3.setStartTime(new Date());
+        record3.setEndTime(new Date());
+        record3.setDownload(false);
+        record3.setHasVisible(true);
+        record3.save();
+
+        FlightRecord record4 = new FlightRecord();
+        record4.setMissionName("mission3");
+        record4.setStartTime(new Date());
+        record4.setEndTime(new Date());
+        record4.setDownload(false);
+        record4.save();
+
+        FlightRecord record5 = new FlightRecord();
+        record5.setMissionName("mission2");
+        record5.setStartTime(new Date());
+        record5.setEndTime(new Date());
+        record5.setDownload(true);
+        record5.save();
+
+        FlightRecord record6 = new FlightRecord();
+        record6.setMissionName("downloadMission");
+        record6.setStartTime(new Date(2017 - 1900, 1, 1, 1, 1, 1));
+        record6.setEndTime(new Date());
+        record6.save();
+    }
 
     private void initUI() {
 
@@ -135,6 +128,9 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         flightRecordsRecycleView.setAdapter(adapter);
     }
 
+    /**
+     * 初始化"下载提醒"等Dialog
+     */
     private void initDialog() {
 
     }
