@@ -3,6 +3,7 @@ package com.hitices.autopatrol.entity.missions;
 
 import com.amap.api.maps2d.model.LatLng;
 import com.hitices.autopatrol.algorithm.FullCoveragePathPlanningAlgorithm;
+import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.List;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 
 /**
@@ -24,19 +24,19 @@ public class FlatlandModel extends BaseModel {
     private float altitude;   //飞行高度，高度为面相对于飞行器起点的高度
     private float speed;    //飞行速度
     private float width;   //扫描宽度
-    private int OverlapRate; //重叠率
+    private int overlapRate; //重叠率
 
     public FlatlandModel(String name) {
         //base
         missionName = name;
         modelType = ModelType.Flatland;
-        cameraAngel = 90;
-        headingMode = WaypointMissionHeadingMode.AUTO;
+        cameraAngle = MissionConstraintHelper.getDefaultCameraAngle();
+        headingAngle = MissionConstraintHelper.getDefaultHeading();
         //flatland
         altitude = 20.0f;
-        speed = 9f;
-        OverlapRate = 20;
-        width = 15;
+        speed = MissionConstraintHelper.getDefaultSpeed();
+        overlapRate = MissionConstraintHelper.getDefaultOverlapRate();
+        width = MissionConstraintHelper.getDefaultWidth();
     }
 
 
@@ -57,11 +57,11 @@ public class FlatlandModel extends BaseModel {
     }
 
     public int getOverlapRate() {
-        return OverlapRate;
+        return overlapRate;
     }
 
     public void setOverlapRate(int value) {
-        this.OverlapRate = value;
+        this.overlapRate = value;
     }
 
     public float getWidth() {
@@ -103,13 +103,13 @@ public class FlatlandModel extends BaseModel {
     }
 
     @Override
-    public WaypointMissionHeadingMode getHeadingMode() {
-        return headingMode;
+    public int getHeadingAngle() {
+        return headingAngle;
     }
 
     @Override
-    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
-        this.headingMode = headingMode;
+    public void setHeadingAngle(int headingAngle) {
+        this.headingAngle = headingAngle;
     }
 
     @Override
@@ -123,13 +123,13 @@ public class FlatlandModel extends BaseModel {
     }
 
     @Override
-    public int getCameraAngel() {
-        return cameraAngel;
+    public int getCameraAngle() {
+        return cameraAngle;
     }
 
     @Override
-    public void setCameraAngel(int cameraAngel) {
-        this.cameraAngel = cameraAngel;
+    public void setCameraAngle(int cameraAngle) {
+        this.cameraAngle = cameraAngle;
     }
 
     @Override
@@ -166,21 +166,26 @@ public class FlatlandModel extends BaseModel {
     public void generateExecutablePoints(LatLng formerPoint) {
         executePoints = new ArrayList<>();
         //顶点，宽度，速度，航点时间，起点
+        float actualWidth = width * (1 - this.overlapRate / 100f);
         FullCoveragePathPlanningAlgorithm algorithm =
-                new FullCoveragePathPlanningAlgorithm(vertexs, width, speed, 0, formerPoint);
+                new FullCoveragePathPlanningAlgorithm(vertexs, actualWidth, speed, 0, formerPoint);
+        //use my point
         List<LatLng> points = algorithm.getShotWaypoints(); //add waypoint in main line to take photo
         //need to set special waypoint action
-        startPoint = points.get(0);
+        //use distance interval
+//        List<LatLng> points = algorithm.getPlanningWaypoints();
+//        startPoint = points.get(0);
         endPoint = points.get(points.size() - 1);
         safeAltitude = altitude;
         for (int i = 0; i < points.size(); i++) {
             Waypoint waypoint = new Waypoint(points.get(i).latitude, points.get(i).longitude, altitude);
             //设置航点动作
+            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             executePoints.add(waypoint);
         }
         Waypoint waypoint = executePoints.get(0);
-        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel);
+        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle);
         waypoint.waypointActions.add(0, action);
     }
 }

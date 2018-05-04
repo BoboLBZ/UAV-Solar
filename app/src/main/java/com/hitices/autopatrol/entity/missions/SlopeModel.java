@@ -3,6 +3,7 @@ package com.hitices.autopatrol.entity.missions;
 import com.amap.api.maps2d.model.LatLng;
 import com.hitices.autopatrol.algorithm.Point;
 import com.hitices.autopatrol.algorithm.SlopePathPlanningAlgorithm;
+import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.List;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
  * Created by Rhys on 2018/4/4.
@@ -29,22 +29,23 @@ public class SlopeModel extends BaseModel {
         //base
         this.missionName = name;
         this.modelType = ModelType.Slope;
-        this.cameraAngel = 90;
-        this.headingMode = WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+        this.cameraAngle = MissionConstraintHelper.getDefaultCameraAngle();
+        this.headingAngle = MissionConstraintHelper.getDefaultHeading();
         //slope land
-        this.speed = 6;
-        this.distanceToPanel = 10;
-        this.width = 15;
-        this.overlapRate = 20;
+        this.speed = MissionConstraintHelper.getDefaultSpeed();
+        this.distanceToPanel = MissionConstraintHelper.getDefaultDistanceToPanel();
+        this.width = MissionConstraintHelper.getDefaultWidth();
+        this.overlapRate = MissionConstraintHelper.getDefaultOverlapRate();
         this.altitude = 2;
     }
 
     @Override
     public void generateExecutablePoints(LatLng formerPoint) {
         executePoints = new ArrayList<>();
+        float actualWidth = width * (1 - this.overlapRate / 100f);
         LatLng a = new LatLng(baselineA.coordinate.getLatitude(), baselineA.coordinate.getLongitude());
         LatLng b = new LatLng(baselineB.coordinate.getLatitude(), baselineB.coordinate.getLongitude());
-        SlopePathPlanningAlgorithm algorithm = new SlopePathPlanningAlgorithm(vertexs, width, a, b);
+        SlopePathPlanningAlgorithm algorithm = new SlopePathPlanningAlgorithm(vertexs, actualWidth, a, b);
         List<Point> points = algorithm.generateWaypoints(baselineA.altitude, baselineB.altitude);
 
         //convert to waypoint
@@ -54,12 +55,13 @@ public class SlopeModel extends BaseModel {
         safeAltitude = (float) points.get(size - 1).getArCos() + altitude + distanceToPanel;
         //以安全高度进入斜面区域，并调整云台角度
         Waypoint w = new Waypoint(startPoint.latitude, startPoint.longitude, safeAltitude);
-        w.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel));
+        w.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle));
         executePoints.add(w);
         for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
             double alt = point.getArCos() + altitude + distanceToPanel;
             Waypoint waypoint = new Waypoint(point.getX(), point.getY(), (float) alt);
+            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             executePoints.add(waypoint);
         }
@@ -155,13 +157,13 @@ public class SlopeModel extends BaseModel {
     }
 
     @Override
-    public WaypointMissionHeadingMode getHeadingMode() {
-        return headingMode;
+    public int getHeadingAngle() {
+        return headingAngle;
     }
 
     @Override
-    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
-        this.headingMode = headingMode;
+    public void setHeadingAngle(int headingAngle) {
+        this.headingAngle = headingAngle;
     }
 
     @Override
@@ -175,13 +177,13 @@ public class SlopeModel extends BaseModel {
     }
 
     @Override
-    public int getCameraAngel() {
-        return cameraAngel;
+    public int getCameraAngle() {
+        return cameraAngle;
     }
 
     @Override
-    public void setCameraAngel(int cameraAngel) {
-        this.cameraAngel = cameraAngel;
+    public void setCameraAngle(int cameraAngle) {
+        this.cameraAngle = cameraAngle;
     }
 
     @Override

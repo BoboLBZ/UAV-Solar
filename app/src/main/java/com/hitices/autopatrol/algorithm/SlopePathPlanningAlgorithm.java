@@ -158,7 +158,7 @@ public class SlopePathPlanningAlgorithm {
                 double C2 = points[j].getX() * points[j - 1].getY() - points[j - 1].getX() * points[j].getY();//x2*y1-x1*y2
                 double py = (C2 * A - tempC * A2) / (A2 * B - A * B2);
                 double px = (C2 * B - tempC * B2) / (A * B2 - A2 * B);
-                if (isOntheLine(points[j - 1], points[j], px, py)) {
+                if (isOnTheLine(points[j - 1], points[j], px, py)) {
                     flag = true;
                     cutPoints.add(new Point(px, py, swapLineNums));  //用point的arc参数存储高度值
                 }
@@ -182,15 +182,15 @@ public class SlopePathPlanningAlgorithm {
         return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
     }
 
-    private boolean isOntheLine(Point start, Point end, double x, double y) {
-        if (doubleEqules(start.getX(), end.getX())) {
+    private boolean isOnTheLine(Point start, Point end, double x, double y) {
+        if (doubleEquals(start.getX(), end.getX())) {
             //经度（x）相等
-            if (doubleEqules(start.getY(), y) || doubleEqules(end.getY(), y))
+            if (doubleEquals(start.getY(), y) || doubleEquals(end.getY(), y))
                 return true;
             if ((y > start.getY() && y < end.getY()) || (y < start.getY() && y > end.getY()))
                 return true;
         } else {
-            if (doubleEqules(start.getX(), x) || doubleEqules(end.getX(), x))
+            if (doubleEquals(start.getX(), x) || doubleEquals(end.getX(), x))
                 return true;
             if ((x > start.getX() && x < end.getX()) || (x < start.getX() && x > end.getX()))
                 return true;
@@ -198,7 +198,7 @@ public class SlopePathPlanningAlgorithm {
         return false;
     }
 
-    private boolean doubleEqules(double d1, double d2) {
+    private boolean doubleEquals(double d1, double d2) {
         return Double.doubleToLongBits(d1) == Double.doubleToLongBits(d2);
     }
 }

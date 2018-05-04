@@ -132,11 +132,11 @@ public class MissionHelper {
         localRoot.appendChild(name);
         //camera angle
         Element cameraAngle = doc.createElement("cameraAngle");
-        cameraAngle.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getCameraAngel())));
+        cameraAngle.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getCameraAngle())));
         localRoot.appendChild(cameraAngle);
-        //headingMode
-        Element headingMode = doc.createElement("headingMode");
-        headingMode.appendChild(doc.createTextNode(multiPointsModel.getHeadingMode().toString()));
+        //headingAngle
+        Element headingMode = doc.createElement("headingAngle");
+        headingMode.appendChild(doc.createTextNode(String.valueOf(multiPointsModel.getHeadingAngle())));
         localRoot.appendChild(headingMode);
         //speed
         Element eSpeed = doc.createElement("speed");
@@ -189,11 +189,11 @@ public class MissionHelper {
         localRoot.appendChild(name);
 
         Element eAngle = doc.createElement("cameraAngle");
-        eAngle.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getCameraAngel())));
+        eAngle.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getCameraAngle())));
         localRoot.appendChild(eAngle);
 
-        Element headingMode = doc.createElement("headingMode");
-        headingMode.appendChild(doc.createTextNode(flatlandModel.getHeadingMode().toString()));
+        Element headingMode = doc.createElement("headingAngle");
+        headingMode.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getHeadingAngle())));
         localRoot.appendChild(headingMode);
 
         Element eSpeed = doc.createElement("speed");
@@ -242,11 +242,11 @@ public class MissionHelper {
         localRoot.appendChild(name);
 
         Element eAngle = doc.createElement("cameraAngle");
-        eAngle.appendChild(doc.createTextNode(String.valueOf(slopeModel.getCameraAngel())));
+        eAngle.appendChild(doc.createTextNode(String.valueOf(slopeModel.getCameraAngle())));
         localRoot.appendChild(eAngle);
 
-        Element headingMode = doc.createElement("headingMode");
-        headingMode.appendChild(doc.createTextNode(slopeModel.getHeadingMode().toString()));
+        Element headingMode = doc.createElement("headingAngle");
+        headingMode.appendChild(doc.createTextNode(String.valueOf(slopeModel.getHeadingAngle())));
         localRoot.appendChild(headingMode);
 
         Element eSpeed = doc.createElement("speed");
@@ -385,12 +385,12 @@ public class MissionHelper {
             //cameraAngle
             NodeList nodes = element.getElementsByTagName("cameraAngle");
             if (nodes.item(0) != null) {
-                multiPointsModel.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+                multiPointsModel.setCameraAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
-            //headingMode
-            nodes = element.getElementsByTagName("headingMode");
+            //headingAngle
+            nodes = element.getElementsByTagName("headingAngle");
             if (nodes.item(0) != null) {
-                multiPointsModel.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+                multiPointsModel.setHeadingAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
             nodes = element.getElementsByTagName("speed");
             if (nodes.item(0) != null) {
@@ -446,12 +446,12 @@ public class MissionHelper {
 
             NodeList nodes = element.getElementsByTagName("cameraAngle");
             if (nodes.item(0) != null) {
-                model.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+                model.setCameraAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
-            //headingMode
-            nodes = element.getElementsByTagName("headingMode");
+            //headingAngle
+            nodes = element.getElementsByTagName("headingAngle");
             if (nodes.item(0) != null) {
-                model.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+                model.setHeadingAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
             nodes = element.getElementsByTagName("speed");
             if (nodes.item(0) != null) {
@@ -494,12 +494,12 @@ public class MissionHelper {
 
             NodeList nodes = element.getElementsByTagName("cameraAngle");
             if (nodes.item(0) != null) {
-                model.setCameraAngel(Integer.parseInt(nodes.item(0).getTextContent()));
+                model.setCameraAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
-            //headingMode
-            nodes = element.getElementsByTagName("headingMode");
+            //headingAngle
+            nodes = element.getElementsByTagName("headingAngle");
             if (nodes.item(0) != null) {
-                model.setHeadingMode(getHeadingMode(nodes.item(0).getTextContent()));
+                model.setHeadingAngle(Integer.parseInt(nodes.item(0).getTextContent()));
             }
             nodes = element.getElementsByTagName("speed");
             if (nodes.item(0) != null) {

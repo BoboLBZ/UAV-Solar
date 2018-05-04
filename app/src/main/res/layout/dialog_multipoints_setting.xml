@@ -116,61 +116,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="3dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="3dp"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="飞机朝向:" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            android:text="拍照朝向:" />
 
-        <RadioGroup
+        <SeekBar
             android:id="@+id/heading"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/heading_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/headingNext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Auto"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/headingInitDirec"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Initial"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/headingRC"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="RC Control"
-                android:textSize="5pt" />
-
-            <RadioButton
-                android:id="@+id/headingWP"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Use Waypoint"
-                android:textSize="5pt" />
-        </RadioGroup>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>

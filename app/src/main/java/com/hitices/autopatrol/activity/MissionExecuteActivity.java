@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 
 import dji.common.battery.BatteryState;
-import dji.common.battery.LowVoltageBehavior;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.mission.waypoint.Waypoint;
@@ -132,10 +133,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private LatLng homePointGPS;
     //use to save the status of mission(mission stop)
     private List<Marker> markers = new ArrayList<>();
-    private int savedHeadingDegree;
+    //    private int savedHeadingDegree;
     //safe
     private boolean returnHomeSettingFlag = true;
     private int savedCameraPitch;
+    private int homeThreshold;
     /**
      * WaypointMissionOperatorListener
      */
@@ -161,12 +163,12 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             if (error == null) {
                 record.setEndTime(new Date());
+                record.setHasVisible(true); //设置照片为可见光图像
                 record.save();
                 setResultToToast("save record success");
             }
         }
     };
-    private int batteryCapacity = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -358,9 +360,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 //            if(savedHeadingDegree && savedCameraPitch )
             if (droneLocation != null) {
                 Waypoint w = new Waypoint(droneLocation.latitude, droneLocation.longitude, alt);
-                WaypointAction actionRotate = new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, savedHeadingDegree);
+//                WaypointAction actionRotate = new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, savedHeadingDegree);
                 WaypointAction actionPitch = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -savedCameraPitch);
-                w.addAction(actionRotate);
+//                w.addAction(actionRotate);
                 w.addAction(actionPitch);
                 list.add(0, w);
             }
@@ -409,6 +411,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             @Override
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
+                    Log.d(TAG, "setSmartReturnHome onResult: " + djiError.getDescription());
                     returnHomeSettingFlag = false;
                 }
             }
@@ -423,6 +426,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             @Override
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
+                    Log.d(TAG, "setSmartReturnHome onResult: " + djiError.getDescription());
                     returnHomeSettingFlag = false;
                 }
             }
@@ -432,70 +436,59 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             @Override
             public void onResult(DJIError djiError) {
                 if (djiError != null) {
+                    Log.d(TAG, "setSmartReturnHome onResult: " + djiError.getDescription());
                     returnHomeSettingFlag = false;
                 }
             }
         });
         //set
         //这个时候遥控器会有警报，在设置smart RTH的情况下不一定会返航
-//        controller.setLowBatteryWarningThreshold(49, new CommonCallbacks.CompletionCallback() {
-//            @Override
-//            public void onResult(DJIError djiError) {
-//                if (djiError != null) {
-//                    returnHomeSettingFlag = false;
-//                }
-//            }
-//        });
+        controller.setLowBatteryWarningThreshold(30, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
         //在低电量返航
-        returnHomeViaBattery();
+        returnHomeViaBattery(homeThreshold);
         return returnHomeSettingFlag;
     }
 
-    private void returnHomeViaBattery() {
+    private void returnHomeViaBattery(@NonNull final int percent) {
+        //不支持
         final Battery battery = AutoPatrolApplication.getBattery();
         if (battery != null) {
-            battery.getCellVoltages(new CommonCallbacks.CompletionCallbackWith<Integer[]>() {
-                @Override
-                public void onSuccess(Integer[] integers) {
-                    batteryCapacity = 0;
-                    for (int i = 0; i < integers.length; i++) {
-                        batteryCapacity += integers[i];
-                    }
-                    Log.d(TAG, "onSuccess: voltages" + String.valueOf(batteryCapacity));
-                }
-
-                @Override
-                public void onFailure(DJIError djiError) {
-
-                }
-            });
-
-            battery.setLevel1CellVoltageThreshold(4000, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    if (djiError != null) {
-                        returnHomeSettingFlag = false;
-                    }
-                }
-            });
-            battery.setLevel1CellVoltageBehavior(LowVoltageBehavior.GO_HOME, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    if (djiError != null) {
-                        returnHomeSettingFlag = false;
-                    }
-                }
-            });
+//
+//            battery.setLevel1CellVoltageThreshold(4000, new CommonCallbacks.CompletionCallback() {
+//                @Override
+//                public void onResult(DJIError djiError) {
+//                    if (djiError != null) {
+//                        Log.d(TAG, "setSmartReturnHome setLevel1CellVoltageThreshold: "+djiError.getDescription());
+//                        returnHomeSettingFlag = false;
+//                    }
+//                }
+//            });
+//            battery.setLevel1CellVoltageBehavior(LowVoltageBehavior.GO_HOME, new CommonCallbacks.CompletionCallback() {
+//                @Override
+//                public void onResult(DJIError djiError) {
+//                    if (djiError != null) {
+//                        Log.d(TAG, "setSmartReturnHome setLevel1CellVoltageBehavior: "+djiError.getDescription());
+//                        returnHomeSettingFlag = false;
+//                    }
+//                }
+//            });
             battery.setStateCallback(new BatteryState.Callback() {
                 boolean flag = true;
 
                 @Override
                 public void onUpdate(BatteryState batteryState) {
                     if (flag) {
-                        Log.d(TAG, "battery: " + String.valueOf(batteryState.getVoltage()));
-                        if (batteryState.getVoltage() < 4000) {
+//                        Log.d(TAG, "battery: " + String.valueOf(batteryState.getChargeRemainingInPercent()));
+                        if (batteryState.getChargeRemainingInPercent() <= percent) {
                             flag = false;
-                            setResultToToast("开始返航");
+                            startReturnHome();
                         }
                     }
                 }
@@ -505,6 +498,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
     }
 
+    private void startReturnHome() {
+        mFlightController.startGoHome(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                setResultToToast("start go home");
+            }
+        });
+    }
     /**
      * 根据传入的任务信息读取子任务列表
      */
@@ -582,9 +583,10 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             Log.d(TAG, "index is " + String.valueOf(index));
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(marker.getPosition());
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
             marker.remove();
             markers.set(index, aMap.addMarker(markerOptions));
+            //Log.d(TAG, "changeWaypointsMarker: num of markers:"+String.valueOf(aMap.getMapScreenMarkers().size()));
         }
     }
 
@@ -727,10 +729,35 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private void showchildSeleteDialog() {
         LinearLayout view = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_execute_select_model, null);
         GridView gridView = view.findViewById(R.id.gridview_execute_select_child);
+        final SeekBar sb_battery = view.findViewById(R.id.execute_battery);
+        final TextView battery_text = view.findViewById(R.id.execute_battery_text);
         //init gridview GridviewSeleteAdapter
         final GridviewSeleteAdapter adapter = new GridviewSeleteAdapter(this, modelList);
         Log.d("debug", String.valueOf(modelList.size()));
         gridView.setAdapter(adapter);
+
+        sb_battery.setMax(90);
+        homeThreshold = MissionConstraintHelper.getReturnHomeThreshold();
+        sb_battery.setProgress(homeThreshold);
+        battery_text.setText(String.valueOf(homeThreshold) + "%");
+
+        sb_battery.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                battery_text.setText(String.valueOf(i) + "%");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         new AlertDialog.Builder(this)
                 .setTitle("")
                 .setView(view)
@@ -738,7 +765,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         executeModelList = adapter.getExecuteList();
-                        System.out.println("exec num:" + String.valueOf(executeModelList.size()));
+                        Log.d(TAG, "onClick:exec num:" + String.valueOf(executeModelList.size()));
+                        int process = sb_battery.getProgress();
+                        if (process > 10 && process < 90) {
+                            homeThreshold = process;
+                        }
                         missionProcessing();
                     }
                 })
@@ -873,6 +904,19 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         return altitude;
     }
 
+    private void startAuto() {
+        uploadMission();
+        while (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.UPLOADING) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            }, 1000);
+        }
+        startMission();
+    }
+
     /**
      * uploadMission
      * 航点任务执行流程第二步
@@ -942,7 +986,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 记录飞行器朝向、云台俯仰角
      */
     private void saveDroneStatus() {
-        savedHeadingDegree = (int) mFlightController.getCompass().getHeading();
+//        savedHeadingDegree = (int) mFlightController.getCompass().getHeading();
         if (unfinishedPoints != null && !executeModelList.isEmpty()) {
             int count = unfinishedPoints.size();
             for (int i = executeModelList.size() - 1; i >= 0; i--) {
@@ -950,12 +994,10 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 if (count > pointNum) {
                     count = count - pointNum;
                 } else {
-                    savedCameraPitch = executeModelList.get(i).getCameraAngel();
+                    savedCameraPitch = executeModelList.get(i).getCameraAngle();
                 }
             }
         }
-        Log.d(TAG, "saveDroneStatus: heading" + String.valueOf(savedHeadingDegree));
-        Log.d(TAG, "saveDroneStatus: pitch" + String.valueOf(savedCameraPitch));
     }
 
     private void changeStatusOfPause() {

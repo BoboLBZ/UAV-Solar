@@ -68,7 +68,6 @@ import java.util.Date;
 import java.util.List;
 
 import dji.common.mission.waypoint.Waypoint;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 
 public class MissionMainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -572,16 +571,17 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView speed_text = multipointdSetiing.findViewById(R.id.seekBar_text);
         final TextView mName = multipointdSetiing.findViewById(R.id.setting_mName);
         final TextView pitchText = multipointdSetiing.findViewById(R.id.pitch_text);
+        final TextView headingText = multipointdSetiing.findViewById(R.id.heading_text);
 
         final SeekBar sb_speed = multipointdSetiing.findViewById(R.id.speed);
         final SeekBar sb_altitude = multipointdSetiing.findViewById(R.id.altitude);
         final SeekBar sb_pitch = multipointdSetiing.findViewById(R.id.pitch);
-
-        final RadioGroup rg_heading = multipointdSetiing.findViewById(R.id.heading);
+        final SeekBar sb_heading = multipointdSetiing.findViewById(R.id.heading);
         //init seekbar
         sb_altitude.setMax((int) (MissionConstraintHelper.getMaxAltitude() + 0.5));
         sb_speed.setMax((int) (MissionConstraintHelper.getMaxSpeed() + 0.5));
         sb_pitch.setMax(MissionConstraintHelper.getMaxPitch());
+        sb_heading.setMax(360);
         //update data
         //通用高度
         sb_altitude.setProgress((int) (getMultipointsModel().getAltitude()));
@@ -592,10 +592,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         sb_speed.setProgress((int) (getMultipointsModel().getSpeed() + 0.5));
         speed_text.setText(String.valueOf(getMultipointsModel().getSpeed()) + " m/s");
         //朝向
-        rg_heading.check(R.id.headingWP);
+        sb_heading.setProgress(getMultipointsModel().getHeadingAngle() + 180);
+        headingText.setText(String.valueOf(getMultipointsModel().getHeadingAngle()));
         //俯仰角
-        sb_pitch.setProgress(getMultipointsModel().getCameraAngel());
-        pitchText.setText(String.valueOf(getMultipointsModel().getCameraAngel()));
+        sb_pitch.setProgress(getMultipointsModel().getCameraAngle());
+        pitchText.setText(String.valueOf(getMultipointsModel().getCameraAngle()));
         //设置监听器
         sb_pitch.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -644,9 +645,20 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
-        rg_heading.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        sb_heading.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                headingText.setText(String.valueOf(i - 180));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -658,16 +670,13 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                         //change commit
                         getMultipointsModel().setSpeed(sb_speed.getProgress());
                         getMultipointsModel().setAltitude(sb_altitude.getProgress());
-                        getMultipointsModel().setCameraAngel(sb_pitch.getProgress());
-                        int checkedid = rg_heading.getCheckedRadioButtonId();
-                        if (checkedid == R.id.headingNext) {
-                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.AUTO);
-                        } else if (checkedid == R.id.headingInitDirec) {
-                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_INITIAL_DIRECTION);
-                        } else if (checkedid == R.id.headingRC) {
-                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER);
-                        } else if (checkedid == R.id.headingWP) {
-                            getMultipointsModel().setHeadingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
+                        getMultipointsModel().setCameraAngle(sb_pitch.getProgress());
+                        int angle = sb_heading.getProgress();
+                        if (angle >= 0 && angle <= 360) {
+                            getMultipointsModel().setHeadingAngle(angle - 180);
+                            getMultipointsModel().changeActionOfAllPoints(angle - 180);
+                        } else {
+                            getMultipointsModel().setHeadingAngle(0); //使用默认值0，正北方向
                         }
                         //change flag
                         saveFlag = false;
@@ -692,6 +701,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final SeekBar mOverate = settingView.findViewById(R.id.polygon_setting_overrate);
         final SeekBar mWidth = settingView.findViewById(R.id.polygon_setting_width);
         final SeekBar mPitch = settingView.findViewById(R.id.polygon_setting_pitch);
+        final SeekBar mHeading = settingView.findViewById(R.id.polygon_setting_heading);
 
 
         final TextView mSpeedText = settingView.findViewById(R.id.polygon_setting_speed_text);
@@ -700,6 +710,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mAltitudeText = settingView.findViewById(R.id.polygon_setting_altitude_text);
         final TextView mPitchText = settingView.findViewById(R.id.polygon_setting_pitch_text);
         final TextView mName = settingView.findViewById(R.id.polygon_setting_name);
+        final TextView mHeadingText = settingView.findViewById(R.id.polygon_setting_heading_text);
+
 
         GridView vertexs = settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
@@ -723,9 +735,12 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mWidthText.setText(String.valueOf((int) (getFlatlandModel().getWidth() + 0.5)) + " m");
 
         mPitch.setMax(MissionConstraintHelper.getMaxPitch());
-        mPitch.setProgress(getFlatlandModel().getCameraAngel());
-        ToastHelper.getInstance().showShortToast("flat " + String.valueOf(getFlatlandModel().getCameraAngel()));
-        mPitchText.setText(String.valueOf(getFlatlandModel().getCameraAngel()));
+        mPitch.setProgress(getFlatlandModel().getCameraAngle());
+        mPitchText.setText(String.valueOf(getFlatlandModel().getCameraAngle()));
+
+        mHeading.setMax(360);
+        mHeading.setProgress(getFlatlandModel().getHeadingAngle() + 180);
+        mHeadingText.setText(String.valueOf(getFlatlandModel().getHeadingAngle()));
 
         mSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -811,7 +826,22 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
+        mHeading.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mHeadingText.setText(String.valueOf(i - 180));
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         vertexs.setAdapter(new FlatlandSettingGridviewAdapter(this, getFlatlandModel().getVertexs()));
         //dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -824,7 +854,13 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 getFlatlandModel().setOverlapRate(mOverate.getProgress());
                 getFlatlandModel().setSpeed(mSpeed.getProgress());
                 getFlatlandModel().setWidth(mWidth.getProgress());
-                getFlatlandModel().setCameraAngel(mPitch.getProgress());
+                getFlatlandModel().setCameraAngle(mPitch.getProgress());
+                int angle = mHeading.getProgress();
+                if (angle >= 0 && angle <= 360) {
+                    getFlatlandModel().setHeadingAngle(angle - 180);
+                } else {
+                    getFlatlandModel().setHeadingAngle(0); //使用默认值0，正北方向
+                }
                 //change flag
                 saveFlag = false;
             }
@@ -847,6 +883,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final SeekBar mWidth = settingView.findViewById(R.id.slope_setting_width);
         final SeekBar mPitch = settingView.findViewById(R.id.slope_setting_pitch);
         final SeekBar mDistance = settingView.findViewById(R.id.slope_setting_distance);
+        final SeekBar mHeading = settingView.findViewById(R.id.slope_setting_heading);
 
         final TextView mSpeedText = settingView.findViewById(R.id.slope_setting_speed_text);
         final TextView mOverateText = settingView.findViewById(R.id.slope_setting_overrate_text);
@@ -855,6 +892,8 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mPitchText = settingView.findViewById(R.id.slope_setting_pitch_text);
         final TextView mDistanceText = settingView.findViewById(R.id.slope_setting_distance_text);
         final TextView mName = settingView.findViewById(R.id.slope_setting_name);
+        final TextView mHeadingText = settingView.findViewById(R.id.slope_setting_heading_text);
+
         //base line
         final Button set = settingView.findViewById(R.id.slope_setting_set);
         final SeekBar mA = settingView.findViewById(R.id.slope_setting_A);
@@ -889,9 +928,12 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mWidthText.setText(String.valueOf((int) (getSlopeModel().getWidth() + 0.5)) + " m");
 
         mPitch.setMax(MissionConstraintHelper.getMaxPitch());
-        mPitch.setProgress(getSlopeModel().getCameraAngel());
-        mPitchText.setText(String.valueOf(getSlopeModel().getCameraAngel()));
+        mPitch.setProgress(getSlopeModel().getCameraAngle());
+        mPitchText.setText(String.valueOf(getSlopeModel().getCameraAngle()));
 
+        mHeading.setMax(360);
+        mHeading.setProgress(getSlopeModel().getHeadingAngle() + 180);
+        mHeadingText.setText(String.valueOf(getSlopeModel().getHeadingAngle()));
 
         mA.setMax((int) MissionConstraintHelper.getMaxAltitude());
         mB.setMax((int) MissionConstraintHelper.getMaxAltitude());
@@ -1042,6 +1084,22 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
+        mHeading.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mHeadingText.setText(String.valueOf(i - 180));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         vertexs.setAdapter(new FlatlandSettingGridviewAdapter(this, getSlopeModel().getVertexs()));
         //dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1054,8 +1112,14 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 getSlopeModel().setOverlapRate(mOverate.getProgress());
                 getSlopeModel().setSpeed(mSpeed.getProgress());
                 getSlopeModel().setWidth(mWidth.getProgress());
-                getSlopeModel().setCameraAngel(mPitch.getProgress());
+                getSlopeModel().setCameraAngle(mPitch.getProgress());
                 getSlopeModel().setDistanceToPanel(mDistance.getProgress());
+                int angle = mHeading.getProgress();
+                if (angle >= 0 && angle <= 360) {
+                    getSlopeModel().setHeadingAngle(angle - 180);
+                } else {
+                    getSlopeModel().setHeadingAngle(0); //使用默认值0，正北方向
+                }
                 //应该增加正确性判断
                 if (getSlopeModel().getBaselineA() != null && getSlopeModel().getBaselineB() != null) {
                     getSlopeModel().getBaselineA().altitude = mA.getProgress();

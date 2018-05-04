@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointAction;
 import dji.common.mission.waypoint.WaypointActionType;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
  * Created by Rhys on 2018/1/11.
@@ -31,8 +30,8 @@ public class MultiPointsModel extends BaseModel {
         //base
         missionName = mName;
         modelType = ModelType.MultiPoints;
-        headingMode = WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
-        cameraAngel = 90;
+        headingAngle = 0; //默认正北方向
+        cameraAngle = 90;
         //multi point
         altitude = 15f;
         speed = 9f;
@@ -91,13 +90,13 @@ public class MultiPointsModel extends BaseModel {
     }
 
     @Override
-    public WaypointMissionHeadingMode getHeadingMode() {
-        return headingMode;
+    public int getHeadingAngle() {
+        return headingAngle;
     }
 
     @Override
-    public void setHeadingMode(WaypointMissionHeadingMode headingMode) {
-        this.headingMode = headingMode;
+    public void setHeadingAngle(int headingAngle) {
+        this.headingAngle = headingAngle;
     }
 
     @Override
@@ -111,13 +110,13 @@ public class MultiPointsModel extends BaseModel {
     }
 
     @Override
-    public int getCameraAngel() {
-        return cameraAngel;
+    public int getCameraAngle() {
+        return cameraAngle;
     }
 
     @Override
-    public void setCameraAngel(int cameraAngel) {
-        this.cameraAngel = cameraAngel;
+    public void setCameraAngle(int cameraAngle) {
+        this.cameraAngle = cameraAngle;
     }
 
     @Override
@@ -178,6 +177,18 @@ public class MultiPointsModel extends BaseModel {
         waypoints.remove(latLng);
     }
 
+    public void changeActionOfAllPoints(int angle) {
+        this.headingAngle = angle;
+        if (!waypointList.isEmpty()) {
+            for (int i = 0; i < waypointList.size(); i++) {
+                Waypoint waypoint = waypointList.get(i);
+                waypoint.removeAllAction();
+                waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, angle));
+                waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
+            }
+        }
+
+    }
     @Override
     public void generateExecutablePoints(LatLng formerPoint) {
         AntColonyAlgorithm antColonyAlgorithm = new AntColonyAlgorithm(waypointList, formerPoint);
@@ -195,7 +206,7 @@ public class MultiPointsModel extends BaseModel {
         startPoint = new LatLng(w.coordinate.getLatitude(), w.coordinate.getLongitude());
         //以安全高度进入子任务区域
         Waypoint waypoint = new Waypoint(startPoint.latitude, startPoint.longitude, safeAltitude);
-        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngel);
+        WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle);
         waypoint.addAction(action);
         executePoints.add(0, waypoint);
         //以安全高度离开子任务区域

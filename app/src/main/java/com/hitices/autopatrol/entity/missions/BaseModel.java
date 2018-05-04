@@ -5,7 +5,6 @@ import com.amap.api.maps2d.model.LatLng;
 import java.util.List;
 
 import dji.common.mission.waypoint.Waypoint;
-import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 
 /**
  * Created by Rhys on 2018/1/28.
@@ -16,8 +15,8 @@ import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 public abstract class BaseModel {
     protected String missionName; //任务名称
     protected ModelType modelType; //任务类型
-    protected WaypointMissionHeadingMode headingMode;
-    protected int cameraAngel;
+    protected int headingAngle;
+    protected int cameraAngle;
     protected LatLng startPoint, endPoint;//use to connect models,does not need to write to file
     protected float safeAltitude;//安全高度，使用该安全高度进入任务
 
@@ -40,17 +39,17 @@ public abstract class BaseModel {
 
     public abstract void setModelType(ModelType modelType);
 
-    public abstract WaypointMissionHeadingMode getHeadingMode();
+    public abstract int getHeadingAngle();
 
-    public abstract void setHeadingMode(WaypointMissionHeadingMode headingMode);
+    public abstract void setHeadingAngle(int headingAngle);
 
     public abstract float getSafeAltitude();
 
     public abstract void setSafeAltitude(float safeAltitude);
 
-    public abstract int getCameraAngel();
+    public abstract int getCameraAngle();
 
-    public abstract void setCameraAngel(int cameraAngel);
+    public abstract void setCameraAngle(int cameraAngle);
 
     public abstract LatLng getEndPoint();
 
