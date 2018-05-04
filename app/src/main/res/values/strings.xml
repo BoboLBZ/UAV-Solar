@@ -33,12 +33,15 @@
 
     <string name="app_func_mission_run">任务执行</string>
     <string name="app_func_mission_manage">任务管理</string>
-    <string name="app_func_data_analysis">数据分析</string>
+    <string name="app_func_data_analysis">巡检记录</string>
     <string name="app_func_data_download">数据下载</string>
 
     <string name="record_select_title">选择巡检记录</string>
 
     <string name="selected_flight_record">SELECTED_RECORD</string>
+    
+    <string name="record_ready_func_delete">删除</string>
+    <string name="record_ready_func_check">查看</string>
 
     <string name="show_visible">可见光图像</string>
     <string name="show_infrared">红外光图像</string>

@@ -588,8 +588,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
             imagePath = RecordImageHelper.getRecordTestImagePath();
 //            imagePath = RecordImageHelper.getRecordVisibleImagePath(record);
         } else {
-//            imagePath = RecordImageHelper.getRecordTestImagePath();
-            imagePath = RecordImageHelper.getRecordVisibleImagePath(record);
+            imagePath = RecordImageHelper.getRecordTestImagePath();
+//            imagePath = RecordImageHelper.getRecordVisibleImagePath(record);
         }
 
         if (!imagePath.exists()) {

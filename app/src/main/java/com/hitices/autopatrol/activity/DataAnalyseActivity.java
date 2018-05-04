@@ -15,6 +15,8 @@ import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.crud.DataSupport;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -61,24 +63,15 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
             genMissions();
         }
 
-        flightRecordList = DataSupport.findAll(FlightRecord.class);
-
+        flightRecordList = DataSupport.where("isDownload=?","1")
+                .order("startTime desc")
+                .find(FlightRecord.class);
+        flightRecordList.addAll(DataSupport.where("isDownload=?","0")
+                .order("startTime desc")
+                .find(FlightRecord.class));
     }
 
     private void genMissions() {
-
-//        PatrolMission mission1 = new PatrolMission();
-//        mission1.setName("mission1");
-//        mission1.save();
-//        PatrolMission mission2 = new PatrolMission();
-//        mission2.setName("mission2");
-//        mission2.save();
-//        PatrolMission mission3 = new PatrolMission();
-//        mission3.setName("mission3");
-//        mission3.save();
-//        PatrolMission downloadMission = new PatrolMission();
-//        downloadMission.setName("downTestMission");
-//        downloadMission.save();
 
         FlightRecord record1 = new FlightRecord();
         record1.setMissionName("mission1");
@@ -101,7 +94,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record3.setMissionName("mission2");
         record3.setStartTime(new Date());
         record3.setEndTime(new Date());
-        record3.setDownload(true);
+        record3.setDownload(false);
         record3.setHasVisible(true);
         record3.save();
 
@@ -116,6 +109,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record5.setMissionName("mission2");
         record5.setStartTime(new Date());
         record5.setEndTime(new Date());
+        record5.setDownload(true);
         record5.save();
 
         FlightRecord record6 = new FlightRecord();
