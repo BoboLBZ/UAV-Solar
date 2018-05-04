@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 
+import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataDownloadActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import dji.common.error.DJIError;
+import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.DownloadListener;
 import dji.sdk.camera.MediaFile;
 
@@ -71,6 +73,17 @@ public class RecordImageDownloadHelper {
     }
 
     public void downloadFilesByMissionRecord(FlightRecord record, FilesDownloadCompleteListener listener) {
+        BaseProduct mProduct = AutoPatrolApplication.getProductInstance();
+        if (null != mProduct && mProduct.isConnected() &&
+                null != mProduct.getModel() && null != mProduct.getCamera()) {
+            Log.d(TAG, "product connected");
+
+        } else {
+            Log.d(TAG, "product not connect");
+            ToastHelper.getInstance().showShortToast("无人机断开连接");
+            return;
+        }
+
         Log.d(TAG, "download by mission record");
         setFlightRecord(record);
         setCompleteListener(listener);

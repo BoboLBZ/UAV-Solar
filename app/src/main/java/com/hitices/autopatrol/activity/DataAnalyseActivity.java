@@ -4,27 +4,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.FlightRecord2AnalyseAdapter;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
 import com.hitices.autopatrol.helper.ToastHelper;
-
 
 import org.litepal.crud.DataSupport;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import dji.common.error.DJIError;
-import dji.log.DJILog;
-import dji.sdk.camera.FetchMediaTask;
-import dji.sdk.camera.FetchMediaTaskContent;
-import dji.sdk.camera.MediaFile;
 
 // 该Activity用于选择任务，同时下载本次任务采集图片，跳转到结果展示界面
 public class DataAnalyseActivity extends AppCompatActivity implements View.OnClickListener {
@@ -32,6 +24,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private List<FlightRecord> flightRecordList;
 
+    private Toolbar toolbar;
     private RecyclerView flightRecordsRecycleView;
 
     @Override
@@ -39,7 +32,6 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_analyse);
 
-        ToastHelper.getInstance().showShortToast("select the mission");
         initMissionList();
         initUI();
         initDialog();
@@ -63,10 +55,10 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
             genMissions();
         }
 
-        flightRecordList = DataSupport.where("isDownload=?","1")
+        flightRecordList = DataSupport.where("isDownload=?", "1")
                 .order("startTime desc")
                 .find(FlightRecord.class);
-        flightRecordList.addAll(DataSupport.where("isDownload=?","0")
+        flightRecordList.addAll(DataSupport.where("isDownload=?", "0")
                 .order("startTime desc")
                 .find(FlightRecord.class));
     }
@@ -120,12 +112,17 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initUI() {
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(getResources().getString(R.string.record_select_title));
+        setSupportActionBar(toolbar);
 
         flightRecordsRecycleView = findViewById(R.id.lv_flight_records);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         flightRecordsRecycleView.setLayoutManager(layoutManager);
         FlightRecord2AnalyseAdapter adapter = new FlightRecord2AnalyseAdapter(flightRecordList);
         flightRecordsRecycleView.setAdapter(adapter);
+//        flightRecordsRecycleView.addItemDecoration(new RecyclerViewDivider(this,
+//                LinearLayoutManager.VERTICAL, 5, getResources().getColor(R.color.item_divider_gray)));
     }
 
     /**

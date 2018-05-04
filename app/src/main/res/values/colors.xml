@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#009688</color>
+    <color name="colorPrimaryDark">#00796b</color>
+    <color name="colorAccent">#ffd740</color>
     <color name="selected">#33FF33</color>
     <color name="unselected">#F7FCF7</color>
 
@@ -28,5 +28,10 @@
     <color name="baseline">#E51815</color>
     <color name="bg">#4De5ffff</color>
     <color name="recycleviewItemSelected">#4Dccffff</color>
+    <color name="item_divider_gray">#aaaaaaaa</color>
+    <color name="item_text_black">#bb333333</color>
+    <color name="item_text_red">#DC7560</color>
+    <color name="bg_cardview_light">#ffffffff</color>
+    <color name="bg_cardview_drak">#ffeeeeee</color>
 
 </resources>

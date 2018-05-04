@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.adapter.FlightRecord2DownloadAdapter;
@@ -25,6 +26,7 @@ public class DataDownloadActivity extends AppCompatActivity {
 
     private List<FlightRecord> flightRecordList;
 
+    private Toolbar toolbar;
     private RecyclerView flightRecordsRecycleView;
     FlightRecord2DownloadAdapter adapter;
 
@@ -41,6 +43,9 @@ public class DataDownloadActivity extends AppCompatActivity {
     }
 
     private void initUI() {
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(getResources().getString(R.string.photo_download_title));
+        setSupportActionBar(toolbar);
 
         flightRecordsRecycleView = findViewById(R.id.lv_flight_records);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -51,7 +56,8 @@ public class DataDownloadActivity extends AppCompatActivity {
 
     private void updateMissionList() {
         String notDownload = "0";
-        flightRecordList = DataSupport.where("isDownload=?", notDownload).find(FlightRecord.class);
+        flightRecordList = DataSupport.where("isDownload=?", notDownload)
+                .order("startTime desc").find(FlightRecord.class);
 
     }
 

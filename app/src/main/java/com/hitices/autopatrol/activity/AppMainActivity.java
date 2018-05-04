@@ -161,7 +161,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
             isConnected = false;
         }
         //for test
-//        isConnected = true;
+        isConnected = true;
         return isConnected;
     }
 

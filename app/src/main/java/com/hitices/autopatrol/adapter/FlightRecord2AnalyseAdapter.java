@@ -3,7 +3,6 @@ package com.hitices.autopatrol.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +10,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.helper.ContextHelper;
-import com.hitices.autopatrol.helper.RecordImageDownloadHelper;
-import com.hitices.autopatrol.helper.RecordImageHelper;
 import com.hitices.autopatrol.helper.RecordInfoHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
 import java.util.List;
-
-import dji.sdk.base.BaseProduct;
 
 /**
  * Created by dusz7 on 20180330.
@@ -36,6 +29,8 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
     private static final int READY_RECORD_ITEM = 0;
     private static final int NO_READY_RECORD_ITEM = 1;
 
+    private Context mContext;
+
     //记录当前展开项的索引
     private int expandPosition = -1;
 
@@ -44,7 +39,6 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
     static class ViewHolder extends RecyclerView.ViewHolder {
         View flightRecordView;
 
-        ImageView powerStationImg;
         TextView missionNameText;
         TextView executeDateText;
         TextView isDownloadText;
@@ -52,12 +46,10 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
         TextView hasInfraredPicView;
         ViewGroup buttons;
 
-
         public ViewHolder(View view) {
             super(view);
             flightRecordView = view;
 
-            powerStationImg = view.findViewById(R.id.img_station_thumb);
             missionNameText = view.findViewById(R.id.tv_mission_name);
             executeDateText = view.findViewById(R.id.tv_execute_date);
             isDownloadText = view.findViewById(R.id.tv_is_download);
@@ -101,6 +93,7 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        mContext = parent.getContext();
         final ViewHolder holder;
         if (viewType == READY_RECORD_ITEM) {
             holder = new ReadyViewHolder(LayoutInflater.from(parent.getContext()).
@@ -182,7 +175,6 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
             holder.isDownloadText.setText("（ 已下载 ）");
 
             ReadyViewHolder readyViewHolder = (ReadyViewHolder) holder;
-
             readyViewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -191,21 +183,21 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
                     flightRecordList.remove(record);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, getItemCount());
+                    ToastHelper.getInstance().showShortToast("已删除");
                 }
             });
             readyViewHolder.checkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(ContextHelper.getApplicationContext(), DataAnalyseMapActivity.class);
-                    intent.putExtra(ContextHelper.getApplicationContext().getResources().getString(R.string.selected_flight_record),
+                    Intent intent = new Intent(mContext, DataAnalyseMapActivity.class);
+                    intent.putExtra(mContext.getResources().getString(R.string.selected_flight_record),
                             record);
-                    ContextHelper.getApplicationContext().startActivity(intent);
+                    mContext.startActivity(intent);
                 }
             });
 
         } else {
             holder.isDownloadText.setText("（ 未下载 ）");
-            // 显示暗
 
             NoReadyViewHolder noReadyViewHolder = (NoReadyViewHolder) holder;
             noReadyViewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -216,6 +208,7 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
                     flightRecordList.remove(record);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, getItemCount());
+                    ToastHelper.getInstance().showShortToast("已删除");
                 }
             });
         }
