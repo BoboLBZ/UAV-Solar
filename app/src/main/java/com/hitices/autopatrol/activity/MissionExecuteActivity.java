@@ -127,7 +127,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private Marker humanLocationMarker;
     //ui
     private MapView mapView;
-    private ImageButton uplaod, start, exit, pause;
+    private ImageButton upload, start, exit, pause;
     private List<Waypoint> unfinishedPoints = new ArrayList<>();
     private int index = -1;
     private LatLng homePointGPS;
@@ -197,11 +197,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     }
 
     private void initUI() {
-        uplaod = findViewById(R.id.execute_uploadMission);
+        upload = findViewById(R.id.execute_uploadMission);
         pause = findViewById(R.id.execute_stopMission);
         exit = findViewById(R.id.execute_exitMission);
         start = findViewById(R.id.execute_startMission);
-        uplaod.setOnClickListener(this);
+        upload.setOnClickListener(this);
         start.setOnClickListener(this);
         exit.setOnClickListener(this);
         pause.setOnClickListener(this);
@@ -836,7 +836,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         builder.maxFlightSpeed(speed);
 
         builder.finishedAction(WaypointMissionFinishedAction.AUTO_LAND);
-        builder.headingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
+        builder.headingMode(WaypointMissionHeadingMode.AUTO);
         builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
 
         DJIError error = getWaypointMissionOperator().loadMission(builder.build());

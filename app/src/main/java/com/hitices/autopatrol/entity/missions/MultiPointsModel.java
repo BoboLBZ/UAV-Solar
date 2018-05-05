@@ -154,8 +154,10 @@ public class MultiPointsModel extends BaseModel {
         //添加航点，使用系统默认参数
         Waypoint waypoint = new Waypoint(latLng.latitude, latLng.longitude, altitude);
         List<WaypointAction> currentGeneralActions = MissionConstraintHelper.getGeneralWaypointActions();
-        for (int i = 0; i < currentGeneralActions.size(); i++)
+        for (int i = 0; i < currentGeneralActions.size(); i++) {
+            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(currentGeneralActions.get(i));
+        }
         waypointList.add(waypoint);
         waypoints.put(latLng, waypoint);
     }
@@ -183,7 +185,7 @@ public class MultiPointsModel extends BaseModel {
             for (int i = 0; i < waypointList.size(); i++) {
                 Waypoint waypoint = waypointList.get(i);
                 waypoint.removeAllAction();
-                waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, angle));
+                waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
                 waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             }
         }
