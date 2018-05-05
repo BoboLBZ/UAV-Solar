@@ -29,7 +29,7 @@ public class MissionConstraintHelper {
     private static int returnHomeThreshold = 26;
     //default value
     private static int defaultCameraAngle = 90;
-    private static int defaultHeading = 0;
+    private static int defaultHeading = 90;
     private static float defaultSpeed = 8f;
     private static int defaultOverlapRate = 0;
     private static int defaultWidth = 15;
