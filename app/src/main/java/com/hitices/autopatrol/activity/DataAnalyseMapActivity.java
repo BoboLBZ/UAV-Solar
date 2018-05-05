@@ -58,7 +58,10 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private static final String VISIBLE_IMAGES = "VISIBLE_IMAGES";
     private static final String INFRARED_IMAGES = "INFRARED_IMAGES";
 
-    private String imageNow = VISIBLE_IMAGES;
+    private static final int BOTH_IMAGES = 0;
+    private static final int ONLY_VISIBLE = 1;
+    private static final int ONLY_INFRARED = 2;
+    private static final int NO_IMAGES = 3;
 
     private View visibleFrame, infraredFrame, showBtnsLayout;
     private Button showVisibleBtn, showInfraredBtn;
@@ -68,6 +71,10 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     private List<AnalyzedImageBean> visibleAnalyzedImageBeans = new ArrayList<>();
     private List<AnalyzedImageBean> infraredAnalyzedImageBeans = new ArrayList<>();
+
+    private String imageNow = VISIBLE_IMAGES;
+    private FlightRecord mFlightRecord;
+    private int imagesType = BOTH_IMAGES;
 
     private ProgressDialog analysisProgressDialog;
 
@@ -93,14 +100,17 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         setContentView(R.layout.activity_data_analyse_map);
 
         Intent intent = getIntent();
-        FlightRecord flightRecord = (FlightRecord) intent.getSerializableExtra(getResources().getString(R.string.selected_flight_record));
-        initImages(flightRecord);
-        initUI(savedInstanceState, flightRecord);
-        initDialog(this);
+        mFlightRecord = (FlightRecord) intent.getSerializableExtra(getResources().getString(R.string.selected_flight_record));
+
+        analyseRecordData();
+
+        initUI(this, savedInstanceState);
+
     }
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
         if (null != visibleMapView) {
             visibleMapView.onResume();
@@ -108,6 +118,9 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         if (null != infraredMapView) {
             infraredMapView.onResume();
         }
+
+        markImageOnMap();
+
         initTFObjectDetection();
     }
 
@@ -186,32 +199,78 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         }
     };
 
-    private void initImages(FlightRecord record) {
+    private void initUI(Context context, Bundle savedInstanceState) {
+
+        // 初始化界面其他部分
+        showBtnsLayout = findViewById(R.id.ll_show_btns);
+        showBtnsLayout.bringToFront();
+        showVisibleBtn = findViewById(R.id.btn_show_visible);
+        showInfraredBtn = findViewById(R.id.btn_show_infrared);
+        showVisibleBtn.setOnClickListener(this);
+        showInfraredBtn.setOnClickListener(this);
+        genReportBtn = findViewById(R.id.btn_gen_report);
+        runAnalysisBtn = findViewById(R.id.btn_run_analysis);
+        genReportBtn.setOnClickListener(this);
+        runAnalysisBtn.setOnClickListener(this);
+
+        initDialog(context);
+        initMapView(savedInstanceState);
+    }
+
+    private void initDialog(Context context) {
+
+        //Init runAnalyse Dialog
+        analysisProgressDialog = new ProgressDialog(context);
+        analysisProgressDialog.setTitle(ContextHelper.getApplicationContext()
+                .getResources().getString(R.string.run_analysis_title));
+        analysisProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
+        analysisProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        analysisProgressDialog.setCanceledOnTouchOutside(false);
+        analysisProgressDialog.setCancelable(true);
+        analysisProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                // 中止分析
+            }
+        });
+    }
+
+    private void analyseRecordData() {
+        if (mFlightRecord.isHasVisible() & mFlightRecord.isHasInfrared()) {
+            imagesType = BOTH_IMAGES;
+        } else if (mFlightRecord.isHasVisible()) {
+            imagesType = ONLY_VISIBLE;
+        } else if (mFlightRecord.isHasInfrared()) {
+            imagesType = ONLY_INFRARED;
+        } else {
+            imagesType = NO_IMAGES;
+        }
+        initImages();
+    }
+
+    private void initImages() {
         visibleAnalyzedImageBeans.clear();
         infraredAnalyzedImageBeans.clear();
 
         List<String> visibleImageUrls = new ArrayList<>();
         List<String> infraredImageUrls = new ArrayList<>();
 
-        // 默认可见光、红外光都有
-        if (record.isHasVisible() && record.isHasInfrared()) {
-            visibleImageUrls = getImageUrls(record, true);
-            infraredImageUrls = getImageUrls(record, false);
-        }
-
-        // 没有可见光图集，有红外
-        if (!record.isHasVisible()) {
-            infraredImageUrls = getImageUrls(record, false);
-        }
-
-        // 没有红外光，有可见光
-        if (!record.isHasInfrared()) {
-            visibleImageUrls = getImageUrls(record, true);
-        }
-
-        // 两个都没有，应该不可能：
-        if (!record.isHasInfrared() && record.isHasVisible()) {
-            return;
+        switch (imagesType) {
+            case BOTH_IMAGES:
+                // 默认可见光、红外光都有
+                visibleImageUrls = getImageUrls(true);
+                infraredImageUrls = getImageUrls(false);
+                break;
+            case ONLY_VISIBLE:
+                // 没有红外光，有可见光
+                visibleImageUrls = getImageUrls(true);
+                break;
+            case ONLY_INFRARED:
+                // 没有可见光图集，有红外
+                infraredImageUrls = getImageUrls(false);
+                break;
+            case NO_IMAGES:
+                break;
         }
 
         if (null != visibleImageUrls && visibleImageUrls.size() != 0) {
@@ -228,131 +287,111 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         }
     }
 
-    private void initUI(Bundle savedInstanceState, FlightRecord record) {
-
-        // 初始化界面其他部分
-        showBtnsLayout = findViewById(R.id.ll_show_btns);
-        showBtnsLayout.bringToFront();
-        showVisibleBtn = findViewById(R.id.btn_show_visible);
-        showInfraredBtn = findViewById(R.id.btn_show_infrared);
-        showVisibleBtn.setOnClickListener(this);
-        showInfraredBtn.setOnClickListener(this);
-        genReportBtn = findViewById(R.id.btn_gen_report);
-        runAnalysisBtn = findViewById(R.id.btn_run_analysis);
-        genReportBtn.setOnClickListener(this);
-        runAnalysisBtn.setOnClickListener(this);
+    private void initMapView(Bundle savedInstanceState) {
 
         // 初始化地图部分
         visibleFrame = findViewById(R.id.fl_record_visible_map);
         infraredFrame = findViewById(R.id.fl_record_infrared_map);
+        visibleFrame.setVisibility(View.VISIBLE);
+        infraredFrame.setVisibility(View.GONE);
 
-        // 默认可见光、红外光都有
-        if (record.isHasVisible() && record.isHasInfrared()) {
-            imageNow = VISIBLE_IMAGES;
+        visibleMapView = findViewById(R.id.mv_record_visible);
+        infraredMapView = findViewById(R.id.mv_record_infrared);
 
-            visibleFrame.setVisibility(View.VISIBLE);
-            infraredFrame.setVisibility(View.GONE);
+        switch (imagesType) {
+            case BOTH_IMAGES:
+                // 默认可见光、红外光都有
+                imageNow = VISIBLE_IMAGES;
 
-            visibleMapView = findViewById(R.id.mv_record_visible);
-            infraredMapView = findViewById(R.id.mv_record_infrared);
-            visibleMapView.onCreate(savedInstanceState);
-            infraredMapView.onCreate(savedInstanceState);
-            if (visibleAMap == null) {
-                visibleAMap = visibleMapView.getMap();
-            }
-            if (infraredAMap == null) {
-                infraredAMap = infraredMapView.getMap();
-            }
-            visibleAMap.setOnMarkerClickListener(visibleMarkerClickListener);
-            GoogleMapHelper.useGoogleMapSatelliteData(visibleAMap);
-            infraredAMap.setOnMarkerClickListener(infraredMarkerClickListener);
-            GoogleMapHelper.useGoogleMapSatelliteData(infraredAMap);
+                visibleMapView.onCreate(savedInstanceState);
+                infraredMapView.onCreate(savedInstanceState);
+                if (visibleAMap == null) {
+                    visibleAMap = visibleMapView.getMap();
+                }
+                if (infraredAMap == null) {
+                    infraredAMap = infraredMapView.getMap();
+                }
+                visibleAMap.setOnMarkerClickListener(visibleMarkerClickListener);
+                GoogleMapHelper.useGoogleMapSatelliteData(visibleAMap);
+                infraredAMap.setOnMarkerClickListener(infraredMarkerClickListener);
+                GoogleMapHelper.useGoogleMapSatelliteData(infraredAMap);
 
-            UiSettings settings1 = visibleAMap.getUiSettings();
-            settings1.setZoomControlsEnabled(false);
-            settings1.setScaleControlsEnabled(true);
-            UiSettings settings2 = infraredAMap.getUiSettings();
-            settings2.setZoomControlsEnabled(false);
-            settings2.setScaleControlsEnabled(true);
+                UiSettings settings1 = visibleAMap.getUiSettings();
+                settings1.setZoomControlsEnabled(false);
+                settings1.setScaleControlsEnabled(true);
+                UiSettings settings2 = infraredAMap.getUiSettings();
+                settings2.setZoomControlsEnabled(false);
+                settings2.setScaleControlsEnabled(true);
 
-            // 标记照片位置点
-            markVisibleImageLocation();
-            markInfraredImageLocation();
-        }
+                break;
+            case ONLY_VISIBLE:
+                // 没有红外光，有可见光
+                imageNow = VISIBLE_IMAGES;
 
-        // 没有可见光图集，有红外
-        if (!record.isHasVisible()) {
-            imageNow = INFRARED_IMAGES;
+                // 去掉上方的选择区域
+                showBtnsLayout.setVisibility(View.GONE);
 
-            // 去掉上方的选择区域
-            showBtnsLayout.setVisibility(View.GONE);
+                visibleMapView.onCreate(savedInstanceState);
+                if (visibleAMap == null) {
+                    visibleAMap = visibleMapView.getMap();
+                }
+                visibleAMap.setOnMarkerClickListener(visibleMarkerClickListener);
+                GoogleMapHelper.useGoogleMapSatelliteData(visibleAMap);
 
-            visibleFrame.setVisibility(View.GONE);
-            infraredFrame.setVisibility(View.VISIBLE);
+                UiSettings settings3 = visibleAMap.getUiSettings();
+                settings3.setZoomControlsEnabled(false);
+                settings3.setScaleControlsEnabled(true);
 
-            infraredMapView = findViewById(R.id.mv_record_infrared);
-            infraredMapView.onCreate(savedInstanceState);
-            if (infraredAMap == null) {
-                infraredAMap = infraredMapView.getMap();
-            }
-            infraredAMap.setOnMarkerClickListener(infraredMarkerClickListener);
-            GoogleMapHelper.useGoogleMapSatelliteData(infraredAMap);
+                break;
+            case ONLY_INFRARED:
+                // 没有可见光图集，有红外
+                imageNow = INFRARED_IMAGES;
 
-            UiSettings settings = infraredAMap.getUiSettings();
-            settings.setZoomControlsEnabled(false);
-            settings.setScaleControlsEnabled(true);
+                // 去掉上方的选择区域
+                showBtnsLayout.setVisibility(View.GONE);
 
-            // 标记照片位置点
-            markInfraredImageLocation();
-        }
+                visibleFrame.setVisibility(View.GONE);
+                infraredFrame.setVisibility(View.VISIBLE);
 
-        // 没有红外光，有可见光
-        if (!record.isHasInfrared()) {
-            imageNow = VISIBLE_IMAGES;
+                infraredMapView = findViewById(R.id.mv_record_infrared);
+                infraredMapView.onCreate(savedInstanceState);
+                if (infraredAMap == null) {
+                    infraredAMap = infraredMapView.getMap();
+                }
+                infraredAMap.setOnMarkerClickListener(infraredMarkerClickListener);
+                GoogleMapHelper.useGoogleMapSatelliteData(infraredAMap);
 
-            // 去掉上方的选择区域
-            showBtnsLayout.setVisibility(View.GONE);
+                UiSettings settings4 = infraredAMap.getUiSettings();
+                settings4.setZoomControlsEnabled(false);
+                settings4.setScaleControlsEnabled(true);
 
-            visibleFrame.setVisibility(View.VISIBLE);
-            infraredFrame.setVisibility(View.GONE);
-
-            visibleMapView = findViewById(R.id.mv_record_visible);
-            visibleMapView.onCreate(savedInstanceState);
-            if (visibleAMap == null) {
-                visibleAMap = visibleMapView.getMap();
-            }
-            visibleAMap.setOnMarkerClickListener(visibleMarkerClickListener);
-            GoogleMapHelper.useGoogleMapSatelliteData(visibleAMap);
-
-            UiSettings settings = visibleAMap.getUiSettings();
-            settings.setZoomControlsEnabled(false);
-            settings.setScaleControlsEnabled(true);
-
-            // 标记照片位置点
-            markVisibleImageLocation();
-        }
-
-        // 两个都没有，应该不可能：
-        if (!record.isHasInfrared() && record.isHasVisible()) {
-
+                break;
+            case NO_IMAGES:
+                break;
         }
     }
 
-    private void initDialog(Context context) {
-
-        //Init runAnalyse Dialog
-        analysisProgressDialog = new ProgressDialog(context);
-        analysisProgressDialog.setTitle(ContextHelper.getApplicationContext().getResources().getString(R.string.run_analysis_title));
-        analysisProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
-        analysisProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        analysisProgressDialog.setCanceledOnTouchOutside(false);
-        analysisProgressDialog.setCancelable(true);
-        analysisProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                // 中止分析
-            }
-        });
+    private void markImageOnMap() {
+        switch (imagesType) {
+            case BOTH_IMAGES:
+                // 默认可见光、红外光都有
+                // 标记照片位置点
+                markVisibleImageLocation();
+                markInfraredImageLocation();
+                break;
+            case ONLY_VISIBLE:
+                // 没有红外光，有可见光
+                // 标记照片位置点
+                markVisibleImageLocation();
+                break;
+            case ONLY_INFRARED:
+                // 没有可见光图集，有红外
+                // 标记照片位置点
+                markInfraredImageLocation();
+                break;
+            case NO_IMAGES:
+                break;
+        }
     }
 
     private void initTFObjectDetection() {
@@ -576,20 +615,19 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     /**
      * 获得图片地址列表
      *
-     * @param record
      * @param isVisible
      * @return
      */
-    private List<String> getImageUrls(FlightRecord record, boolean isVisible) {
+    private List<String> getImageUrls(boolean isVisible) {
         List<String> urls = new ArrayList<>();
 
         File imagePath;
         if (isVisible) {
             imagePath = RecordImageHelper.getRecordTestImagePath();
-//            imagePath = RecordImageHelper.getRecordVisibleImagePath(record);
+//            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
         } else {
             imagePath = RecordImageHelper.getRecordTestImagePath();
-//            imagePath = RecordImageHelper.getRecordVisibleImagePath(record);
+//            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
         }
 
         if (!imagePath.exists()) {
