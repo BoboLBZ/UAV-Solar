@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +30,7 @@ import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
-import com.hitices.autopatrol.entity.imageData.AnalyzedImage;
+import com.hitices.autopatrol.entity.imageData.AnalyzedImageBean;
 import com.hitices.autopatrol.entity.imageData.MyRecognition;
 import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.GoogleMapHelper;
@@ -40,7 +39,6 @@ import com.hitices.autopatrol.helper.ToastHelper;
 import com.hitices.autopatrol.tfObjectDetection.Classifier;
 import com.hitices.autopatrol.tfObjectDetection.ImageUtils;
 import com.hitices.autopatrol.tfObjectDetection.TensorFlowObjectDetectionAPIModel;
-import com.nostra13.universalimageloader.utils.L;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,8 +66,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private MapView visibleMapView, infraredMapView;
     private AMap visibleAMap, infraredAMap;
 
-    private List<AnalyzedImage> visibleAnalyzedImages = new ArrayList<>();
-    private List<AnalyzedImage> infraredAnalyzedImages = new ArrayList<>();
+    private List<AnalyzedImageBean> visibleAnalyzedImageBeans = new ArrayList<>();
+    private List<AnalyzedImageBean> infraredAnalyzedImageBeans = new ArrayList<>();
 
     private ProgressDialog analysisProgressDialog;
 
@@ -99,7 +97,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         initImages(flightRecord);
         initUI(savedInstanceState, flightRecord);
         initDialog(this);
-        initTFObjectDetection();
     }
 
     @Override
@@ -111,6 +108,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         if (null != infraredMapView) {
             infraredMapView.onResume();
         }
+        initTFObjectDetection();
     }
 
     @Override
@@ -173,10 +171,10 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                     analysisProgressDialog.setProgress(msg.arg1);
                     break;
                 case TFOD_UPDATE_MARKER:
-                    AnalyzedImage image = (AnalyzedImage) msg.obj;
+                    AnalyzedImageBean image = (AnalyzedImageBean) msg.obj;
                     LatLng location = image.getMapMarker().getPosition();
                     image.getMapMarker().remove();
-                    MarkerOptions markerOptions = genWarnMarkerOptions(visibleAnalyzedImages.indexOf(image),
+                    MarkerOptions markerOptions = genWarnMarkerOptions(visibleAnalyzedImageBeans.indexOf(image),
                             location);
                     Marker marker = visibleAMap.addMarker(markerOptions);
                     image.setMapMarker(marker);
@@ -189,8 +187,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     };
 
     private void initImages(FlightRecord record) {
-        visibleAnalyzedImages.clear();
-        infraredAnalyzedImages.clear();
+        visibleAnalyzedImageBeans.clear();
+        infraredAnalyzedImageBeans.clear();
 
         List<String> visibleImageUrls = new ArrayList<>();
         List<String> infraredImageUrls = new ArrayList<>();
@@ -218,14 +216,14 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         if (null != visibleImageUrls && visibleImageUrls.size() != 0) {
             for (String url : visibleImageUrls) {
-                AnalyzedImage image = new AnalyzedImage(url, AnalyzedImage.IS_VISIBLE);
-                visibleAnalyzedImages.add(image);
+                AnalyzedImageBean image = new AnalyzedImageBean(url, AnalyzedImageBean.IS_VISIBLE);
+                visibleAnalyzedImageBeans.add(image);
             }
         }
         if (null != infraredImageUrls && infraredImageUrls.size() != 0) {
             for (String url : infraredImageUrls) {
-                AnalyzedImage image = new AnalyzedImage(url, AnalyzedImage.IS_INFRARED);
-                infraredAnalyzedImages.add(image);
+                AnalyzedImageBean image = new AnalyzedImageBean(url, AnalyzedImageBean.IS_INFRARED);
+                infraredAnalyzedImageBeans.add(image);
             }
         }
     }
@@ -361,15 +359,17 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         try {
             detector = TensorFlowObjectDetectionAPIModel.create(
                     getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
+            if (null == detector) {
+                ToastHelper.getInstance().showShortToast("模型初始化失败");
+            }
         } catch (final IOException e) {
             Log.e(TAG, "Exception initializing classifier!" + e);
-            ToastHelper.getInstance().showShortToast("Classifier could not be initialized");
             finish();
         }
     }
 
     private void runVisibleDataAnalyse() {
-        if (null == visibleAnalyzedImages || visibleAnalyzedImages.size() == 0) {
+        if (null == visibleAnalyzedImageBeans || visibleAnalyzedImageBeans.size() == 0) {
             // 无照片
             return;
         }
@@ -379,12 +379,12 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         Thread runTFODThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int index = 0; index < visibleAnalyzedImages.size(); index++) {
+                for (int index = 0; index < visibleAnalyzedImageBeans.size(); index++) {
 
-                    final AnalyzedImage image = visibleAnalyzedImages.get(index);
+                    final AnalyzedImageBean image = visibleAnalyzedImageBeans.get(index);
 
                     final int nowNum = index + 1;
-                    final int nowProgress = (int) (1.0 * nowNum / visibleAnalyzedImages.size() * 100);
+                    final int nowProgress = (int) (1.0 * nowNum / visibleAnalyzedImageBeans.size() * 100);
 
                     runTFObjectDetection(image, new OneAnalysisListener() {
                         @Override
@@ -396,7 +396,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                         public void onSuccess(int imageState) {
                             Log.d(TAG, "now success nums: " + nowNum);
                             image.setImageState(imageState);
-                            if (imageState != AnalyzedImage.IS_NORMAL) {
+                            if (imageState != AnalyzedImageBean.IS_NORMAL) {
                                 Message message = new Message();
                                 message.what = TFOD_UPDATE_MARKER;
                                 message.obj = image;
@@ -408,7 +408,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                             message.arg1 = nowProgress;
                             handler.sendMessage(message);
 
-                            if (nowNum == visibleAnalyzedImages.size()) {
+                            if (nowNum == visibleAnalyzedImageBeans.size()) {
                                 ToastHelper.getInstance().showShortToast("分析完成： " + nowNum + " 张照片");
                                 Message message1 = new Message();
                                 message1.what = TFOD_COMPLETED;
@@ -436,7 +436,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     }
 
-    private void runTFObjectDetection(AnalyzedImage image, OneAnalysisListener oneAnalysisListener) {
+    private void runTFObjectDetection(AnalyzedImageBean image, OneAnalysisListener oneAnalysisListener) {
         // read image
         FileInputStream solarImageFS;
         try {
@@ -517,12 +517,12 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         // 保存结果
         image.setRecognitions(mappedRecognitions);
 
-        int thisImageState = AnalyzedImage.IS_NORMAL;
+        int thisImageState = AnalyzedImageBean.IS_NORMAL;
         if (hasCovered) {
-            thisImageState = AnalyzedImage.HAS_COVERED;
+            thisImageState = AnalyzedImageBean.HAS_COVERED;
         }
         if (hasBroken) {
-            thisImageState = AnalyzedImage.HAS_BROKEN;
+            thisImageState = AnalyzedImageBean.HAS_BROKEN;
         }
         oneAnalysisListener.onSuccess(thisImageState);
     }
@@ -532,12 +532,12 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      */
     private void markVisibleImageLocation() {
 
-        if (visibleAnalyzedImages.size() == 0) {
+        if (visibleAnalyzedImageBeans.size() == 0) {
             // 读取照片异常
         }
 
-        for (int i = 0; i < visibleAnalyzedImages.size(); i++) {
-            AnalyzedImage image = visibleAnalyzedImages.get(i);
+        for (int i = 0; i < visibleAnalyzedImageBeans.size(); i++) {
+            AnalyzedImageBean image = visibleAnalyzedImageBeans.get(i);
             LatLng location = RecordImageHelper.getImageLatlng(image.getImagePath());
             location = GoogleMapHelper.WGS84ConvertToAmap(location);
             MarkerOptions newMarkerOptions = genNormalMarkerOptions(i, location);
@@ -555,12 +555,12 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      */
     private void markInfraredImageLocation() {
 
-        if (infraredAnalyzedImages.size() == 0) {
+        if (infraredAnalyzedImageBeans.size() == 0) {
             // 读取照片异常
         }
 
-        for (int i = 0; i < infraredAnalyzedImages.size(); i++) {
-            AnalyzedImage image = infraredAnalyzedImages.get(i);
+        for (int i = 0; i < infraredAnalyzedImageBeans.size(); i++) {
+            AnalyzedImageBean image = infraredAnalyzedImageBeans.get(i);
             LatLng location = RecordImageHelper.getImageLatlng(image.getImagePath());
             location = GoogleMapHelper.WGS84ConvertToAmap(location);
             MarkerOptions newMarkerOptions = genNormalMarkerOptions(i, location);
@@ -622,14 +622,14 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      */
     private void showMakerImage(int index, boolean isVisible) {
         ToastHelper.getInstance().showShortToast("image_index: " + index);
-        AnalyzedImage showImage;
+        AnalyzedImageBean showImage;
         if (isVisible) {
-            showImage = visibleAnalyzedImages.get(index);
+            showImage = visibleAnalyzedImageBeans.get(index);
             Intent intent = new Intent(this, AnalyzedImageActivity.class);
             intent.putExtra(AnalyzedImageActivity.EXTRA_IMAGE, showImage);
             startActivity(intent);
         } else {
-            showImage = infraredAnalyzedImages.get(index);
+            showImage = infraredAnalyzedImageBeans.get(index);
         }
     }
 

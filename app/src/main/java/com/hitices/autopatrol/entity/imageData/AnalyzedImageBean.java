@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.amap.api.maps2d.model.Marker;
-import com.hitices.autopatrol.tfObjectDetection.Classifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
  * Created by dusz7 on 20180426.
  */
 
-public class AnalyzedImage implements Parcelable {
+public class AnalyzedImageBean implements Parcelable {
 
     public static final int IS_VISIBLE = 0;
     public static final int IS_INFRARED = 1;
@@ -32,14 +31,14 @@ public class AnalyzedImage implements Parcelable {
 
     private List<MyRecognition> recognitions;
 
-    public AnalyzedImage() {
+    public AnalyzedImageBean() {
         imagePath = "";
         imageType = IS_VISIBLE;
         imageState = IS_NORMAL;
         recognitions = new LinkedList<MyRecognition>();
     }
 
-    public AnalyzedImage(String imagePath, int imageType) {
+    public AnalyzedImageBean(String imagePath, int imageType) {
         this.imagePath = imagePath;
         this.imageType = imageType;
         imageState = IS_NORMAL;
@@ -99,10 +98,10 @@ public class AnalyzedImage implements Parcelable {
         parcel.writeList(recognitions);
     }
 
-    public static final Parcelable.Creator<AnalyzedImage> CREATOR = new Parcelable.Creator<AnalyzedImage>() {
+    public static final Parcelable.Creator<AnalyzedImageBean> CREATOR = new Parcelable.Creator<AnalyzedImageBean>() {
         @Override
-        public AnalyzedImage createFromParcel(Parcel parcel) {
-            AnalyzedImage image = new AnalyzedImage();
+        public AnalyzedImageBean createFromParcel(Parcel parcel) {
+            AnalyzedImageBean image = new AnalyzedImageBean();
             image.imagePath = parcel.readString();
             image.imageState = parcel.readInt();
             image.imageType = parcel.readInt();
@@ -111,8 +110,8 @@ public class AnalyzedImage implements Parcelable {
         }
 
         @Override
-        public AnalyzedImage[] newArray(int i) {
-            return new AnalyzedImage[i];
+        public AnalyzedImageBean[] newArray(int i) {
+            return new AnalyzedImageBean[i];
         }
     };
 }

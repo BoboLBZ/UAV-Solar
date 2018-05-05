@@ -44,7 +44,7 @@ public class DataDownloadActivity extends AppCompatActivity {
 
     private void initUI() {
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(getResources().getString(R.string.photo_download_title));
+        toolbar.setTitle(getResources().getString(R.string.record_download_title));
         setSupportActionBar(toolbar);
 
         flightRecordsRecycleView = findViewById(R.id.lv_flight_records);

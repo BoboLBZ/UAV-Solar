@@ -37,6 +37,7 @@
     <string name="app_func_data_download">数据下载</string>
 
     <string name="record_select_title">选择巡检记录</string>
+    <string name="record_download_title">选择待下载记录</string>
 
     <string name="selected_flight_record">SELECTED_RECORD</string>
     

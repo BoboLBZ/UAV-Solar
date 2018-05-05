@@ -8,17 +8,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.entity.imageData.AnalyzedImage;
+import com.hitices.autopatrol.entity.imageData.AnalyzedImageBean;
 import com.hitices.autopatrol.entity.imageData.MyRecognition;
-import com.hitices.autopatrol.tfObjectDetection.Classifier;
-import com.hitices.autopatrol.tfObjectDetection.ImageUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +26,7 @@ public class AnalyzedImageActivity extends AppCompatActivity {
     public static final String EXTRA_IMAGE = "extra_image";
 
     private PhotoView photoView;
-    private AnalyzedImage showImage;
+    private AnalyzedImageBean showImage;
     private Bitmap showImageBitmap;
 
     @Override

@@ -73,7 +73,12 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         br.close();
 
 
-        d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
+        try {
+            d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
+        } catch (Exception e) {
+            return null;
+        }
+
 
         final Graph g = d.inferenceInterface.graph();
 
