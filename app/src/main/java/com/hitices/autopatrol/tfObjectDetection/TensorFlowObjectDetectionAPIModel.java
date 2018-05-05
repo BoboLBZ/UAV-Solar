@@ -58,8 +58,11 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
             final String modelFilename,
             final String labelFilename,
             final int inputSize) throws IOException {
+
+        // d---APIModel
         final TensorFlowObjectDetectionAPIModel d = new TensorFlowObjectDetectionAPIModel();
 
+        // 读取labels
         InputStream labelsInput = null;
         String actualFilename = labelFilename.split("file:///android_asset/")[1];
         labelsInput = assetManager.open(actualFilename);
@@ -67,18 +70,17 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         br = new BufferedReader(new InputStreamReader(labelsInput));
         String line;
         while ((line = br.readLine()) != null) {
-//            LOGGER.w(line);
             d.labels.add(line);
         }
         br.close();
 
-
+        // 读取模型，构建inferenceInterface
         try {
             d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
         } catch (Exception e) {
+            // 读取失败的话就直接返回
             return null;
         }
-
 
         final Graph g = d.inferenceInterface.graph();
 

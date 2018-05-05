@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -69,6 +70,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private MapView visibleMapView, infraredMapView;
     private AMap visibleAMap, infraredAMap;
 
+    private boolean needInitComplexThing;
+
     private List<AnalyzedImageBean> visibleAnalyzedImageBeans = new ArrayList<>();
     private List<AnalyzedImageBean> infraredAnalyzedImageBeans = new ArrayList<>();
 
@@ -81,7 +84,9 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     // object_detection
 
     // 模型及Label位置
-    private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/frozen_inference_graph.pb";
+    private static final String SSD_MOBILENET1_MODEL_FILE = "file:///android_asset/ssd_mobilenet1.pb";
+    private static final String FASTERRCNN_RESNET101_MODEL_FILE = "file:///android_asset/fasterrcnn_resnet101.pb";
+    private static final String TF_OD_API_MODEL_FILE = SSD_MOBILENET1_MODEL_FILE;
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/solar_labels_list.txt";
     // API输入图片的尺寸（要压缩处理）
     private static final int TF_OD_API_INPUT_SIZE = 450;
@@ -89,7 +94,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
 
     private static final boolean SAVE_PREVIEW_BITMAP = false;
-//    private static final float TEXT_SIZE_DIP = 10;
 
     // API主体
     private Classifier detector;
@@ -106,22 +110,25 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         initUI(this, savedInstanceState);
 
+        needInitComplexThing = true;
     }
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume");
         super.onResume();
+
+        if (needInitComplexThing) {
+            markImageOnMap();
+            initTFObjectDetection();
+            needInitComplexThing = false;
+        }
+
         if (null != visibleMapView) {
             visibleMapView.onResume();
         }
         if (null != infraredMapView) {
             infraredMapView.onResume();
         }
-
-        markImageOnMap();
-
-        initTFObjectDetection();
     }
 
     @Override
