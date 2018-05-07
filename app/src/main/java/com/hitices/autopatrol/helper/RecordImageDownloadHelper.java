@@ -120,7 +120,7 @@ public class RecordImageDownloadHelper {
         // 开始下载
         recordImageNum = missionFilesIndex.size();
         downloadNumNow = 0;
-        showDownloadProgressDialog();
+        showDownloadProgressDialog(recordImageNum);
         for (int index : missionFilesIndex) {
             djiMediaHelper.downLoadFile(index, recordVisibleDir, downloadOnePicListener);
         }
@@ -135,15 +135,28 @@ public class RecordImageDownloadHelper {
         mDownloadDialog.setIcon(android.R.drawable.ic_dialog_info);
         mDownloadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDownloadDialog.setCanceledOnTouchOutside(false);
-        mDownloadDialog.setCancelable(true);
-        mDownloadDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+//        mDownloadDialog.setCancelable(true);
+//        mDownloadDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+//            @Override
+//            public void onCancel(DialogInterface dialog) {
+//                if (djiMediaHelper.getmMediaManager() != null) {
+//                    djiMediaHelper.getmMediaManager().exitMediaDownloading();
+//                }
+//            }
+//        });
+        mDownloadDialog.setCancelable(false);
+        mDownloadDialog.setButton("停止下载", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // 中止下载
                 if (djiMediaHelper.getmMediaManager() != null) {
                     djiMediaHelper.getmMediaManager().exitMediaDownloading();
                 }
+                hideDownloadProgressDialog();
+                ToastHelper.getInstance().showShortToast("下载已中止！");
             }
         });
+        mDownloadDialog.setProgressNumberFormat("已下载：%1d/%2d");
     }
 
     private DownloadListener<String> downloadOnePicListener = new DownloadListener<String>() {
@@ -170,11 +183,12 @@ public class RecordImageDownloadHelper {
         public void onSuccess(String filePath) {
 //            ToastHelper.getInstance().showShortToast("Download File Success" + ":" + filePath);
             downloadNumNow++;
-            int tmpProgress = (int) (1.0 * downloadNumNow / recordImageNum * 100);
-            if (tmpProgress != currentProgress) {
-                mDownloadDialog.setProgress(tmpProgress);
-                currentProgress = tmpProgress;
-            }
+//            int tmpProgress = (int) (1.0 * downloadNumNow / recordImageNum * 100);
+//            if (tmpProgress != currentProgress) {
+//                mDownloadDialog.setProgress(tmpProgress);
+//                currentProgress = tmpProgress;
+//            }
+            mDownloadDialog.incrementProgressBy(1);
             if (downloadNumNow == recordImageNum) {
                 // 最后一张图片下载完成
                 // 等上面执行完了才显示与执行
@@ -207,11 +221,13 @@ public class RecordImageDownloadHelper {
 //        });
     }
 
-    private void showDownloadProgressDialog() {
+    private void showDownloadProgressDialog(final int max) {
         if (mDownloadDialog != null) {
             activity.runOnUiThread(new Runnable() {
                 public void run() {
-                    mDownloadDialog.incrementProgressBy(-mDownloadDialog.getProgress());
+                    mDownloadDialog.setMax(max);
+                    mDownloadDialog.setProgress(0);
+//                    mDownloadDialog.incrementProgressBy(-mDownloadDialog.getProgress());
                     mDownloadDialog.show();
                 }
             });

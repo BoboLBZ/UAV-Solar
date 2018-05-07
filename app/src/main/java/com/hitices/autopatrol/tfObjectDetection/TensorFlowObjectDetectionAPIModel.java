@@ -2,20 +2,30 @@ package com.hitices.autopatrol.tfObjectDetection;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Trace;
 import android.util.Log;
+
+import com.hitices.autopatrol.R;
+import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
+import com.hitices.autopatrol.entity.imageData.MyRecognition;
+import com.hitices.autopatrol.entity.imageData.RecognizingImageBean;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Operation;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Vector;
@@ -51,7 +61,7 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
     /**
      * Initializes a native TensorFlow session for classifying images.
      *
-     * @param assetManager The asset manager to be used to load assets.
+     * @param assetManager  The asset manager to be used to load assets.
      * @param modelFilename The filepath of the model GraphDef protocol buffer.
      * @param labelFilename The filepath of label file for classes.
      */
@@ -114,7 +124,7 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         }
 
         // Pre-allocate buffers.
-        d.outputNames = new String[] {"detection_boxes", "detection_scores",
+        d.outputNames = new String[]{"detection_boxes", "detection_scores",
                 "detection_classes", "num_detections"};
         d.intValues = new int[d.inputSize * d.inputSize];
         d.byteValues = new byte[d.inputSize * d.inputSize * 3];
@@ -125,7 +135,8 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         return d;
     }
 
-    private TensorFlowObjectDetectionAPIModel() {}
+    private TensorFlowObjectDetectionAPIModel() {
+    }
 
     @Override
     public List<Recognition> recognizeImage(Bitmap bitmap) {
@@ -223,4 +234,101 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
     public void close() {
         inferenceInterface.close();
     }
+
+
+    // demo example
+//    private void runTFObjectDetection(RecognizingImageBean image, DataAnalyseMapActivity.OneAnalysisListener oneAnalysisListener) {
+//        // read image
+//        FileInputStream solarImageFS;
+//        try {
+//            solarImageFS = new FileInputStream(image.getImagePath());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return;
+//        }
+//        Bitmap solarImageBitmap = BitmapFactory.decodeStream(solarImageFS);
+//
+//        // pre-process image(prepare to do something)
+//        int previewWidth = solarImageBitmap.getWidth();
+//        int previewHeight = solarImageBitmap.getHeight();
+//        int cropSize = TF_OD_API_INPUT_SIZE;
+//
+//        // 创建压缩图像
+//        Bitmap rgbFrameBitmap = Bitmap.createBitmap(solarImageBitmap);
+//        Bitmap croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
+//
+//        Matrix frameToCropTransform =
+//                ImageUtils.getTransformationMatrix(
+//                        previewWidth, previewHeight,
+//                        cropSize, cropSize,
+//                        0, false); // 旋转为0？？？
+//        Matrix cropToFrameTransform = new Matrix();
+//        frameToCropTransform.invert(cropToFrameTransform);
+//
+//        final Canvas canvas = new Canvas(croppedBitmap);
+//        canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
+//        // For examining the actual TF input.
+////        if (SAVE_PREVIEW_BITMAP) {
+////            ImageUtils.saveBitmap(croppedBitmap);
+////        }
+//
+//        // tfodapi 分析
+//        // detector recognizeImage
+//        Log.d(TAG, image.getImagePath() + " before recognize");
+//        final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
+//        Log.d(TAG, "after recognize & have results");
+//
+//        // recognize small size test
+////        Bitmap copyCroppedImageBitmap = Bitmap.createBitmap(croppedBitmap);
+////        final Canvas testCanvas = new Canvas(copyCroppedImageBitmap);
+////        final Paint paint = new Paint();
+////        paint.setColor(Color.RED);
+////        paint.setStyle(Paint.Style.STROKE);
+////        paint.setStrokeWidth(2.0f);
+//
+//        // 处理结果
+//        boolean hasCovered = false;
+//        boolean hasBroken = false;
+//        final List<MyRecognition> mappedRecognitions = new LinkedList<MyRecognition>();
+//
+//        for (final Classifier.Recognition result : results) {
+//
+//            Log.d(TAG, "result: " + result.toString());
+//
+//            final RectF location = result.getLocation();
+//            if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
+//
+//                if (result.getTitle().equals(getResources().getString(R.string.covered_panel_title))) {
+//                    hasCovered = true;
+//                }
+//                if (result.getTitle().equals(getResources().getString(R.string.broken_panel_title))) {
+//                    hasBroken = true;
+//                }
+//
+//                // for test
+////                testCanvas.drawRect(location, paint);
+////                ImageUtils.saveBitmap(copyCroppedImageBitmap);
+//
+//                // location change
+//                cropToFrameTransform.mapRect(location);
+//                result.setLocation(location);
+//                mappedRecognitions.add(new MyRecognition(result));
+//            }
+//        }
+//
+//        // 保存结果
+//        image.setRecognitions(mappedRecognitions);
+//
+//        int thisImageState = RecognizingImageBean.IS_NORMAL;
+//        if (hasCovered) {
+//            thisImageState = RecognizingImageBean.HAS_COVERED;
+//        }
+//        if (hasBroken) {
+//            thisImageState = RecognizingImageBean.HAS_BROKEN;
+//        }
+//        oneAnalysisListener.onSuccess(thisImageState);
+//
+//        Log.d(TAG, "save the image result");
+//    }
+
 }

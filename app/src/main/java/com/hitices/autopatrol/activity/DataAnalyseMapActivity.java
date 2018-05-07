@@ -10,8 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,10 +47,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     private static final String TAG = DataAnalyseMapActivity.class.getName();
 
-    private static final int TFOD_SUCCESS = 0;
-    private static final int TFOD_COMPLETED = 1;
-    private static final int TFOD_UPDATE_MARKER = 2;
-
     private static final String VISIBLE_IMAGES = "VISIBLE_IMAGES";
     private static final String INFRARED_IMAGES = "INFRARED_IMAGES";
 
@@ -75,8 +69,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private String imageNow = VISIBLE_IMAGES;
     private FlightRecord mFlightRecord;
     private int imagesType = BOTH_IMAGES;
-
-    private ProgressDialog analysisProgressDialog;
 
     // object_detection
 
@@ -178,35 +170,13 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                         // 无照片
                         return;
                     }
-                    new RunVisibleAnalysisTask().execute();
+                    new RunVisibleAnalysisTask(this).execute();
                 } else if (imageNow.equals(INFRARED_IMAGES)) {
                     runInfraredDataAnalyse();
                 }
                 break;
         }
     }
-
-    private Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case TFOD_SUCCESS:
-                    analysisProgressDialog.setProgress(msg.arg1);
-                    break;
-                case TFOD_UPDATE_MARKER:
-                    RecognizingImageBean image = (RecognizingImageBean) msg.obj;
-                    LatLng location = image.getMapMarker().getPosition();
-                    image.getMapMarker().remove();
-                    MarkerOptions markerOptions = genWarnMarkerOptions(visibleRecognizingImageBeans.indexOf(image),
-                            location);
-                    Marker marker = visibleAMap.addMarker(markerOptions);
-                    image.setMapMarker(marker);
-                    break;
-                case TFOD_COMPLETED:
-                    hideAnalysisProgressDialog();
-                    break;
-            }
-        }
-    };
 
     private void initUI(Context context, Bundle savedInstanceState) {
 
@@ -223,26 +193,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         genReportBtn.setVisibility(View.GONE);
         runAnalysisBtn.setOnClickListener(this);
 
-        initDialog(context);
         initMapView(savedInstanceState);
-    }
-
-    private void initDialog(Context context) {
-
-        //Init runAnalyse Dialog
-        analysisProgressDialog = new ProgressDialog(context);
-        analysisProgressDialog.setTitle(ContextHelper.getApplicationContext()
-                .getResources().getString(R.string.run_analysis_title));
-        analysisProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
-        analysisProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        analysisProgressDialog.setCanceledOnTouchOutside(false);
-        analysisProgressDialog.setCancelable(true);
-        analysisProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                // 中止分析
-            }
-        });
     }
 
     private void analyseRecordData() {
@@ -400,6 +351,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         try {
             detector = TensorFlowObjectDetectionAPIModel.create(
                     getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
+            Log.d(TAG, "init detector");
             if (null == detector) {
                 ToastHelper.getInstance().showShortToast("模型初始化失败");
             }
@@ -411,100 +363,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
     private void runInfraredDataAnalyse() {
 
-    }
-
-    private void runTFObjectDetection(RecognizingImageBean image, OneAnalysisListener oneAnalysisListener) {
-        // read image
-        FileInputStream solarImageFS;
-        try {
-            solarImageFS = new FileInputStream(image.getImagePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        Bitmap solarImageBitmap = BitmapFactory.decodeStream(solarImageFS);
-
-        // pre-process image(prepare to do something)
-        int previewWidth = solarImageBitmap.getWidth();
-        int previewHeight = solarImageBitmap.getHeight();
-        int cropSize = TF_OD_API_INPUT_SIZE;
-
-        // 创建压缩图像
-        Bitmap rgbFrameBitmap = Bitmap.createBitmap(solarImageBitmap);
-        Bitmap croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
-
-        Matrix frameToCropTransform =
-                ImageUtils.getTransformationMatrix(
-                        previewWidth, previewHeight,
-                        cropSize, cropSize,
-                        0, false); // 旋转为0？？？
-        Matrix cropToFrameTransform = new Matrix();
-        frameToCropTransform.invert(cropToFrameTransform);
-
-        final Canvas canvas = new Canvas(croppedBitmap);
-        canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
-        // For examining the actual TF input.
-//        if (SAVE_PREVIEW_BITMAP) {
-//            ImageUtils.saveBitmap(croppedBitmap);
-//        }
-
-        // tfodapi 分析
-        // detector recognizeImage
-        Log.d(TAG, image.getImagePath() + " before recognize");
-        final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
-        Log.d(TAG, "after recognize & have results");
-
-        // recognize small size test
-//        Bitmap copyCroppedImageBitmap = Bitmap.createBitmap(croppedBitmap);
-//        final Canvas testCanvas = new Canvas(copyCroppedImageBitmap);
-//        final Paint paint = new Paint();
-//        paint.setColor(Color.RED);
-//        paint.setStyle(Paint.Style.STROKE);
-//        paint.setStrokeWidth(2.0f);
-
-        // 处理结果
-        boolean hasCovered = false;
-        boolean hasBroken = false;
-        final List<MyRecognition> mappedRecognitions = new LinkedList<MyRecognition>();
-
-        for (final Classifier.Recognition result : results) {
-
-            Log.d(TAG, "result: " + result.toString());
-
-            final RectF location = result.getLocation();
-            if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
-
-                if (result.getTitle().equals(getResources().getString(R.string.covered_panel_title))) {
-                    hasCovered = true;
-                }
-                if (result.getTitle().equals(getResources().getString(R.string.broken_panel_title))) {
-                    hasBroken = true;
-                }
-
-                // for test
-//                testCanvas.drawRect(location, paint);
-//                ImageUtils.saveBitmap(copyCroppedImageBitmap);
-
-                // location change
-                cropToFrameTransform.mapRect(location);
-                result.setLocation(location);
-                mappedRecognitions.add(new MyRecognition(result));
-            }
-        }
-
-        // 保存结果
-        image.setRecognitions(mappedRecognitions);
-
-        int thisImageState = RecognizingImageBean.IS_NORMAL;
-        if (hasCovered) {
-            thisImageState = RecognizingImageBean.HAS_COVERED;
-        }
-        if (hasBroken) {
-            thisImageState = RecognizingImageBean.HAS_BROKEN;
-        }
-        oneAnalysisListener.onSuccess(thisImageState);
-
-        Log.d(TAG, "save the image result");
     }
 
     /**
@@ -600,7 +458,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
      * @param isVisible
      */
     private void showMakerImage(int index, boolean isVisible) {
-        ToastHelper.getInstance().showShortToast("image_index: " + index);
+//        ToastHelper.getInstance().showShortToast("image_index: " + index);
         RecognizingImageBean showImage;
         if (isVisible) {
             showImage = visibleRecognizingImageBeans.get(index);
@@ -645,6 +503,13 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         return markerOptions;
     }
 
+    /**
+     * 生成一个警告的位置标记（红色）
+     *
+     * @param index
+     * @param location
+     * @return
+     */
     private MarkerOptions genWarnMarkerOptions(int index, LatLng location) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.title(String.valueOf(index));
@@ -654,102 +519,45 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         return markerOptions;
     }
 
-    private void showAnalysisProgressDialog() {
-        if (analysisProgressDialog != null) {
-            analysisProgressDialog.incrementProgressBy(-analysisProgressDialog.getProgress());
-            analysisProgressDialog.show();
-        }
-    }
-
-    private void hideAnalysisProgressDialog() {
-        if (null != analysisProgressDialog && analysisProgressDialog.isShowing()) {
-            analysisProgressDialog.dismiss();
-        }
-    }
-
-    private interface OneAnalysisListener {
-        void onStart();
-
-        void onSuccess(int imageType);
-
-        void onFailure();
-    }
-
-    private void runVisibleDataAnalyse() {
-
-        Thread runTFODThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int index = 0; index < visibleRecognizingImageBeans.size(); index++) {
-
-                    final RecognizingImageBean image = visibleRecognizingImageBeans.get(index);
-
-                    final int nowNum = index + 1;
-                    final int nowProgress = (int) (1.0 * nowNum / visibleRecognizingImageBeans.size() * 100);
-
-                    runTFObjectDetection(image, new OneAnalysisListener() {
-                        @Override
-                        public void onStart() {
-
-                        }
-
-                        @Override
-                        public void onSuccess(int imageState) {
-                            Log.d(TAG, "now success nums: " + nowNum);
-                            image.setSolarState(imageState);
-                            if (imageState != RecognizingImageBean.IS_NORMAL) {
-                                Message message = new Message();
-                                message.what = TFOD_UPDATE_MARKER;
-                                message.obj = image;
-                                handler.sendMessage(message);
-                            }
-
-                            Message message = new Message();
-                            message.what = TFOD_SUCCESS;
-                            message.arg1 = nowProgress;
-                            handler.sendMessage(message);
-
-                            if (nowNum == visibleRecognizingImageBeans.size()) {
-                                ToastHelper.getInstance().showShortToast("分析完成： " + nowNum + " 张照片");
-                                Message message1 = new Message();
-                                message1.what = TFOD_COMPLETED;
-                                handler.sendMessage(message1);
-                            }
-
-                        }
-
-                        @Override
-                        public void onFailure() {
-
-                        }
-                    });
-
-
-                }
-            }
-        });
-
-        runTFODThread.start();
-
-    }
-
-
     class RunVisibleAnalysisTask extends AsyncTask<Void, RecognizingImageBean, Boolean> {
+        private Context context;
+        private ProgressDialog analysisProgressDialog;
+
+        public RunVisibleAnalysisTask(Context context) {
+            this.context = context;
+        }
+
         @Override
         protected void onPreExecute() {
-            showAnalysisProgressDialog();
+            analysisProgressDialog = new ProgressDialog(context);
+            analysisProgressDialog.setTitle(ContextHelper.getApplicationContext()
+                    .getResources().getString(R.string.run_analysis_title));
+            analysisProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            analysisProgressDialog.setCanceledOnTouchOutside(false);
+            analysisProgressDialog.setCancelable(false);
+            analysisProgressDialog.setButton("停止分析", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // 中止分析
+                    cancel(true);
+                    ToastHelper.getInstance().showShortToast("分析已中止！");
+                }
+            });
+            analysisProgressDialog.setProgressNumberFormat("已分析：%1d/%2d");
+            analysisProgressDialog.setMax(visibleRecognizingImageBeans.size());
+            analysisProgressDialog.show();
+            analysisProgressDialog.setProgress(0);
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             for (int index = 0; index < visibleRecognizingImageBeans.size(); index++) {
 
-                final RecognizingImageBean image = visibleRecognizingImageBeans.get(index);
+                if (isCancelled()) {
+                    break;
+                }
 
-                // 计算如果识别完这张图后的分析任务的进度
-                final int nowNum = index + 1;
-                final int nowProgress = (int) (1.0 * nowNum / visibleRecognizingImageBeans.size() * 100);
-                image.setNowProgress(nowProgress);
+                final RecognizingImageBean image = visibleRecognizingImageBeans.get(index);
 
                 // read image
                 FileInputStream solarImageFS;
@@ -765,11 +573,10 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                 int previewWidth = solarImageBitmap.getWidth();
                 int previewHeight = solarImageBitmap.getHeight();
                 int cropSize = TF_OD_API_INPUT_SIZE;
-
-                // 创建压缩图像
+                // create resize bitmap
                 Bitmap rgbFrameBitmap = Bitmap.createBitmap(solarImageBitmap);
                 Bitmap croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
-
+                // 计算图像变换矩阵
                 Matrix frameToCropTransform =
                         ImageUtils.getTransformationMatrix(
                                 previewWidth, previewHeight,
@@ -777,11 +584,10 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                                 0, false); // 旋转为0？？？
                 Matrix cropToFrameTransform = new Matrix();
                 frameToCropTransform.invert(cropToFrameTransform);
-
+                // get resized bitmap
                 final Canvas canvas = new Canvas(croppedBitmap);
                 canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
 
-                // tfodapi 分析
                 // detector recognizeImage
                 Log.d(TAG, image.getImagePath() + " before recognize");
                 final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
@@ -792,9 +598,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                 boolean hasBroken = false;
                 final List<MyRecognition> mappedRecognitions = new LinkedList<MyRecognition>();
 
+                // analyse every result
                 for (final Classifier.Recognition result : results) {
 
-                    Log.d(TAG, "result: " + result.toString());
+                    // to test results & confidence
+//                    Log.d(TAG, "result: " + result.toString());
 
                     final RectF location = result.getLocation();
                     if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
@@ -826,12 +634,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                 image.setSolarState(thisState);
 
                 publishProgress(image);
-
-                Log.d(TAG, "save the image result");
             }
-
             return true;
-
         }
 
         @Override
@@ -839,7 +643,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
             RecognizingImageBean image = values[0];
 
             // set dialog progress
-            analysisProgressDialog.setProgress(image.getNowProgress());
+            analysisProgressDialog.incrementProgressBy(1);
 
             // update this image's marker on MapView
             if (image.getSolarState() != RecognizingImageBean.IS_NORMAL) {
@@ -854,9 +658,13 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             if (aBoolean) {
-                hideAnalysisProgressDialog();
+                analysisProgressDialog.dismiss();
             }
         }
 
+        @Override
+        protected void onCancelled() {
+            analysisProgressDialog.dismiss();
+        }
     }
 }

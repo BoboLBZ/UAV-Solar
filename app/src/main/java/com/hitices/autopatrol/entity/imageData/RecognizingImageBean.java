@@ -29,9 +29,6 @@ public class RecognizingImageBean implements Parcelable {
 
     private Marker mapMarker;
 
-    // 传递一下progress
-    private int nowProgress;
-
     private List<MyRecognition> recognitions;
 
     public RecognizingImageBean() {
@@ -86,14 +83,6 @@ public class RecognizingImageBean implements Parcelable {
 
     public void setRecognitions(List<MyRecognition> recognitions) {
         this.recognitions = recognitions;
-    }
-
-    public int getNowProgress() {
-        return nowProgress;
-    }
-
-    public void setNowProgress(int nowProgress) {
-        this.nowProgress = nowProgress;
     }
 
     @Override
