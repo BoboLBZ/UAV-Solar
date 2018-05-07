@@ -425,7 +425,14 @@ public class MissionHelper {
                             NodeList t = e.getChildNodes();
                             for (int k = 0; k < t.getLength(); k++) {
                                 WaypointActionType type = getAction(t.item(k).getNodeName());
-                                w.addAction(new WaypointAction(type, k));
+                                switch (type) {
+                                    case ROTATE_AIRCRAFT:
+                                        w.addAction(new WaypointAction(type, multiPointsModel.getHeadingAngle()));
+                                        break;
+                                    default:
+                                        w.addAction(new WaypointAction(type, 0));
+                                        break;
+                                }
                             }
                         }
                     }
