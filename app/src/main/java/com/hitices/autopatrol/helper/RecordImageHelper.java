@@ -29,6 +29,10 @@ public class RecordImageHelper {
         return new File(MissionConstraintHelper.MISSION_PHOTO_DIR + "/Test");
     }
 
+    public static File getRecordTestSSizeImagePath() {
+        return new File(MissionConstraintHelper.MISSION_PHOTO_DIR + "/TestSSize");
+    }
+
     /**
      * get gps info
      */

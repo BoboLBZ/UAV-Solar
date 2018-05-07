@@ -69,7 +69,7 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record1.setMissionName("mission1");
         record1.setStartTime(new Date());
         record1.setEndTime(new Date());
-        record1.setHasInfrared(true);
+        record1.setHasVisible(true);
         record1.setDownload(true);
         record1.save();
 
@@ -79,14 +79,13 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record2.setEndTime(new Date());
         record2.setDownload(true);
         record2.setHasVisible(true);
-        record2.setHasInfrared(true);
         record2.save();
 
         FlightRecord record3 = new FlightRecord();
         record3.setMissionName("mission2");
         record3.setStartTime(new Date());
         record3.setEndTime(new Date());
-        record3.setDownload(false);
+        record3.setDownload(true);
         record3.setHasVisible(true);
         record3.save();
 
@@ -101,7 +100,6 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
         record5.setMissionName("mission2");
         record5.setStartTime(new Date());
         record5.setEndTime(new Date());
-        record5.setDownload(true);
         record5.save();
 
         FlightRecord record6 = new FlightRecord();

@@ -12,7 +12,7 @@ import java.util.List;
  * Created by dusz7 on 20180426.
  */
 
-public class AnalyzedImageBean implements Parcelable {
+public class RecognizingImageBean implements Parcelable {
 
     public static final int IS_VISIBLE = 0;
     public static final int IS_INFRARED = 1;
@@ -23,25 +23,28 @@ public class AnalyzedImageBean implements Parcelable {
 
     private int imageType;
 
-    private int imageState;
+    private int solarState;
 
     private String imagePath;
 
     private Marker mapMarker;
 
+    // 传递一下progress
+    private int nowProgress;
+
     private List<MyRecognition> recognitions;
 
-    public AnalyzedImageBean() {
+    public RecognizingImageBean() {
         imagePath = "";
         imageType = IS_VISIBLE;
-        imageState = IS_NORMAL;
+        solarState = IS_NORMAL;
         recognitions = new LinkedList<MyRecognition>();
     }
 
-    public AnalyzedImageBean(String imagePath, int imageType) {
+    public RecognizingImageBean(String imagePath, int imageType) {
         this.imagePath = imagePath;
         this.imageType = imageType;
-        imageState = IS_NORMAL;
+        solarState = IS_NORMAL;
         recognitions = new LinkedList<MyRecognition>();
     }
 
@@ -53,12 +56,12 @@ public class AnalyzedImageBean implements Parcelable {
         this.imageType = imageType;
     }
 
-    public int getImageState() {
-        return imageState;
+    public int getSolarState() {
+        return solarState;
     }
 
-    public void setImageState(int imageState) {
-        this.imageState = imageState;
+    public void setSolarState(int solarState) {
+        this.solarState = solarState;
     }
 
     public String getImagePath() {
@@ -85,6 +88,14 @@ public class AnalyzedImageBean implements Parcelable {
         this.recognitions = recognitions;
     }
 
+    public int getNowProgress() {
+        return nowProgress;
+    }
+
+    public void setNowProgress(int nowProgress) {
+        this.nowProgress = nowProgress;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -93,25 +104,25 @@ public class AnalyzedImageBean implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(imagePath);
-        parcel.writeInt(imageState);
+        parcel.writeInt(solarState);
         parcel.writeInt(imageType);
         parcel.writeList(recognitions);
     }
 
-    public static final Parcelable.Creator<AnalyzedImageBean> CREATOR = new Parcelable.Creator<AnalyzedImageBean>() {
+    public static final Parcelable.Creator<RecognizingImageBean> CREATOR = new Parcelable.Creator<RecognizingImageBean>() {
         @Override
-        public AnalyzedImageBean createFromParcel(Parcel parcel) {
-            AnalyzedImageBean image = new AnalyzedImageBean();
+        public RecognizingImageBean createFromParcel(Parcel parcel) {
+            RecognizingImageBean image = new RecognizingImageBean();
             image.imagePath = parcel.readString();
-            image.imageState = parcel.readInt();
+            image.solarState = parcel.readInt();
             image.imageType = parcel.readInt();
             image.recognitions = parcel.readArrayList(MyRecognition.class.getClassLoader());
             return image;
         }
 
         @Override
-        public AnalyzedImageBean[] newArray(int i) {
-            return new AnalyzedImageBean[i];
+        public RecognizingImageBean[] newArray(int i) {
+            return new RecognizingImageBean[i];
         }
     };
 }

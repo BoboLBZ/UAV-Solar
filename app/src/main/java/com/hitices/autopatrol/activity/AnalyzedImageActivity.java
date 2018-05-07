@@ -14,7 +14,7 @@ import android.util.Log;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.hitices.autopatrol.R;
-import com.hitices.autopatrol.entity.imageData.AnalyzedImageBean;
+import com.hitices.autopatrol.entity.imageData.RecognizingImageBean;
 import com.hitices.autopatrol.entity.imageData.MyRecognition;
 
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ public class AnalyzedImageActivity extends AppCompatActivity {
     public static final String EXTRA_IMAGE = "extra_image";
 
     private PhotoView photoView;
-    private AnalyzedImageBean showImage;
+    private RecognizingImageBean showImage;
     private Bitmap showImageBitmap;
 
     @Override

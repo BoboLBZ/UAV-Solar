@@ -4,6 +4,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
+import android.util.Log;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Operation;
@@ -24,6 +25,7 @@ import java.util.Vector;
  */
 
 public class TensorFlowObjectDetectionAPIModel implements Classifier {
+    private static final String TAG = TensorFlowObjectDetectionAPIModel.class.getName();
 
     // Only return this many results.
     private static final int MAX_RESULTS = 300;
@@ -74,6 +76,7 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         }
         br.close();
 
+        Log.d(TAG, "before read model");
         // 读取模型，构建inferenceInterface
         try {
             d.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
@@ -81,6 +84,7 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
             // 读取失败的话就直接返回
             return null;
         }
+        Log.d(TAG, "after read model");
 
         final Graph g = d.inferenceInterface.graph();
 
@@ -126,9 +130,11 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
     @Override
     public List<Recognition> recognizeImage(Bitmap bitmap) {
         // Log this method so that it can be analyzed with systrace.
-        Trace.beginSection("recognizeImage");
+//        Trace.beginSection("recognizeImage");
+        Log.d(TAG, "begin recognizeImage");
 
-        Trace.beginSection("preprocessBitmap");
+//        Trace.beginSection("preprocessBitmap");
+//        Log.d(TAG, "preprocessBitmap");
         // Preprocess the image data from 0-255 int to normalized float based
         // on the provided parameters.
         // java.lang.ArrayIndexOutOfBoundsException
@@ -139,20 +145,26 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
             byteValues[i * 3 + 1] = (byte) ((intValues[i] >> 8) & 0xFF);
             byteValues[i * 3 + 0] = (byte) ((intValues[i] >> 16) & 0xFF);
         }
-        Trace.endSection(); // preprocessBitmap
+//        Trace.endSection(); // preprocessBitmap
+//        Log.d(TAG, "preprocess done");
 
         // Copy the input data into TensorFlow.
-        Trace.beginSection("feed");
+//        Trace.beginSection("feed");
+//        Log.d(TAG, "begin feed");
         inferenceInterface.feed(inputName, byteValues, 1, inputSize, inputSize, 3);
-        Trace.endSection();
+//        Trace.endSection();
+//        Log.d(TAG, "end feed");
 
         // Run the inference call.
-        Trace.beginSection("run");
+//        Trace.beginSection("run");
+        Log.d(TAG, "begin run");
         inferenceInterface.run(outputNames, logStats);
-        Trace.endSection();
+//        Trace.endSection();
+        Log.d(TAG, "end run");
 
         // Copy the output Tensor back into the output array.
-        Trace.beginSection("fetch");
+//        Trace.beginSection("fetch");
+//        Log.d(TAG, "begin fetch");
         outputLocations = new float[MAX_RESULTS * 4];
         outputScores = new float[MAX_RESULTS];
         outputClasses = new float[MAX_RESULTS];
@@ -161,7 +173,8 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         inferenceInterface.fetch(outputNames[1], outputScores);
         inferenceInterface.fetch(outputNames[2], outputClasses);
         inferenceInterface.fetch(outputNames[3], outputNumDetections);
-        Trace.endSection();
+//        Trace.endSection();
+//        Log.d(TAG, "end fetch");
 
         // Find the best detections.
         final PriorityQueue<Recognition> pq =
@@ -191,7 +204,8 @@ public class TensorFlowObjectDetectionAPIModel implements Classifier {
         for (int i = 0; i < Math.min(pq.size(), MAX_RESULTS); ++i) {
             recognitions.add(pq.poll());
         }
-        Trace.endSection(); // "recognizeImage"
+//        Trace.endSection(); // "recognizeImage"
+        Log.d(TAG, "end recognizeImage");
         return recognitions;
     }
 
