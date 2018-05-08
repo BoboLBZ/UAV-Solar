@@ -99,7 +99,7 @@ public class FlightRecord2DownloadAdapter extends RecyclerView.Adapter<FlightRec
                 final FlightRecord selectedRecord = flightRecordList.get(position);
 
                 if (null != activity) {
-                    activity.downloadSelectedRecordImg(selectedRecord);
+                    activity.downloadSelectedRecordImg(selectedRecord, position);
                 }
             }
         });

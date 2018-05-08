@@ -61,18 +61,20 @@ public class DataDownloadActivity extends AppCompatActivity {
 
     }
 
-    public void downloadSelectedRecordImg(final FlightRecord record) {
+    public void downloadSelectedRecordImg(final FlightRecord record, final int position) {
         downloadHelper.downloadFilesByMissionRecord(record, new RecordImageDownloadHelper.FilesDownloadCompleteListener() {
             @Override
             public void onComplete() {
                 ToastHelper.getInstance().showShortToast("下载完成");
                 record.setDownload(true);
                 record.save();
+                flightRecordList.remove(record);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        updateMissionList();
-                        adapter.notifyDataSetChanged();
+                        adapter.notifyItemRemoved(position);
+                        adapter.notifyItemRangeChanged(position, flightRecordList.size());
+//                        adapter.notifyDataSetChanged();
                     }
                 });
             }

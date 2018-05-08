@@ -76,12 +76,12 @@ public class MissionManagemantActivity extends AppCompatActivity implements View
 
     @Override
     public void onClick(View view) {
+        menu.collapse();
         switch (view.getId()) {
             case R.id.btn_create_mission_management:
                 createMission();
                 break;
             case R.id.btn_import_mission_management:
-                menu.collapse();
                 importMission();
                 break;
         }
