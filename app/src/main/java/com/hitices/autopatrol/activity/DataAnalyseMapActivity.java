@@ -73,15 +73,17 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     // object_detection
 
     // 模型及Label位置
-    private static final String SSD_MOBILENET1_MODEL_FILE = "file:///android_asset/ssd_mobilenet1.pb";
     private static final String FASTERRCNN_RESNET101_MODEL_FILE = "file:///android_asset/fasterrcnn_resnet101.pb";
     private static final String RFCN_RESNET101_MODEL_FILE = "file:///android_asset/rfcn_resnet101.pb";
-    private static final String TF_OD_API_MODEL_FILE = RFCN_RESNET101_MODEL_FILE;
+    private static final String SSD_MOBILENET1_MODEL_FILE = "file:///android_asset/ssd_mobilenet1.pb";
+    private static final String SSD_MOBILENET2_MODEL_FILE = "file:///android_asset/ssd_mobilenet2.pb";
+    private static final String SSD_INCEPTION2_MODEL_FILE = "file:///android_asset/ssd_inception2.pb";
+    private static final String TF_OD_API_MODEL_FILE = SSD_INCEPTION2_MODEL_FILE;
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/solar_labels_list.txt";
     // API输入图片的尺寸（要压缩处理）
-    private static final int TF_OD_API_INPUT_SIZE = 500;
+    private static final int TF_OD_API_INPUT_SIZE = 750;
     // Minimum detection confidence to track a detection.
-    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.9f;
+    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
 
     private static final boolean SAVE_PREVIEW_BITMAP = false;
 
@@ -109,7 +111,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         if (needInitComplexThing) {
             markImageOnMap();
-            initTFObjectDetection();
+//            initTFObjectDetection();
             needInitComplexThing = false;
         }
 
@@ -551,6 +553,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         @Override
         protected Boolean doInBackground(Void... voids) {
+            initTFObjectDetection();
+
             for (int index = 0; index < visibleRecognizingImageBeans.size(); index++) {
 
                 if (isCancelled()) {

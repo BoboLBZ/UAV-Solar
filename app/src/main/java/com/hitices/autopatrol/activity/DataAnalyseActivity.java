@@ -51,9 +51,9 @@ public class DataAnalyseActivity extends AppCompatActivity implements View.OnCli
 
     private void initMissionList() {
 
-        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
-            genMissions();
-        }
+//        if (DataSupport.findAll(FlightRecord.class).size() == 0) {
+//            genMissions();
+//        }
 
         flightRecordList = DataSupport.where("isDownload=?", "1")
                 .order("startTime desc")
