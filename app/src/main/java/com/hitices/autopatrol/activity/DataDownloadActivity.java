@@ -74,7 +74,6 @@ public class DataDownloadActivity extends AppCompatActivity {
                     public void run() {
                         adapter.notifyItemRemoved(position);
                         adapter.notifyItemRangeChanged(position, flightRecordList.size());
-//                        adapter.notifyDataSetChanged();
                     }
                 });
             }

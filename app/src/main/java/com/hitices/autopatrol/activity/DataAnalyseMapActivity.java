@@ -10,11 +10,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
@@ -61,6 +64,8 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private MapView visibleMapView, infraredMapView;
     private AMap visibleAMap, infraredAMap;
 
+    private AlertDialog runVisibleAnalysisDialog;
+
     private boolean needInitComplexThing;
 
     private List<RecognizingImageBean> visibleRecognizingImageBeans = new ArrayList<>();
@@ -81,9 +86,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private static final String TF_OD_API_MODEL_FILE = SSD_INCEPTION2_MODEL_FILE;
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/solar_labels_list.txt";
     // API输入图片的尺寸（要压缩处理）
-    private static final int TF_OD_API_INPUT_SIZE = 750;
+    private static final int TF_OD_API_INPUT_SIZE = 600;
+    private int tfodApiInputSize = TF_OD_API_INPUT_SIZE;
     // Minimum detection confidence to track a detection.
-    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
+    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.9f;
+    private float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
 
     private static final boolean SAVE_PREVIEW_BITMAP = false;
 
@@ -111,7 +118,6 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         if (needInitComplexThing) {
             markImageOnMap();
-//            initTFObjectDetection();
             needInitComplexThing = false;
         }
 
@@ -166,13 +172,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                 break;
             case R.id.btn_run_analysis:
                 // 运行分析
-                ToastHelper.getInstance().showShortToast("运行分析");
+//                ToastHelper.getInstance().showShortToast("运行分析");
                 if (imageNow.equals(VISIBLE_IMAGES)) {
-                    if (null == visibleRecognizingImageBeans || visibleRecognizingImageBeans.size() == 0) {
-                        // 无照片
-                        return;
+                    if (null != runVisibleAnalysisDialog) {
+                        runVisibleAnalysisDialog.show();
                     }
-                    new RunVisibleAnalysisTask(this).execute();
                 } else if (imageNow.equals(INFRARED_IMAGES)) {
                     runInfraredDataAnalyse();
                 }
@@ -195,7 +199,46 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
         genReportBtn.setVisibility(View.GONE);
         runAnalysisBtn.setOnClickListener(this);
 
+        initDialog(context);
         initMapView(savedInstanceState);
+    }
+
+    private void initDialog(final Context context) {
+        AlertDialog.Builder runVisibleAnalysisBuilder = new AlertDialog.Builder(context);
+        ViewGroup runVisibleAnalysisDialogLayout = (ViewGroup) getLayoutInflater().inflate(R.layout.dialog_run_visible_analysis, null);
+        final EditText inputSizeEdit = runVisibleAnalysisDialogLayout.findViewById(R.id.et_api_input_size);
+        final EditText minConfidenceEdit = runVisibleAnalysisDialogLayout.findViewById(R.id.et_min_confidence);
+        inputSizeEdit.setHint(String.valueOf(tfodApiInputSize));
+        minConfidenceEdit.setHint(String.valueOf(100 * minimumConfidence));
+        runVisibleAnalysisBuilder.setTitle("设置TensorFlow API参数")
+                .setView(runVisibleAnalysisDialogLayout)
+                .setPositiveButton("开始分析", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (null != inputSizeEdit.getText().toString() && !inputSizeEdit.getText().toString().equals("")) {
+                            tfodApiInputSize = Integer.parseInt(inputSizeEdit.getText().toString());
+                        }
+                        if (null != minConfidenceEdit.getText().toString() && !minConfidenceEdit.getText().toString().equals("")) {
+                            minimumConfidence = Float.parseFloat(minConfidenceEdit.getText().toString()) / 100;
+                        }
+
+                        Log.d(TAG, "inputSize: " + tfodApiInputSize + "minConfidence: " + minimumConfidence);
+
+                        if (null == visibleRecognizingImageBeans || visibleRecognizingImageBeans.size() == 0) {
+                            // 无照片
+                            return;
+                        }
+                        new RunVisibleAnalysisTask(context).execute();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+        runVisibleAnalysisDialog = runVisibleAnalysisBuilder.create();
+
     }
 
     private void analyseRecordData() {
@@ -352,7 +395,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
     private void initTFObjectDetection() {
         try {
             detector = TensorFlowObjectDetectionAPIModel.create(
-                    getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
+                    getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, tfodApiInputSize);
             Log.d(TAG, "init detector");
             if (null == detector) {
                 ToastHelper.getInstance().showShortToast("模型初始化失败");
@@ -424,11 +467,11 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 
         File imagePath;
         if (isVisible) {
-            imagePath = RecordImageHelper.getRecordTestSSizeImagePath();
-//            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
+//            imagePath = RecordImageHelper.getRecordTestSSizeImagePath();
+            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
         } else {
-            imagePath = RecordImageHelper.getRecordTestSSizeImagePath();
-//            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
+//            imagePath = RecordImageHelper.getRecordTestSSizeImagePath();
+            imagePath = RecordImageHelper.getRecordVisibleImagePath(mFlightRecord);
         }
 
         if (!imagePath.exists()) {
@@ -576,7 +619,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
                 // pre-process image(prepare to do something)
                 int previewWidth = solarImageBitmap.getWidth();
                 int previewHeight = solarImageBitmap.getHeight();
-                int cropSize = TF_OD_API_INPUT_SIZE;
+                int cropSize = tfodApiInputSize;
                 // create resize bitmap
                 Bitmap rgbFrameBitmap = Bitmap.createBitmap(solarImageBitmap);
                 Bitmap croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Bitmap.Config.ARGB_8888);
@@ -609,7 +652,7 @@ public class DataAnalyseMapActivity extends AppCompatActivity implements View.On
 //                    Log.d(TAG, "result: " + result.toString());
 
                     final RectF location = result.getLocation();
-                    if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
+                    if (location != null && result.getConfidence() >= minimumConfidence) {
 
                         if (result.getTitle().equals(getResources().getString(R.string.covered_panel_title))) {
                             hasCovered = true;

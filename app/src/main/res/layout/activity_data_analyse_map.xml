@@ -64,6 +64,8 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="5dp"
+        android:background="@drawable/bg_record_func_button"
+        android:minHeight="32dp"
         android:text="@string/run_analysis" />
 
 

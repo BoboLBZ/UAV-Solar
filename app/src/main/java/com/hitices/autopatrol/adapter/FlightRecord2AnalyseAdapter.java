@@ -1,7 +1,9 @@
 package com.hitices.autopatrol.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.activity.DataAnalyseMapActivity;
 import com.hitices.autopatrol.entity.dataSupport.FlightRecord;
+import com.hitices.autopatrol.helper.RecordImageHelper;
 import com.hitices.autopatrol.helper.RecordInfoHelper;
 import com.hitices.autopatrol.helper.ToastHelper;
 
@@ -73,6 +76,7 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
 
     static class NoReadyViewHolder extends ViewHolder {
         Button deleteButton;
+
         public NoReadyViewHolder(View view) {
             super(view);
             deleteButton = view.findViewById(R.id.btn_record_delete);
@@ -178,12 +182,51 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
             readyViewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    expandPosition = -1;
-                    record.delete();
-                    flightRecordList.remove(record);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, getItemCount());
-                    ToastHelper.getInstance().showShortToast("已删除");
+                    new AlertDialog.Builder(mContext).setTitle("请确认要删除的内容")
+                            .setMessage("任务名称：" + record.getMissionName() + "\n" +
+                                    "执行时间：" + RecordInfoHelper.getRecordStartDateShowName(record) + "\n" +
+                                    "\n")
+                            .setNeutralButton("仅删除\n已下载照片", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    boolean result = RecordImageHelper.deleteStoredImage(record);
+                                    if (result) {
+                                        record.setDownload(false);
+                                        record.save();
+                                        expandPosition = -1;
+                                        flightRecordList.remove(record);
+                                        notifyItemRemoved(position);
+                                        notifyItemRangeChanged(position, getItemCount());
+                                        flightRecordList.add(record);
+                                        notifyItemInserted(flightRecordList.size() - 1);
+                                        ToastHelper.getInstance().showShortToast("已删除照片");
+                                    } else {
+                                        ToastHelper.getInstance().showShortToast("删除失败");
+                                    }
+                                }
+                            })
+                            .setPositiveButton("删除\n照片与记录", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    boolean result = RecordImageHelper.deleteStoredImage(record);
+                                    if (result) {
+                                        expandPosition = -1;
+                                        record.delete();
+                                        flightRecordList.remove(record);
+                                        notifyItemRemoved(position);
+                                        notifyItemRangeChanged(position, getItemCount());
+                                        ToastHelper.getInstance().showShortToast("已删除");
+                                    } else {
+                                        ToastHelper.getInstance().showShortToast("删除失败");
+                                    }
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    alertDialog.dismiss();
+                                }
+                            }).create().show();
                 }
             });
             readyViewHolder.checkButton.setOnClickListener(new View.OnClickListener() {
@@ -203,12 +246,27 @@ public class FlightRecord2AnalyseAdapter extends RecyclerView.Adapter<FlightReco
             noReadyViewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    expandPosition = -1;
-                    record.delete();
-                    flightRecordList.remove(record);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, getItemCount());
-                    ToastHelper.getInstance().showShortToast("已删除");
+                    new AlertDialog.Builder(mContext).setTitle("请确认要删除的内容")
+                            .setMessage("任务名称：" + record.getMissionName() + "\n" +
+                                    "执行时间：" + RecordInfoHelper.getRecordStartDateShowName(record) + "\n" +
+                                    "\n")
+                            .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    expandPosition = -1;
+                                    record.delete();
+                                    flightRecordList.remove(record);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, getItemCount());
+                                    ToastHelper.getInstance().showShortToast("已删除");
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+//                                    alertDialog.dismiss();
+                                }
+                            }).create().show();
                 }
             });
         }

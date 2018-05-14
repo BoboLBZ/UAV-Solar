@@ -33,6 +33,40 @@ public class RecordImageHelper {
         return new File(MissionConstraintHelper.MISSION_PHOTO_DIR + "/TestSSize");
     }
 
+    public static boolean deleteStoredImage(FlightRecord record) {
+        boolean isSuccessful = true;
+        if (record.isHasVisible()) {
+            if (!deleteFile(getRecordVisibleImagePath(record))) {
+                isSuccessful = false;
+            }
+        }
+        if (record.isHasInfrared()) {
+            if (!deleteFile(getRecordInfraredImagePath(record))) {
+                isSuccessful = false;
+            }
+        }
+        return isSuccessful;
+    }
+
+    private static boolean deleteFile(File file) {
+        if (file.isFile()) {
+            return file.delete();
+        }
+        if (file.isDirectory()) {
+            File[] childFile = file.listFiles();
+            if (childFile == null || childFile.length == 0) {
+                return file.delete();
+            }
+            for (File f : childFile) {
+                if (!deleteFile(f)) {
+                    return false;
+                }
+            }
+            return file.delete();
+        }
+        return true;
+    }
+
     /**
      * get gps info
      */
