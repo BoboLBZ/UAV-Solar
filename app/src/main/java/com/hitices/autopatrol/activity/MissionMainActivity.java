@@ -702,7 +702,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final SeekBar mWidth = settingView.findViewById(R.id.polygon_setting_width);
         final SeekBar mPitch = settingView.findViewById(R.id.polygon_setting_pitch);
         final SeekBar mHeading = settingView.findViewById(R.id.polygon_setting_heading);
-
+        final SeekBar mDis=settingView.findViewById(R.id.polygon_setting_dis);
 
         final TextView mSpeedText = settingView.findViewById(R.id.polygon_setting_speed_text);
         final TextView mOverateText = settingView.findViewById(R.id.polygon_setting_overrate_text);
@@ -711,7 +711,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mPitchText = settingView.findViewById(R.id.polygon_setting_pitch_text);
         final TextView mName = settingView.findViewById(R.id.polygon_setting_name);
         final TextView mHeadingText = settingView.findViewById(R.id.polygon_setting_heading_text);
-
+        final TextView mDisText=settingView.findViewById(R.id.polygon_setting_dis_text);
 
         GridView vertexs = settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
@@ -720,6 +720,10 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mAltitude.setMax((int) MissionConstraintHelper.getMaxAltitude());
         mAltitude.setProgress((int) (getFlatlandModel().getAltitude() + 0.5));
         mAltitudeText.setText(String.valueOf((int) (getFlatlandModel().getAltitude() + 0.5)) + " m");
+
+        mDis.setMax(20);
+        mDis.setProgress((int)(getFlatlandModel().getDistanceToPanel() + 0.5));
+        mDisText.setText(String.valueOf((int) (getFlatlandModel().getDistanceToPanel() + 0.5)) + " m");
 
         mSpeed.setMax((int) MissionConstraintHelper.getMaxSpeed());
         mSpeed.setProgress((int) (getFlatlandModel().getSpeed()));
@@ -842,6 +846,22 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
             }
         });
+        mDis.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mDisText.setText(String.valueOf(progress)+" m");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         vertexs.setAdapter(new FlatlandSettingGridviewAdapter(this, getFlatlandModel().getVertexs()));
         //dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -855,6 +875,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 getFlatlandModel().setSpeed(mSpeed.getProgress());
                 getFlatlandModel().setWidth(mWidth.getProgress());
                 getFlatlandModel().setCameraAngle(mPitch.getProgress());
+                getFlatlandModel().setDistanceToPanel(mDis.getProgress());
                 int angle = mHeading.getProgress();
                 if (angle >= 0 && angle <= 360) {
                     getFlatlandModel().setHeadingAngle(angle - 180);

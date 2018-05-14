@@ -451,6 +451,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             }
         });
+        controller.setSeriousLowBatteryWarningThreshold(homeThreshold, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                if (djiError != null) {
+                    returnHomeSettingFlag = false;
+                }
+            }
+        });
         //在低电量返航
         returnHomeViaBattery(homeThreshold);
         return returnHomeSettingFlag;
@@ -460,25 +468,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         //不支持
         final Battery battery = AutoPatrolApplication.getBattery();
         if (battery != null) {
-//
-//            battery.setLevel1CellVoltageThreshold(4000, new CommonCallbacks.CompletionCallback() {
-//                @Override
-//                public void onResult(DJIError djiError) {
-//                    if (djiError != null) {
-//                        Log.d(TAG, "setSmartReturnHome setLevel1CellVoltageThreshold: "+djiError.getDescription());
-//                        returnHomeSettingFlag = false;
-//                    }
-//                }
-//            });
-//            battery.setLevel1CellVoltageBehavior(LowVoltageBehavior.GO_HOME, new CommonCallbacks.CompletionCallback() {
-//                @Override
-//                public void onResult(DJIError djiError) {
-//                    if (djiError != null) {
-//                        Log.d(TAG, "setSmartReturnHome setLevel1CellVoltageBehavior: "+djiError.getDescription());
-//                        returnHomeSettingFlag = false;
-//                    }
-//                }
-//            });
             battery.setStateCallback(new BatteryState.Callback() {
                 boolean flag = true;
 
@@ -836,7 +825,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         builder.maxFlightSpeed(speed);
 
         builder.finishedAction(WaypointMissionFinishedAction.AUTO_LAND);
-        builder.headingMode(WaypointMissionHeadingMode.AUTO);
+        builder.headingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
         builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
 
         DJIError error = getWaypointMissionOperator().loadMission(builder.build());

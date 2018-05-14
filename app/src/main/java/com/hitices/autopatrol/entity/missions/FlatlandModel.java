@@ -22,6 +22,7 @@ import dji.common.mission.waypoint.WaypointActionType;
 public class FlatlandModel extends BaseModel {
     private List<LatLng> vertexs = new ArrayList<>();  //polygon 定点集合
     private float altitude;   //飞行高度，高度为面相对于飞行器起点的高度
+    private float distanceToPanel;
     private float speed;    //飞行速度
     private float width;   //扫描宽度
     private int overlapRate; //重叠率
@@ -34,6 +35,7 @@ public class FlatlandModel extends BaseModel {
         headingAngle = MissionConstraintHelper.getDefaultHeading();
         //flatland
         altitude = 20.0f;
+        distanceToPanel=MissionConstraintHelper.getDefaultDistanceToPanel();
         speed = MissionConstraintHelper.getDefaultSpeed();
         overlapRate = MissionConstraintHelper.getDefaultOverlapRate();
         width = MissionConstraintHelper.getDefaultWidth();
@@ -80,6 +82,14 @@ public class FlatlandModel extends BaseModel {
         //修改Vertexs，
         vertexs.clear();
         vertexs = vs;
+    }
+
+    public float getDistanceToPanel() {
+        return distanceToPanel;
+    }
+
+    public void setDistanceToPanel(float distanceToPanel) {
+        this.distanceToPanel = distanceToPanel;
     }
 
     @Override
@@ -176,16 +186,17 @@ public class FlatlandModel extends BaseModel {
 //        List<LatLng> points = algorithm.getPlanningWaypoints();
 //        startPoint = points.get(0);
         endPoint = points.get(points.size() - 1);
-        safeAltitude = altitude;
+        safeAltitude = altitude+distanceToPanel;
         for (int i = 0; i < points.size(); i++) {
-            Waypoint waypoint = new Waypoint(points.get(i).latitude, points.get(i).longitude, altitude);
+            Waypoint waypoint = new Waypoint(points.get(i).latitude, points.get(i).longitude, altitude+distanceToPanel);
             //设置航点动作
-            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+            //waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             executePoints.add(waypoint);
         }
         Waypoint waypoint = executePoints.get(0);
         WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle);
         waypoint.waypointActions.add(0, action);
+        waypoint.waypointActions.add(0,new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
     }
 }
