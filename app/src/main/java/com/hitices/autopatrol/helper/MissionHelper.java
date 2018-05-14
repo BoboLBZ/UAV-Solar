@@ -204,6 +204,10 @@ public class MissionHelper {
         eAltitude.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getAltitude())));
         localRoot.appendChild(eAltitude);
 
+        Element eDis = doc.createElement("distanceToPanel");
+        eDis.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getDistanceToPanel())));
+        localRoot.appendChild(eDis);
+
         Element eHorRate = doc.createElement("OverlapRate");
         eHorRate.appendChild(doc.createTextNode(String.valueOf(flatlandModel.getOverlapRate())));
         localRoot.appendChild(eHorRate);
@@ -467,6 +471,11 @@ public class MissionHelper {
             nodes = element.getElementsByTagName("altitude");
             if (nodes.item(0) != null) {
                 model.setAltitude(Float.parseFloat(nodes.item(0).getTextContent()));
+            }
+            //distanceToPanel
+            nodes = element.getElementsByTagName("distanceToPanel");
+            if (nodes.item(0) != null) {
+                model.setDistanceToPanel(Float.parseFloat(nodes.item(0).getTextContent()));
             }
             nodes = element.getElementsByTagName("OverlapRate");
             if (nodes.item(0) != null) {
