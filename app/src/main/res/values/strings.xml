@@ -40,7 +40,7 @@
     <string name="record_download_title">选择待下载记录</string>
 
     <string name="selected_flight_record">SELECTED_RECORD</string>
-    
+
     <string name="record_func_delete">删除</string>
     <string name="record_func_check">查看</string>
     <string name="record_func_download">下载</string>

@@ -172,6 +172,15 @@ public class FlatlandModel extends BaseModel {
         vertexs.add(latLng);
     }
 
+    public boolean adjustVertes(int index, LatLng latLng) {
+        if (index >= 0 && index < vertexs.size()) {
+            vertexs.remove(index);
+            vertexs.add(index, latLng);
+            return true;
+        } else {
+            return false;
+        }
+    }
     @Override
     public void generateExecutablePoints(LatLng formerPoint) {
         executePoints = new ArrayList<>();
@@ -198,5 +207,19 @@ public class FlatlandModel extends BaseModel {
         WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle);
         waypoint.waypointActions.add(0, action);
         waypoint.waypointActions.add(0,new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+    }
+
+    public List<Waypoint> getAdjustPoints() {
+        List<Waypoint> points = new ArrayList<>();
+        for (int i = 0; i < vertexs.size(); i++) {
+            Waypoint waypoint = new Waypoint(vertexs.get(i).latitude, vertexs.get(i).longitude, altitude + distanceToPanel);
+//            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+//            waypoint.addAction(new WaypointAction(WaypointActionType.))
+            points.add(waypoint);
+        }
+        Waypoint waypoint = points.get(0);
+        waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+        waypoint.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -this.cameraAngle));
+        return points;
     }
 }

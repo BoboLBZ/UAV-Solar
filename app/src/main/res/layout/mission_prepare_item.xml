@@ -2,7 +2,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="90dp">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="90dp"
@@ -10,31 +9,60 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:background="@color/blue_gv_background"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/prepare_mission_name"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:text="mission one"
-            android:textColor="@color/white" />
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="90dp"
+            android:background="@color/blue_gv_background"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/prepare_mission_date"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:text="mission one"
-            android:textColor="@color/white" />
+            <TextView
+                android:id="@+id/prepare_mission_name"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="mission one"
+                android:textColor="@color/white" />
 
-        <TextView
-            android:id="@+id/prepare_mission_child_num"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:text="mission one"
-            android:textColor="@color/white" />
+            <TextView
+                android:id="@+id/prepare_mission_date"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="mission one"
+                android:textColor="@color/white" />
 
+            <TextView
+                android:id="@+id/prepare_mission_child_num"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="mission one"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="90dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/prepare_mission_adjust"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:background="@color/blue_gv_background"
+                android:text="调 整"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/prepare_mission_execute"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:background="@color/blue_gv_background"
+                android:text="执 行"
+                android:textColor="@color/white" />
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
