@@ -74,32 +74,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     private BaseModel adjustModel;
     private List<BaseModel> modelList;
     private FlightController mFlightController;
-    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
-        @Override
-        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
-        }
-
-        @Override
-        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
-        }
-
-        @Override
-        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
-        }
-
-        @Override
-        public void onExecutionStart() {
-        }
-
-        @Override
-        public void onExecutionFinish(@Nullable final DJIError error) {
-            if(error != null){
-                ToastHelper.getInstance().showShortToast("stop");
-                index=index+1;
-            }
-        }
-    };
-
     private WaypointMissionOperator operatorInstance;
     //mission about
     private PatrolMission patrolMission;
@@ -137,6 +111,31 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     private Button btnSaveLocation, btnSaveAltitude, btnSaveHeading, btnSaveCameraAngle, btnSave;
     private LatLng homePointGPS;
     private int index = -1;
+    private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
+        @Override
+        public void onDownloadUpdate(WaypointMissionDownloadEvent downloadEvent) {
+        }
+
+        @Override
+        public void onUploadUpdate(WaypointMissionUploadEvent uploadEvent) {
+        }
+
+        @Override
+        public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent) {
+        }
+
+        @Override
+        public void onExecutionStart() {
+        }
+
+        @Override
+        public void onExecutionFinish(@Nullable final DJIError error) {
+            if (error != null) {
+                ToastHelper.getInstance().showShortToast("stop");
+                index = index + 1;
+            }
+        }
+    };
     private float cameraAngle = 0;
     private float currentAltitude;
 
@@ -268,7 +267,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         List<Waypoint> points = new ArrayList<>();
         points.add(waypoints.get(index+1));
         loadMission(WaypointListConvert(points), getAltitude(waypoints));
-//        loadMission(WaypointListConvert(waypoints.subList(index+1,index+1)), getAltitude(waypoints));
     }
 
     /**
@@ -455,12 +453,23 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     }
 
     private void saveLocation() {
+        boolean flag = false;
         switch (adjustModel.getModelType()) {
             case Flatland:
-                ((FlatlandModel) adjustModel).adjustVertes(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+                flag = ((FlatlandModel) adjustModel).adjustVertes(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+                break;
+            case MultiPoints:
+                flag = ((MultiPointsModel) adjustModel).updateWaypointLocation(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+                break;
+            case Slope:
+                flag = ((SlopeModel) adjustModel).updateDroneLocation(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
                 break;
         }
-        ToastHelper.getInstance().showShortToast("saveLocation success");
+        if (flag) {
+            ToastHelper.getInstance().showShortToast("saveLocation success");
+        } else {
+            ToastHelper.getInstance().showShortToast("saveLocation failed");
+        }
     }
 
     private void saveAltitude() {
@@ -468,6 +477,12 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
             case Flatland:
                 float oldAltitude = ((FlatlandModel) adjustModel).getAltitude();
                 ((FlatlandModel) adjustModel).setDistanceToPanel(currentAltitude - oldAltitude);
+                break;
+            case MultiPoints:
+                ((MultiPointsModel) adjustModel).updateWaypointAltitude(index, currentAltitude);
+                break;
+            case Slope:
+                ((SlopeModel) adjustModel).updateAltitude(index, currentAltitude);
                 break;
         }
         ToastHelper.getInstance().showShortToast("saveAltitude success");
@@ -644,11 +659,13 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         if (adjustModel != null) {
             switch (adjustModel.getModelType()) {
                 case Slope:
+                    waypoints = ((SlopeModel) adjustModel).getAdjustPoints();
                     break;
                 case Flatland:
                     waypoints = ((FlatlandModel) adjustModel).getAdjustPoints();
                     break;
                 case MultiPoints:
+                    waypoints = ((MultiPointsModel) adjustModel).getWaypointList();
                     break;
             }
         }
