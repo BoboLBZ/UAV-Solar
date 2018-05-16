@@ -145,11 +145,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     //flatland
     private Polyline f_polyline;
     private Polygon f_polygon;
-    private Marker f_startPoint;
+    private List<Marker> mFMarkers = new ArrayList<>();
     //slope model
     private Polyline s_polyline;
     private Polygon s_polygon;
-    private Marker s_startPoint;
+    private List<Marker> mSMarkers = new ArrayList<>();
     private Marker s_base_A;
     private Marker s_base_B;
     private Polyline s_baseline;
@@ -165,25 +165,41 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
 
         @Override
         public void onMarkerDragEnd(Marker arg0) {
-            if (currentModel.getModelType() == ModelType.Slope) {
-                if (type.equals("baseA")) {
-                    s_baseline.remove();
-                    //s_base_A=arg0;
-                    id = s_base_A.getId();
-                } else if (type.equals("baseB")) {
-                    s_baseline.remove();
-                    //s_base_B=arg0;
-                    id = s_base_B.getId();
-                }
+            switch (currentModel.getModelType()) {
+                case Flatland:
+                    int fPointIndex = Integer.parseInt(arg0.getTitle());
+                    getFlatlandModel().setVertex(fPointIndex, arg0.getPosition());
+                    updateFlatlandBorder();
+                    break;
+                case Slope:
+                    if (type.equals("baseA") || type.equals("baseB")) {
+                        if (type.equals("baseA")) {
+                            s_baseline.remove();
+                            //s_base_A=arg0;
+                            id = s_base_A.getId();
+                        } else if (type.equals("baseB")) {
+                            s_baseline.remove();
+                            //s_base_B=arg0;
+                            id = s_base_B.getId();
+                        }
+                        drawBaseline(s_base_A, s_base_B);
+
+//                    System.out.println("debug:ID0:"+arg0.getId());
+//                    System.out.println("debug:IDA:"+s_base_A.getId());
+//                    System.out.println("debug:IDB:"+s_base_B.getId());
+//                    System.out.println("debug:arg0:"+arg0.getTitle().toString());
+//                    System.out.println("debug:A:"+s_base_A.getTitle().toString());
+//                    System.out.println("debug:B:"+s_base_B.getTitle().toString());
+//                    removerRedundancy();
+                    } else {
+                        int sPointIndex = Integer.parseInt(arg0.getTitle());
+                        getSlopeModel().setVertex(sPointIndex, arg0.getPosition());
+                        updateSlopeBorder();
+                    }
+
+                    break;
+
             }
-            drawBaseline(s_base_A, s_base_B);
-//            System.out.println("debug:ID0:"+arg0.getId());
-//            System.out.println("debug:IDA:"+s_base_A.getId());
-//            System.out.println("debug:IDB:"+s_base_B.getId());
-//            System.out.println("debug:arg0:"+arg0.getTitle().toString());
-//            System.out.println("debug:A:"+s_base_A.getTitle().toString());
-//            System.out.println("debug:B:"+s_base_B.getTitle().toString());
-            //removerRedundancy();
 
         }
 
@@ -221,13 +237,15 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                     saveFlag = false;
                     break;
                 case Flatland:
-                    drawFlatlandBorder(latLng);
+                    drawFlatlandPoint(latLng);
+                    updateFlatlandBorder();
                     saveFlag = false;
                     break;
                 case Slope:
                     switch (status_of_slopemodel) {
                         case 1:
-                            drawSlopeBorder(latLng);
+                            drawSlopePoint(latLng);
+                            updateSlopeBorder();
                             saveFlag = false;
                             break;
                         case 2:
@@ -322,6 +340,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private Context getContext() {
         return this;
     }
+
     private void initMapView(Bundle savedInstanceState) {
         mapView = findViewById(R.id.map_mission_main);
         mapView.onCreate(savedInstanceState);
@@ -702,7 +721,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final SeekBar mWidth = settingView.findViewById(R.id.polygon_setting_width);
         final SeekBar mPitch = settingView.findViewById(R.id.polygon_setting_pitch);
         final SeekBar mHeading = settingView.findViewById(R.id.polygon_setting_heading);
-        final SeekBar mDis=settingView.findViewById(R.id.polygon_setting_dis);
+        final SeekBar mDis = settingView.findViewById(R.id.polygon_setting_dis);
 
         final TextView mSpeedText = settingView.findViewById(R.id.polygon_setting_speed_text);
         final TextView mOverateText = settingView.findViewById(R.id.polygon_setting_overrate_text);
@@ -711,7 +730,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         final TextView mPitchText = settingView.findViewById(R.id.polygon_setting_pitch_text);
         final TextView mName = settingView.findViewById(R.id.polygon_setting_name);
         final TextView mHeadingText = settingView.findViewById(R.id.polygon_setting_heading_text);
-        final TextView mDisText=settingView.findViewById(R.id.polygon_setting_dis_text);
+        final TextView mDisText = settingView.findViewById(R.id.polygon_setting_dis_text);
 
         GridView vertexs = settingView.findViewById(R.id.polygon_setting_vertexs);
         //init
@@ -722,7 +741,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mAltitudeText.setText(String.valueOf((int) (getFlatlandModel().getAltitude() + 0.5)) + " m");
 
         mDis.setMax(20);
-        mDis.setProgress((int)(getFlatlandModel().getDistanceToPanel() + 0.5));
+        mDis.setProgress((int) (getFlatlandModel().getDistanceToPanel() + 0.5));
         mDisText.setText(String.valueOf((int) (getFlatlandModel().getDistanceToPanel() + 0.5)) + " m");
 
         mSpeed.setMax((int) MissionConstraintHelper.getMaxSpeed());
@@ -849,7 +868,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         mDis.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mDisText.setText(String.valueOf(progress)+" m");
+                mDisText.setText(String.valueOf(progress) + " m");
             }
 
             @Override
@@ -1187,84 +1206,65 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         markerOptions.draggable(false);
         markerOptions.title("point");
-        aMap.addMarker(markerOptions);
+//        aMap.addMarker(markerOptions);
         Marker marker = aMap.addMarker(markerOptions);
         mMarkers.add(marker);
     }
 
     //flatland
-    private void drawFlatlandBorder(LatLng latLng) {
-        getFlatlandModel().addVertex(latLng);
+    private void drawFlatlandPoint(LatLng latLng) {
+        int pointIndex = getFlatlandModel().addVertex(latLng);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title(String.valueOf(pointIndex));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.draggable(true);
+        mFMarkers.add(aMap.addMarker(markerOptions));
+    }
+
+    private void updateFlatlandBorder() {
+        // clear older border
         if (f_polyline != null) {
             f_polyline.remove();
         }
-        if (f_polygon != null)
+        if (f_polygon != null) {
             f_polygon.remove();
-        if (f_startPoint != null)
-            f_startPoint.remove();
+        }
+
+        // draw new border
         PolylineOptions options = new PolylineOptions().addAll(getFlatlandModel().getVertexs());
-        if (getFlatlandModel().getVertexs().size() > 0)
+        if (getFlatlandModel().getVertexs().size() > 2)
             options.add(getFlatlandModel().getVertexs().get(0));
         f_polyline = aMap.addPolyline(options);
         f_polygon = aMap.addPolygon(new PolygonOptions().addAll(getFlatlandModel().getVertexs())
                 .fillColor(getResources().getColor(R.color.fillColor)));
-        if (getFlatlandModel().getVertexs().size() == 1)
-            drawStartPoint(getFlatlandModel().getVertexs().get(0));
-        else {
-            destroyStartPoint();
-        }
-
-    }
-
-    private void drawStartPoint(LatLng latLng) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        markerOptions.title("f_startPoint");
-        aMap.addMarker(markerOptions);
-        f_startPoint = aMap.addMarker(markerOptions);
-    }
-
-    private void destroyStartPoint() {
-        if (f_startPoint != null)
-            f_startPoint.destroy();
     }
 
     //slope model about
-    private void drawSlopeBorder(LatLng latLng) {
-        getSlopeModel().addVertex(latLng);
+    private void drawSlopePoint(LatLng latLng) {
+        int pointIndex = getSlopeModel().addVertex(latLng);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.title(String.valueOf(pointIndex));
+        markerOptions.position(latLng);
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.draggable(true);
+        mSMarkers.add(aMap.addMarker(markerOptions));
+    }
+
+    private void updateSlopeBorder() {
         if (s_polyline != null) {
             s_polyline.remove();
         }
-        if (s_polygon != null)
+        if (s_polygon != null) {
             s_polygon.remove();
-        if (s_startPoint != null)
-            s_startPoint.remove();
+        }
+
         PolylineOptions options = new PolylineOptions().addAll(getSlopeModel().getVertexs());
-        if (getSlopeModel().getVertexs().size() > 0)
+        if (getSlopeModel().getVertexs().size() > 2)
             options.add(getSlopeModel().getVertexs().get(0));
         s_polyline = aMap.addPolyline(options);
         s_polygon = aMap.addPolygon(new PolygonOptions().addAll(getSlopeModel().getVertexs())
                 .fillColor(getResources().getColor(R.color.fillColorSlope)));
-        if (getSlopeModel().getVertexs().size() == 1)
-            drawStartPointSlope(getSlopeModel().getVertexs().get(0));
-        else {
-            destroyStartPointSlope();
-        }
-    }
-
-    private void drawStartPointSlope(LatLng latLng) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        markerOptions.title("f_startPoint");
-        aMap.addMarker(markerOptions);
-        s_startPoint = aMap.addMarker(markerOptions);
-    }
-
-    private void destroyStartPointSlope() {
-        if (s_startPoint != null)
-            s_startPoint.destroy();
     }
 
     private void drawBaseline(Marker a, Marker b) {
@@ -1321,7 +1321,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_a)));
             markerOptions.draggable(true);
             markerOptions.title("baseA");
-            aMap.addMarker(markerOptions);
+//            aMap.addMarker(markerOptions);
             s_base_A = aMap.addMarker(markerOptions);
         } else if (s_base_B == null) {
             MarkerOptions markerOptions = new MarkerOptions();
@@ -1329,7 +1329,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_b)));
             markerOptions.draggable(true);
             markerOptions.title("baseB");
-            aMap.addMarker(markerOptions);
+//            aMap.addMarker(markerOptions);
             s_base_B = aMap.addMarker(markerOptions);
         }
         if (s_base_A != null && s_base_B != null) {
@@ -1379,8 +1379,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             f_polygon.remove();
         if (f_polyline != null)
             f_polyline.remove();
-        if (f_startPoint != null)
-            f_startPoint.destroy();
+        for (int i = 0; i < mFMarkers.size(); i++) {
+            if (!mFMarkers.get(i).getTitle().equals("marker"))
+                mFMarkers.get(i).destroy();
+        }
+        mFMarkers.clear();
     }
 
     private void clearSlopeDisplay() {
@@ -1388,8 +1391,11 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             s_polygon.remove();
         if (s_polyline != null)
             s_polyline.remove();
-        if (s_startPoint != null)
-            s_startPoint.destroy();
+        for (int i = 0; i < mSMarkers.size(); i++) {
+            if (!mSMarkers.get(i).getTitle().equals("marker"))
+                mSMarkers.get(i).destroy();
+        }
+        mSMarkers.clear();
         if (s_base_A != null) {
             s_base_A.remove();
             s_base_A.destroy();
@@ -1414,7 +1420,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             markerOptions.draggable(false);
             markerOptions.title("waypoint");
-            aMap.addMarker(markerOptions);
+//            aMap.addMarker(markerOptions);
             cameraUpdate(ll, aMap.getCameraPosition().zoom);
             Marker marker = aMap.addMarker(markerOptions);
             mMarkers.add(marker);
@@ -1535,6 +1541,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private class ChildMissionListAdapter extends RecyclerView.Adapter<ViewHolder> {
         private List<BaseModel> modelList;
         private int rowIndex = 0;
+
         public ChildMissionListAdapter(List<BaseModel> list) {
 
             this.modelList = list;

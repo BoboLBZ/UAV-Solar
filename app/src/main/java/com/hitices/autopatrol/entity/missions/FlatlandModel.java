@@ -36,7 +36,7 @@ public class FlatlandModel extends BaseModel {
         headingAngle = MissionConstraintHelper.getDefaultHeading();
         //flatland
         altitude = 20.0f;
-        distanceToPanel=MissionConstraintHelper.getDefaultDistanceToPanel();
+        distanceToPanel = MissionConstraintHelper.getDefaultDistanceToPanel();
         speed = MissionConstraintHelper.getDefaultSpeed();
         overlapRate = MissionConstraintHelper.getDefaultOverlapRate();
         width = MissionConstraintHelper.getDefaultWidth();
@@ -168,9 +168,16 @@ public class FlatlandModel extends BaseModel {
         return executePoints;
     }
 
-    public void addVertex(LatLng latLng) {
+    public int addVertex(LatLng latLng) {
         //添加顶点
         vertexs.add(latLng);
+        return vertexs.size() - 1;
+    }
+
+    public void setVertex(int index, LatLng latLng) {
+        if (index >= 0 && index < vertexs.size()) {
+            vertexs.set(index, latLng);
+        }
     }
 
     public boolean adjustVertes(int index, LatLng latLng) {
@@ -178,13 +185,14 @@ public class FlatlandModel extends BaseModel {
 //            vertexs.remove(index);
 //            vertexs.add(index, latLng);
             vertexs.add(latLng);
-            Collections.swap(vertexs,index,vertexs.size()-1);
-            vertexs.remove(vertexs.size()-1);
+            Collections.swap(vertexs, index, vertexs.size() - 1);
+            vertexs.remove(vertexs.size() - 1);
             return true;
         } else {
             return false;
         }
     }
+
     @Override
     public void generateExecutablePoints(LatLng formerPoint) {
         executePoints = new ArrayList<>();
@@ -199,9 +207,9 @@ public class FlatlandModel extends BaseModel {
 //        List<LatLng> points = algorithm.getPlanningWaypoints();
 //        startPoint = points.get(0);
         endPoint = points.get(points.size() - 1);
-        safeAltitude = altitude+distanceToPanel;
+        safeAltitude = altitude + distanceToPanel;
         for (int i = 0; i < points.size(); i++) {
-            Waypoint waypoint = new Waypoint(points.get(i).latitude, points.get(i).longitude, altitude+distanceToPanel);
+            Waypoint waypoint = new Waypoint(points.get(i).latitude, points.get(i).longitude, altitude + distanceToPanel);
             //设置航点动作
             //waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
@@ -210,7 +218,7 @@ public class FlatlandModel extends BaseModel {
         Waypoint waypoint = executePoints.get(0);
         WaypointAction action = new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle);
         waypoint.waypointActions.add(0, action);
-        waypoint.waypointActions.add(0,new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+        waypoint.waypointActions.add(0, new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
     }
 
     public List<Waypoint> getAdjustPoints() {

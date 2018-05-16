@@ -69,9 +69,13 @@ public class SlopeModel extends BaseModel {
 //        Waypoint w=executePoints.get(0);
 
     }
-    public void addVertex(LatLng latLng) {
+    public int addVertex(LatLng latLng) {
         //添加顶点
         vertexs.add(latLng);
+        return vertexs.size() - 1;
+    }
+    public void setVertex(int index, LatLng latLng) {
+        vertexs.set(index, latLng);
     }
 
     public void setAltitude(float altitude) {
