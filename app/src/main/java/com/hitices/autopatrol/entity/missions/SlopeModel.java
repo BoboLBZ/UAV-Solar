@@ -56,15 +56,17 @@ public class SlopeModel extends BaseModel {
         //以安全高度进入斜面区域，并调整云台角度
         Waypoint w = new Waypoint(startPoint.latitude, startPoint.longitude, safeAltitude);
         w.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -cameraAngle));
+        w.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
         executePoints.add(w);
         for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
             double alt = point.getArCos() + altitude + distanceToPanel;
             Waypoint waypoint = new Waypoint(point.getX(), point.getY(), (float) alt);
-            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+            //waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
             waypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO, 0));
             executePoints.add(waypoint);
         }
+//        Waypoint w=executePoints.get(0);
 
     }
     public void addVertex(LatLng latLng) {

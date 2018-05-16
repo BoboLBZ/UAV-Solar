@@ -6,6 +6,7 @@ import com.hitices.autopatrol.algorithm.FullCoveragePathPlanningAlgorithm;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import dji.common.mission.waypoint.Waypoint;
@@ -174,8 +175,11 @@ public class FlatlandModel extends BaseModel {
 
     public boolean adjustVertes(int index, LatLng latLng) {
         if (index >= 0 && index < vertexs.size()) {
-            vertexs.remove(index);
-            vertexs.add(index, latLng);
+//            vertexs.remove(index);
+//            vertexs.add(index, latLng);
+            vertexs.add(latLng);
+            Collections.swap(vertexs,index,vertexs.size()-1);
+            vertexs.remove(vertexs.size()-1);
             return true;
         } else {
             return false;
@@ -213,13 +217,10 @@ public class FlatlandModel extends BaseModel {
         List<Waypoint> points = new ArrayList<>();
         for (int i = 0; i < vertexs.size(); i++) {
             Waypoint waypoint = new Waypoint(vertexs.get(i).latitude, vertexs.get(i).longitude, altitude + distanceToPanel);
-//            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
-//            waypoint.addAction(new WaypointAction(WaypointActionType.))
+            waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
+            waypoint.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -this.cameraAngle));
             points.add(waypoint);
         }
-        Waypoint waypoint = points.get(0);
-        waypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT, this.headingAngle));
-        waypoint.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH, -this.cameraAngle));
         return points;
     }
 }

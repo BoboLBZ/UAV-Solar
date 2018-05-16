@@ -120,7 +120,7 @@ public class SlopePathPlanningAlgorithm {
         //扫面线斜率,先不考虑斜率为0的情况
 //        double k= (lowPoint.getX() -highPoint.getY())/(highPoint.getY() - lowPoint.getY());//x1-x2 / y2-y1
 //        double b=points[0].getY()- k * points[0].getX();
-        double A = (lowPoint.getX() - highPoint.getY()) / (highPoint.getY() - lowPoint.getY());
+        double A = (lowPoint.getX() - highPoint.getX()) / (highPoint.getY() - lowPoint.getY());
         double B = -1;
         double C = points[0].getY() - A * points[0].getX();
         double fenmu = Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2));

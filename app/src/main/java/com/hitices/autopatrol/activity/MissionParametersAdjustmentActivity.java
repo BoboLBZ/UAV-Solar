@@ -93,8 +93,8 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            if(error != null){
-                ToastHelper.getInstance().showShortToast("stop");
+            if(error == null){
+                setResultToToast("stop");
                 index=index+1;
             }
         }
@@ -268,7 +268,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         List<Waypoint> points = new ArrayList<>();
         points.add(waypoints.get(index+1));
         loadMission(WaypointListConvert(points), getAltitude(waypoints));
-//        loadMission(WaypointListConvert(waypoints.subList(index+1,index+1)), getAltitude(waypoints));
     }
 
     /**
@@ -455,12 +454,19 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     }
 
     private void saveLocation() {
+        boolean flag=false;
         switch (adjustModel.getModelType()) {
             case Flatland:
-                ((FlatlandModel) adjustModel).adjustVertes(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+                flag=((FlatlandModel) adjustModel).adjustVertes(index, GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
                 break;
         }
-        ToastHelper.getInstance().showShortToast("saveLocation success");
+        if(flag){
+            ToastHelper.getInstance().showShortToast("saveLocation success");
+            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+        }
+          else {
+            ToastHelper.getInstance().showShortToast("saveLocation failed");
+        }
     }
 
     private void saveAltitude() {
@@ -561,6 +567,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      * 在地图上标记航线
      */
     private void markWaypoints(List<Waypoint> waypoints) {
+        aMap.getMapScreenMarkers().clear();
         List<LatLng> lines = new ArrayList<>();
         //lines.add(droneLocation);
         for (int i = 0; i < waypoints.size(); i++) {
@@ -577,6 +584,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
         ToastHelper.getInstance().showShortToast("num of waypoint is " + String.valueOf(waypoints.size()));
     }
+
 
     private void markHomePoint(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
