@@ -93,6 +93,10 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
+            if(error != null){
+                ToastHelper.getInstance().showShortToast("stop");
+                index=index+1;
+            }
         }
     };
 
@@ -226,18 +230,18 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                                     djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
                             //gps 坐标转换成 高德坐标系
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    if (djiFlightControllerCurrentState.isFlying() &&
-                                            Math.abs(djiFlightControllerCurrentState.getVelocityX()) < 0.001 &&
-                                            Math.abs(djiFlightControllerCurrentState.getVelocityY()) < 0.001 &&
-                                            Math.abs(djiFlightControllerCurrentState.getVelocityZ()) < 0.001) {
-                                        countOfPoints(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-                                    }
-                                }
-                            });
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//
+//                                    if (djiFlightControllerCurrentState.isFlying() &&
+//                                            Math.abs(djiFlightControllerCurrentState.getVelocityX()) < 0.001 &&
+//                                            Math.abs(djiFlightControllerCurrentState.getVelocityY()) < 0.001 &&
+//                                            Math.abs(djiFlightControllerCurrentState.getVelocityZ()) < 0.001) {
+//                                        countOfPoints(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+//                                    }
+//                                }
+//                            });
                         }
                     });
             ToastHelper.getInstance().showShortToast("in flight control");
@@ -252,11 +256,19 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         }
 
     }
-
-    private void missionProcessing() {
-        List<Waypoint> waypoints = generateExecutableWaypoints();
+    private void missionProcessingWithMark(){
+        generateExecutableWaypoints();
         markWaypoints(waypoints);
-        loadMission(WaypointListConvert(waypoints), getAltitude(waypoints));
+        List<Waypoint> points = new ArrayList<>();
+        points.add(waypoints.get(index+1));
+        loadMission(WaypointListConvert(points), getAltitude(waypoints));
+    }
+    private void missionProcessing() {
+        generateExecutableWaypoints();
+        List<Waypoint> points = new ArrayList<>();
+        points.add(waypoints.get(index+1));
+        loadMission(WaypointListConvert(points), getAltitude(waypoints));
+//        loadMission(WaypointListConvert(waypoints.subList(index+1,index+1)), getAltitude(waypoints));
     }
 
     /**
@@ -266,29 +278,34 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     private void loadMission(@NonNull List<Waypoint> list, @NonNull float altitude) {
         ToastHelper.getInstance().showShortToast("on load");
         //以无人机起飞位置作为返航点
+//        if (droneLocation != null) {
+//            list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
+//            homePointGPS = new LatLng(droneLocation.latitude, droneLocation.longitude);
+//            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+//        }
+//        //以当前人的位置作返航点
+//        else {
+//            if (humanLocation != null) {
+//                list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
+//                homePointGPS = GoogleMapHelper.AmapConvertToWGS84(humanLocation);
+//
+//            }
+//        }
+        List<Waypoint> points=new ArrayList<>();
         if (droneLocation != null) {
-            list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
-            homePointGPS = new LatLng(droneLocation.latitude, droneLocation.longitude);
-            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
+            points.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
         }
-        //以当前人的位置作返航点
-        else {
-            if (humanLocation != null) {
-                list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
-                homePointGPS = GoogleMapHelper.AmapConvertToWGS84(humanLocation);
-
-            }
-        }
+        points.addAll(list);
+        setResultToToast("points num:"+String.valueOf(points.size()));
         builder = new WaypointMission.Builder();
-
-        builder.waypointList(list);
-        builder.waypointCount(list.size());
+        builder.waypointList(points);
+        builder.waypointCount(points.size());
 
         float speed = getSpeed(adjustModel);
         builder.autoFlightSpeed(speed);
         builder.maxFlightSpeed(speed);
 
-        builder.finishedAction(WaypointMissionFinishedAction.AUTO_LAND);
+        builder.finishedAction(WaypointMissionFinishedAction.NO_ACTION);
         builder.headingMode(WaypointMissionHeadingMode.USING_WAYPOINT_HEADING);
         builder.flightPathMode(WaypointMissionFlightPathMode.NORMAL);
 
@@ -360,7 +377,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
     /**
      * 任务终止
-     * mf,call wrong function,dashazi
+     * mf,call wrong function
      */
     private void stopMission() {
         ToastHelper.getInstance().showShortToast("on stop");
@@ -383,7 +400,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                 startMission();
                 break;
             case R.id.adjustment_stopMission:
-                changeStatusOfPause();
+                missionProcessing();
                 break;
             case R.id.adjustment_location:
                 saveLocation();
@@ -693,7 +710,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                     public void onClick(DialogInterface dialog, int which) {
                         adjustModel = modelList.get(which);
                         Log.d(TAG, "onClick: " + String.valueOf(which));
-                        missionProcessing();
+                        missionProcessingWithMark();
                     }
                 })
                 .setPositiveButton("ok", new DialogInterface.OnClickListener() {
