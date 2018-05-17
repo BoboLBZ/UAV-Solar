@@ -53,11 +53,11 @@
             android:layout_height="wrap_content"
             android:text="通用高度:" />
 
-        <SeekBar
+        <EditText
             android:id="@+id/altitude"
-            style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/altitude_text"
@@ -88,7 +88,8 @@
         <TextView
             android:id="@+id/seekBar_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="m" />
     </LinearLayout>
 
     <LinearLayout
@@ -105,16 +106,17 @@
             android:layout_height="wrap_content"
             android:text="云台俯角:" />
 
-        <SeekBar
+        <EditText
             android:id="@+id/pitch"
-            style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/pitch_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="0~90" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -130,16 +132,17 @@
             android:layout_height="wrap_content"
             android:text="拍照朝向:" />
 
-        <SeekBar
+        <EditText
             android:id="@+id/heading"
-            style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/heading_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="-180~180" />
     </LinearLayout>
 
 </LinearLayout>
