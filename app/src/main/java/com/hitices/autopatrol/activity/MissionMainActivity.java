@@ -913,7 +913,7 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
     private void showSlopeModelSettingDialog() {
         LinearLayout settingView = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_slope_setting, null);
 
-        final SeekBar mAltitude = settingView.findViewById(R.id.slope_setting_altitude);
+//        final SeekBar mAltitude = settingView.findViewById(R.id.slope_setting_altitude);
         final SeekBar mSpeed = settingView.findViewById(R.id.slope_setting_speed);
 
         final EditText mAltitude = settingView.findViewById(R.id.slope_setting_altitude);
