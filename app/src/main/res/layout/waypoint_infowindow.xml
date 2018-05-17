@@ -46,15 +46,22 @@
             android:layout_height="wrap_content"
             android:text="高度:" />
 
-        <SeekBar
+        <EditText
             android:id="@+id/info_altitude"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_width="110dp"
-            android:layout_height="wrap_content" />
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned|numberDecimal" />
 
         <TextView
-            android:id="@+id/info_altitude_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="m " />
+
+        <Button
+            android:id="@+id/info_saveWaypoint"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="保存"
+            android:textSize="13sp" />
     </LinearLayout>
 </LinearLayout>

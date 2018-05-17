@@ -130,8 +130,8 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            if (error != null) {
-                ToastHelper.getInstance().showShortToast("stop");
+            if (error == null) {
+                setResultToToast("可以开始调整");
                 index = index + 1;
             }
         }
@@ -229,18 +229,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                                     djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
                             //gps 坐标转换成 高德坐标系
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//
-//                                    if (djiFlightControllerCurrentState.isFlying() &&
-//                                            Math.abs(djiFlightControllerCurrentState.getVelocityX()) < 0.001 &&
-//                                            Math.abs(djiFlightControllerCurrentState.getVelocityY()) < 0.001 &&
-//                                            Math.abs(djiFlightControllerCurrentState.getVelocityZ()) < 0.001) {
-//                                        countOfPoints(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-//                                    }
-//                                }
-//                            });
                         }
                     });
             ToastHelper.getInstance().showShortToast("in flight control");
@@ -275,20 +263,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      */
     private void loadMission(@NonNull List<Waypoint> list, @NonNull float altitude) {
         ToastHelper.getInstance().showShortToast("on load");
-        //以无人机起飞位置作为返航点
-//        if (droneLocation != null) {
-//            list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
-//            homePointGPS = new LatLng(droneLocation.latitude, droneLocation.longitude);
-//            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-//        }
-//        //以当前人的位置作返航点
-//        else {
-//            if (humanLocation != null) {
-//                list.add(waypointConvert(new Waypoint(humanLocation.latitude, humanLocation.longitude, altitude)));
-//                homePointGPS = GoogleMapHelper.AmapConvertToWGS84(humanLocation);
-//
-//            }
-//        }
         List<Waypoint> points=new ArrayList<>();
         if (droneLocation != null) {
             points.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
@@ -466,6 +440,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                 break;
         }
         if (flag) {
+            markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
             ToastHelper.getInstance().showShortToast("saveLocation success");
         } else {
             ToastHelper.getInstance().showShortToast("saveLocation failed");
@@ -473,19 +448,24 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     }
 
     private void saveAltitude() {
+        boolean result = false;
         switch (adjustModel.getModelType()) {
             case Flatland:
                 float oldAltitude = ((FlatlandModel) adjustModel).getAltitude();
-                ((FlatlandModel) adjustModel).setDistanceToPanel(currentAltitude - oldAltitude);
+                result = ((FlatlandModel) adjustModel).setDistanceToPanel(currentAltitude - oldAltitude);
                 break;
             case MultiPoints:
-                ((MultiPointsModel) adjustModel).updateWaypointAltitude(index, currentAltitude);
+                result = ((MultiPointsModel) adjustModel).updateWaypointAltitude(index, currentAltitude);
                 break;
             case Slope:
-                ((SlopeModel) adjustModel).updateAltitude(index, currentAltitude);
+                result = ((SlopeModel) adjustModel).updateAltitude(index, currentAltitude);
                 break;
         }
-        ToastHelper.getInstance().showShortToast("saveAltitude success");
+        if (result) {
+            ToastHelper.getInstance().showShortToast("saveAltitude success");
+        } else {
+            ToastHelper.getInstance().showShortToast("saveAltitude failed");
+        }
     }
 
     private void saveHeading() {

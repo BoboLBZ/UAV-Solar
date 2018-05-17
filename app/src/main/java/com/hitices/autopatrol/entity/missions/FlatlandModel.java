@@ -89,8 +89,9 @@ public class FlatlandModel extends BaseModel {
         return distanceToPanel;
     }
 
-    public void setDistanceToPanel(float distanceToPanel) {
+    public boolean setDistanceToPanel(float distanceToPanel) {
         this.distanceToPanel = distanceToPanel;
+        return true;
     }
 
     @Override

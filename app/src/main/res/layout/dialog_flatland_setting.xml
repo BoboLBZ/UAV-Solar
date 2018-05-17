@@ -52,7 +52,7 @@
             android:id="@+id/polygon_setting_altitude"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="numberSigned|numberDecimal" />
         <TextView
             android:id="@+id/polygon_setting_altitude_text"
             android:layout_width="wrap_content"
@@ -73,7 +73,8 @@
         <EditText
             android:id="@+id/polygon_setting_dis"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/polygon_setting_dis_text"
@@ -118,7 +119,8 @@
         <EditText
             android:id="@+id/polygon_setting_width"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/polygon_setting_width_text"
@@ -164,7 +166,8 @@
         <EditText
             android:id="@+id/polygon_setting_pitch"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/polygon_setting_pitch_text"
@@ -187,7 +190,8 @@
         <EditText
             android:id="@+id/polygon_setting_heading"
             android:layout_width="200dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned|numberDecimal" />
 
         <TextView
             android:id="@+id/polygon_setting_heading_text"
