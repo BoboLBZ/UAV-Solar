@@ -22,18 +22,19 @@
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
-        android:background="@color/blue_semi_transparent"
         android:layout_marginStart="10dp"
+        android:background="@color/blue_semi_transparent"
         android:text="mission one" />
 
     <TextView
         android:id="@+id/tv_child_name_mission_main"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:background="@color/blue_semi_transparent"
         android:layout_toEndOf="@+id/btn_child_mission_main"
+        android:background="@color/blue_semi_transparent"
         android:gravity="center"
         android:text="子任务"
+        android:textColor="@color/red"
         android:textSize="25dp" />
 
     <ImageButton
@@ -41,8 +42,8 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
-        android:enabled="false"
         android:background="@color/blue_semi_transparent"
+        android:enabled="false"
         android:src="@drawable/ic_mission_settings" />
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu

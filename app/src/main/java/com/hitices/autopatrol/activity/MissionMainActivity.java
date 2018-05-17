@@ -1287,11 +1287,12 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
                 public void onClick(View v) {
                     float alt = StringToFloat(sb_altitude.getText().toString());
                     waypoint.altitude = alt;
+                    mMarker.hideInfoWindow();
                 }
             });
             //init data
             if (waypoint != null) {
-                sb_altitude.setText((int) (waypoint.altitude + 0.5));
+                sb_altitude.setText(String.valueOf(waypoint.altitude));
                 tv_lat.setText("纬度:" + String.valueOf(waypoint.coordinate.getLatitude()));
                 tv_lng.setText("经度:" + String.valueOf(waypoint.coordinate.getLongitude()));
             }
