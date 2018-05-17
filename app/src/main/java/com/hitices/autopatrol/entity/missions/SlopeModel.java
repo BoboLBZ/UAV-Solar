@@ -6,6 +6,7 @@ import com.hitices.autopatrol.algorithm.SlopePathPlanningAlgorithm;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import dji.common.mission.waypoint.Waypoint;
@@ -78,12 +79,12 @@ public class SlopeModel extends BaseModel {
         vertexs.set(index, latLng);
     }
 
-    public void setAltitude(float altitude) {
-        this.altitude = altitude;
-    }
-
     public float getAltitude() {
         return altitude;
+    }
+
+    public void setAltitude(float altitude) {
+        this.altitude = altitude;
     }
 
     public float getSpeed() {
@@ -215,5 +216,60 @@ public class SlopeModel extends BaseModel {
     @Override
     public List<Waypoint> getExecutePoints() {
         return executePoints;
+    }
+
+    public List<Waypoint> getAdjustPoints() {
+        List<Waypoint> points = new ArrayList<>();
+        float altitude = baselineB.altitude + distanceToPanel;
+        points.add(new Waypoint(baselineA.coordinate.getLatitude(), baselineA.coordinate.getLongitude(), altitude));
+        points.add(new Waypoint(baselineB.coordinate.getLatitude(), baselineB.coordinate.getLongitude(), altitude));
+        for (int i = 0; i < vertexs.size(); i++) {
+            points.add(new Waypoint(vertexs.get(i).latitude, vertexs.get(i).longitude, altitude));
+        }
+        return points;
+    }
+
+    public boolean updateDroneLocation(int index, LatLng latLng) {
+        //index:0:low;1,high;
+        if (index < 0 || index >= vertexs.size() + 2) {
+            return false;
+        } else {
+            switch (index) {
+                case 0:
+                    float altA = baselineA.altitude;
+                    baselineA = new Waypoint(latLng.latitude, latLng.longitude, altA);
+                    break;
+                case 1:
+                    float altB = baselineB.altitude;
+                    baselineB = new Waypoint(latLng.latitude, latLng.longitude, altB);
+                    break;
+                default:
+                    vertexs.add(latLng);
+                    Collections.swap(vertexs, index - 2, vertexs.size() - 1);
+                    vertexs.remove(vertexs.size() - 1);
+                    break;
+            }
+            return true;
+        }
+    }
+
+    public boolean updateAltitude(int index, float alt) {
+        //index:0:low;1,high;
+        if (index < 0 || index >= vertexs.size() + 2) {
+            return false;
+        } else {
+            switch (index) {
+                case 0:
+                    baselineA.altitude = alt;
+                    break;
+                case 1:
+                    baselineB.altitude = alt;
+                    break;
+                default:
+                    this.altitude = alt;
+                    break;
+            }
+            return true;
+        }
     }
 }

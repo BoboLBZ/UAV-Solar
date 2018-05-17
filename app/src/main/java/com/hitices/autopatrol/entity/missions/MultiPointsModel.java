@@ -6,6 +6,7 @@ import com.hitices.autopatrol.algorithm.AntColonyAlgorithm;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -179,6 +180,27 @@ public class MultiPointsModel extends BaseModel {
         waypoints.remove(latLng);
     }
 
+    public boolean updateWaypointLocation(int index, LatLng latLng) {
+        if (index < 0 || index >= this.waypointList.size()) {
+            return false;
+        } else {
+            float alt = waypointList.get(index).altitude;
+            waypointList.add(new Waypoint(latLng.latitude, latLng.longitude, alt));
+            Collections.swap(waypointList, index, waypointList.size() - 1);
+            waypointList.remove(waypointList.size() - 1);
+            return true;
+        }
+    }
+
+    public boolean updateWaypointAltitude(int index, float alt) {
+        if (index < 0 || index >= this.waypointList.size()) {
+            return false;
+        } else {
+            Waypoint w = waypointList.get(index);
+            w.altitude = alt;
+            return true;
+        }
+    }
     public void changeActionOfAllPoints(int angle) {
         this.headingAngle = angle;
         if (!waypointList.isEmpty()) {
