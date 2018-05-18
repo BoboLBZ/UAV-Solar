@@ -63,6 +63,7 @@ import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.crud.DataSupport;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -382,11 +383,15 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
             //read mission
             mission = DataSupport.find(PatrolMission.class, id);
             if (mission == null) {
-                ToastHelper.getInstance().showShortToast("can not open current mission");
+                ToastHelper.getInstance().showShortToast("无法打开当前任务");
                 finish();
             }
             if (path == null) {
-                mission.setFilePath(MissionConstraintHelper.MISSION_DIR + "/" + mission.getName() + ".xml");
+                try {
+                    mission.setFilePath(MissionConstraintHelper.MISSION_DIR + "/" + URLEncoder.encode(mission.getName(), "utf-8") + ".xml");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             MissionHelper helper = new MissionHelper(mission.getFilePath(), mission);
             modelList = helper.getModelList();
@@ -422,14 +427,14 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         input.setFocusableInTouchMode(true);
         input.requestFocus();
         adBuilder.setView(input);
-        adBuilder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+        adBuilder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
             }
         });
 
-        adBuilder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+        adBuilder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
             }
@@ -1094,10 +1099,10 @@ public class MissionMainActivity extends AppCompatActivity implements View.OnCli
         }
         //update file
         if (!MissionHelper.saveMissionToFile(mission, modelList)) {
-            setResultToToast("save failed");
+            setResultToToast("任务保存失败");
         } else {
             saveFlag = true;
-            setResultToToast("success");
+            setResultToToast("任务保存成功");
         }
     }
 

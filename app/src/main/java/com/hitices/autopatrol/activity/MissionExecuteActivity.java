@@ -94,6 +94,14 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private List<BaseModel> executeModelList;
     private FlightController mFlightController;
     private FlightRecord record;
+    private WaypointMissionOperator operatorInstance;
+    //mission about
+    private PatrolMission patrolMission;
+    private AMap aMap;
+    private Marker droneMarker;
+    private LatLng droneLocation;
+    private LatLng humanLocation;
+    private Marker humanLocationMarker;
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation amapLocation) {
@@ -117,14 +125,6 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
     };
-    private WaypointMissionOperator operatorInstance;
-    //mission about
-    private PatrolMission patrolMission;
-    private AMap aMap;
-    private Marker droneMarker;
-    private LatLng droneLocation;
-    private LatLng humanLocation;
-    private Marker humanLocationMarker;
     //ui
     private MapView mapView;
     private ImageButton upload, start, exit, pause;
@@ -160,12 +160,12 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error) {
-            setResultToToast("Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            setResultToToast("任务终止: " + (error == null ? "成功!" : error.getDescription()));
             if (error == null) {
                 record.setEndTime(new Date());
                 record.setHasVisible(true); //设置照片为可见光图像
                 record.save();
-                setResultToToast("save record success");
+                // setResultToToast("");
             }
         }
     };
@@ -272,7 +272,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
                         }
                     });
-            ToastHelper.getInstance().showShortToast("in flight control");
+            // ToastHelper.getInstance().showShortToast("in flight control");
         }
 
     }
@@ -371,9 +371,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             Log.d(TAG, "num of unfinished points:" + String.valueOf(unfinishedPoints.size()));
             DJIError error = getWaypointMissionOperator().loadMission(builder.build());
             if (error == null) {
-                ToastHelper.getInstance().showShortToast("Continue:load success");
+                ToastHelper.getInstance().showShortToast("任务继续:制订任务成功");
             } else {
-                ToastHelper.getInstance().showShortToast("Continue:load mission failed:" + error.getDescription());
+                ToastHelper.getInstance().showShortToast("任务继续:制订任务失败:" + error.getDescription());
                 return false;
             }
             //check smart return home
@@ -483,7 +483,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                 }
             });
         } else {
-            setResultToToast("get battery failed");
+            setResultToToast("连接电池失败");
         }
     }
 
@@ -491,7 +491,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         mFlightController.startGoHome(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError djiError) {
-                setResultToToast("start go home");
+                setResultToToast("开始返航");
             }
         });
     }
@@ -547,7 +547,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
         }
         //lines.add(droneLocation);
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
-        ToastHelper.getInstance().showShortToast("num of waypoint is " + String.valueOf(waypoints.size()));
+        ToastHelper.getInstance().showShortToast("任务点数量:" + String.valueOf(waypoints.size()));
     }
 
     private void processOfMission(LatLng latLng) {
@@ -689,7 +689,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             operatorInstance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
         }
         if (operatorInstance == null) {
-            ToastHelper.getInstance().showShortToast("waypointMissionOperator is null");
+            ToastHelper.getInstance().showShortToast("系统错误，请重试");
         }
         return operatorInstance;
     }
@@ -700,7 +700,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
     private void addListener() {
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().addListener(eventNotificationListener);
-            ToastHelper.getInstance().showShortToast("add listener");
+            // ToastHelper.getInstance().showShortToast("add listener");
         }
     }
 
@@ -711,7 +711,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().removeListener(eventNotificationListener);
-            ToastHelper.getInstance().showShortToast("remove listener");
+            // ToastHelper.getInstance().showShortToast("remove listener");
         }
     }
 
@@ -800,7 +800,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 航点任务执行流程第一步
      */
     private void loadMission(@NonNull List<Waypoint> list, @NonNull float altitude) {
-        ToastHelper.getInstance().showShortToast("on load");
+        // ToastHelper.getInstance().showShortToast("on load");
         //以无人机起飞位置作为返航点
         if (droneLocation != null) {
             list.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
@@ -830,9 +830,9 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
 
         DJIError error = getWaypointMissionOperator().loadMission(builder.build());
         if (error == null) {
-            ToastHelper.getInstance().showShortToast("load success");
+            ToastHelper.getInstance().showShortToast("制订任务成功");
         } else {
-            ToastHelper.getInstance().showShortToast("load mission failed:" + error.getDescription());
+            ToastHelper.getInstance().showShortToast("制订任务失败:" + error.getDescription());
         }
 
     }
@@ -859,7 +859,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
         Log.d(TAG, "speed is " + String.valueOf(speed));
-        ToastHelper.getInstance().showShortToast("speed is " + String.valueOf(speed));
+        ToastHelper.getInstance().showShortToast("飞行速度:" + String.valueOf(speed));
         return speed;
     }
 
@@ -889,7 +889,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             }
         }
         Log.d(TAG, "safe altitude is " + String.valueOf(altitude));
-        ToastHelper.getInstance().showShortToast("safe altitude is " + String.valueOf(altitude));
+        ToastHelper.getInstance().showShortToast("安全飞行高度:" + String.valueOf(altitude));
         return altitude;
     }
 
@@ -912,21 +912,21 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 上传任务到飞机
      */
     private void uploadMission() {
-        ToastHelper.getInstance().showShortToast("on upload");
+        // ToastHelper.getInstance().showShortToast("on upload");
         if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.READY_TO_UPLOAD) {
             getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error2) {
                     if (error2 == null) {
-                        setResultToToast("Mission upload successfully!");
+                        setResultToToast("任务上传成功");
                     } else {
-                        setResultToToast("Mission upload failed, error: " + error2.getDescription() + " retrying...");
+                        setResultToToast("任务上传失败: " + error2.getDescription() + " 重试中...");
                         getWaypointMissionOperator().retryUploadMission(null);
                     }
                 }
             });
         } else {
-            setResultToToast("can not upload");
+            setResultToToast("无法上传或任务已经上传");
         }
     }
 
@@ -934,7 +934,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 任务开始执行
      */
     private void startMission() {
-        ToastHelper.getInstance().showShortToast("on start");
+        // ToastHelper.getInstance().showShortToast("on start");
         record = new FlightRecord();
         record.setMissionName(patrolMission.getName());
 //        record.setPowerStationName(patrolMission.getPowerStation().getName());
@@ -946,11 +946,11 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
                     if (error3 == null) {
                         record.setStartTime(new Date());
                     }
-                    setResultToToast("Mission Start:" + (error3 == null ? "Successfully" : error3.getDescription()));
+                    setResultToToast("任务开始执行:" + (error3 == null ? "成功" : error3.getDescription()));
                 }
             });
         } else {
-            setResultToToast("mission state:" + getWaypointMissionOperator().getCurrentState().getName());
+            setResultToToast("任务状态:" + getWaypointMissionOperator().getCurrentState().getName());
             getWaypointMissionOperator().retryUploadMission(null);
         }
     }
@@ -960,12 +960,12 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * mf,call wrong function,dashazi
      */
     private void stopMission() {
-        ToastHelper.getInstance().showShortToast("on stop");
+        // ToastHelper.getInstance().showShortToast("on stop");
 
         getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError error3) {
-                setResultToToast("Mission Stop: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                setResultToToast("任务终止: " + (error3 == null ? "成功" : error3.getDescription()));
             }
         });
         saveDroneStatus();
@@ -1023,12 +1023,12 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
      * 任务暂停
      */
     private void pauseMission() {
-        ToastHelper.getInstance().showShortToast("on pause");
+        // ToastHelper.getInstance().showShortToast("on pause");
 
         getWaypointMissionOperator().pauseMission(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError error3) {
-                setResultToToast("Mission Pause: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                setResultToToast("任务暂停: " + (error3 == null ? "成功" : error3.getDescription()));
             }
         });
     }
@@ -1038,7 +1038,7 @@ public class MissionExecuteActivity extends Activity implements View.OnClickList
             getWaypointMissionOperator().resumeMission(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error3) {
-                    setResultToToast("Mission resume: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                    setResultToToast("任务继续: " + (error3 == null ? "成功" : error3.getDescription()));
                 }
             });
         }

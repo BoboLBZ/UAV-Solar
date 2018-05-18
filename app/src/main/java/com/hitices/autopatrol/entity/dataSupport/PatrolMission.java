@@ -5,8 +5,8 @@ import com.hitices.autopatrol.helper.MissionConstraintHelper;
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
+import java.net.URLEncoder;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by dusz7 on 20180403.
@@ -46,7 +46,11 @@ public class PatrolMission extends DataSupport {
 
     public void setName(String name) {
         this.name = name;
-        setFilePath(MissionConstraintHelper.MISSION_DIR + "/" + name + ".xml");
+        try {
+            setFilePath(MissionConstraintHelper.MISSION_DIR + "/" + URLEncoder.encode(name, "utf-8") + ".xml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getFilePath() {
@@ -54,7 +58,11 @@ public class PatrolMission extends DataSupport {
     }
 
     public void setFilePath(String filePath) {
-        this.filePath = filePath;
+        try {
+            this.filePath = filePath;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Date getLastModifiedTime() {

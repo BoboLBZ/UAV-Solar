@@ -21,9 +21,8 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -71,6 +70,7 @@ public class MissionHelper {
             doc.appendChild(root);
             Element name = doc.createElement("missionName");
             name.appendChild(doc.createTextNode(patrolMission.getName()));
+//            root.setAttribute("missionName",patrolMission.getName());
             root.appendChild(name);
             //child mission
             for (int i = 0; i < modelList.size(); i++) {
@@ -88,16 +88,15 @@ public class MissionHelper {
             }
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "no");
             DOMSource source = new DOMSource(doc);
             System.out.println("path:" + patrolMission.getFilePath());
             File file1 = new File(patrolMission.getFilePath());
             StreamResult result = new StreamResult(file1);
             transformer.transform(source, result);
-        } catch (ParserConfigurationException pce) {
-            pce.printStackTrace();
-            return false;
-        } catch (TransformerException tfe) {
-            tfe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -337,7 +336,6 @@ public class MissionHelper {
     private boolean init() {
         try {
             File file = new File(filePath);
-//            System.out.println("filePath:"+filePath);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
@@ -348,7 +346,6 @@ public class MissionHelper {
                 return false;
             }
 
-//            patrolMission = new PatrolMission();
             NodeList nodeList = doc.getElementsByTagName("missionName");
             if (nodeList.item(0) != null) {
                 patrolMission.setName(nodeList.item(0).getTextContent());

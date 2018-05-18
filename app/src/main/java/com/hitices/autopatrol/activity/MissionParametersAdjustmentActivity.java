@@ -20,7 +20,6 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.MapView;
@@ -109,7 +108,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     private MapView mapView;
     private ImageButton upload, start, pause;
     private Button btnSaveLocation, btnSaveAltitude, btnSaveHeading, btnSaveCameraAngle, btnSave;
-    private LatLng homePointGPS;
     private int index = -1;
     private WaypointMissionOperatorListener eventNotificationListener = new WaypointMissionOperatorListener() {
         @Override
@@ -231,7 +229,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                             updateDroneLocation(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
                         }
                     });
-            ToastHelper.getInstance().showShortToast("in flight control");
+//            ToastHelper.getInstance().showShortToast("in flight control");
         }
         if (AutoPatrolApplication.getGimbalInstance() != null) {
             AutoPatrolApplication.getGimbalInstance().setStateCallback(new GimbalState.Callback() {
@@ -262,13 +260,13 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      * 航点任务执行流程第一步
      */
     private void loadMission(@NonNull List<Waypoint> list, @NonNull float altitude) {
-        ToastHelper.getInstance().showShortToast("on load");
+//        ToastHelper.getInstance().showShortToast("on load");
         List<Waypoint> points=new ArrayList<>();
         if (droneLocation != null) {
             points.add(new Waypoint(droneLocation.latitude, droneLocation.longitude, altitude));
         }
         points.addAll(list);
-        setResultToToast("points num:"+String.valueOf(points.size()));
+//        setResultToToast("points num:"+String.valueOf(points.size()));
         builder = new WaypointMission.Builder();
         builder.waypointList(points);
         builder.waypointCount(points.size());
@@ -283,9 +281,9 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
         DJIError error = getWaypointMissionOperator().loadMission(builder.build());
         if (error == null) {
-            ToastHelper.getInstance().showShortToast("load success");
+            ToastHelper.getInstance().showShortToast("生成任务成功");
         } else {
-            ToastHelper.getInstance().showShortToast("load mission failed:" + error.getDescription());
+            ToastHelper.getInstance().showShortToast("l生成任务失败:" + error.getDescription());
         }
 
     }
@@ -311,21 +309,21 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      * 上传任务到飞机
      */
     private void uploadMission() {
-        ToastHelper.getInstance().showShortToast("on upload");
+//        ToastHelper.getInstance().showShortToast("on upload");
         if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.READY_TO_UPLOAD) {
             getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error2) {
                     if (error2 == null) {
-                        setResultToToast("Mission upload successfully!");
+                        setResultToToast("任务上传成功!");
                     } else {
-                        setResultToToast("Mission upload failed, error: " + error2.getDescription() + " retrying...");
+                        setResultToToast("任务上传失败: " + error2.getDescription() + " 重传中...");
                         getWaypointMissionOperator().retryUploadMission(null);
                     }
                 }
             });
         } else {
-            setResultToToast("can not upload");
+            setResultToToast("任务已上传或未制订任务，请重试");
         }
     }
 
@@ -333,33 +331,18 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      * 任务开始执行
      */
     private void startMission() {
-        ToastHelper.getInstance().showShortToast("on start");
+//        ToastHelper.getInstance().showShortToast("on start");
         if (getWaypointMissionOperator().getCurrentState() == WaypointMissionState.READY_TO_EXECUTE) {
             getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error3) {
-                    setResultToToast("Mission Start:" + (error3 == null ? "Successfully" : error3.getDescription()));
+                    setResultToToast("任务开始:" + (error3 == null ? "成功" : error3.getDescription()));
                 }
             });
         } else {
-            setResultToToast("mission state:" + getWaypointMissionOperator().getCurrentState().getName());
+            setResultToToast("请稍后重试:" + getWaypointMissionOperator().getCurrentState().getName() + "");
             getWaypointMissionOperator().retryUploadMission(null);
         }
-    }
-
-    /**
-     * 任务终止
-     * mf,call wrong function
-     */
-    private void stopMission() {
-        ToastHelper.getInstance().showShortToast("on stop");
-
-        getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError error3) {
-                setResultToToast("Mission Stop: " + (error3 == null ? "Successfully" : error3.getDescription()));
-            }
-        });
     }
 
     @Override
@@ -392,40 +375,6 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         }
     }
 
-    private void changeStatusOfPause() {
-        WaypointMissionState state = getWaypointMissionOperator().getCurrentState();
-        if (state != null) {
-            if (state == WaypointMissionState.EXECUTING) {
-                pauseMission();
-                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_resume));
-            } else if (state == WaypointMissionState.EXECUTION_PAUSED) {
-                continueMission();
-                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_stop));
-
-            } else {
-                pause.setImageDrawable(getResources().getDrawable(R.drawable.ic_mission_stop));
-            }
-        }
-    }
-
-    private void countOfPoints(LatLng latLng) {
-//        if(getWaypointMissionOperator().getCurrentState() == WaypointMissionState.EXECUTING){
-//            changeStatusOfPause();//pause
-//            index=index+1;
-//        }
-        if (index + 1 >= 0) {
-            Waypoint waypoint = waypoints.get(index + 1);
-            LatLng temp = new LatLng(waypoint.coordinate.getLatitude(), waypoint.coordinate.getLongitude());
-            //判断是否到达下一个点
-            float dis = AMapUtils.calculateLineDistance(temp, latLng);
-            Log.d(TAG, "processOfMission: " + String.valueOf(dis));
-            if (dis < 5) {
-                index = index + 1;
-                changeStatusOfPause();//pause
-            }
-        }
-    }
-
     private void saveLocation() {
         boolean flag = false;
         switch (adjustModel.getModelType()) {
@@ -441,9 +390,9 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         }
         if (flag) {
             markHomePoint(GoogleMapHelper.WGS84ConvertToAmap(droneLocation));
-            ToastHelper.getInstance().showShortToast("saveLocation success");
+            ToastHelper.getInstance().showShortToast("成功记录位置");
         } else {
-            ToastHelper.getInstance().showShortToast("saveLocation failed");
+            ToastHelper.getInstance().showShortToast("调整位置失败");
         }
     }
 
@@ -462,16 +411,17 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                 break;
         }
         if (result) {
-            ToastHelper.getInstance().showShortToast("saveAltitude success");
+            ToastHelper.getInstance().showShortToast("成功记录高度");
         } else {
-            ToastHelper.getInstance().showShortToast("saveAltitude failed");
+            ToastHelper.getInstance().showShortToast("记录高度失败");
         }
     }
 
     private void saveHeading() {
         float heading = mFlightController.getCompass().getHeading();
         adjustModel.setHeadingAngle((int) heading);
-        ToastHelper.getInstance().showShortToast("saveHeading success " + String.valueOf(heading));
+        ToastHelper.getInstance().showShortToast("成功记录拍照朝向:" + String.valueOf(heading));
+
     }
 
     private void saveCameraAngle() {
@@ -479,7 +429,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 //        Attitude attitude=mFlightController.getState().getAttitude();
 //        double pitch=-attitude.pitch;
 //        adjustModel.setCameraAngle((int)pitch);
-        ToastHelper.getInstance().showShortToast("saveCameraPitch success " + String.valueOf((int) cameraAngle));
+        ToastHelper.getInstance().showShortToast("成功记录相机俯角:" + String.valueOf((int) cameraAngle));
     }
 
     private void saveMission() {
@@ -502,10 +452,10 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         }
         //update file
         if (!MissionHelper.saveMissionToFile(patrolMission, modelList)) {
-            setResultToToast("saveMission failed");
+            setResultToToast("保存任务失败");
         } else {
 //            saveFlag = true;
-            setResultToToast("saveMission success");
+            setResultToToast("保存任务成功");
         }
     }
 
@@ -513,12 +463,12 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
      * 任务暂停
      */
     private void pauseMission() {
-        ToastHelper.getInstance().showShortToast("on pause");
+//        ToastHelper.getInstance().showShortToast("on pause");
 
         getWaypointMissionOperator().pauseMission(new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError error3) {
-                setResultToToast("Mission Pause: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                setResultToToast("任务暂停成功: " + (error3 == null ? "成功" : error3.getDescription()));
             }
         });
     }
@@ -528,7 +478,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
             getWaypointMissionOperator().resumeMission(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error3) {
-                    setResultToToast("Mission resume: " + (error3 == null ? "Successfully" : error3.getDescription()));
+                    setResultToToast("任务继续执行: " + (error3 == null ? "成功" : error3.getDescription()));
                 }
             });
         }
@@ -570,7 +520,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
         }
         //lines.add(droneLocation);
         aMap.addPolyline(new PolylineOptions().addAll(lines).color(Color.argb(125, 1, 1, 1)));
-        ToastHelper.getInstance().showShortToast("num of waypoint is " + String.valueOf(waypoints.size()));
+        ToastHelper.getInstance().showShortToast("任务点个数:" + String.valueOf(waypoints.size()));
     }
 
     private void markHomePoint(LatLng latLng) {
@@ -596,7 +546,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                 break;
         }
         Log.d(TAG, "speed is " + String.valueOf(speed));
-        ToastHelper.getInstance().showShortToast("speed is " + String.valueOf(speed));
+        ToastHelper.getInstance().showShortToast("飞行速度:" + String.valueOf(speed));
         return speed;
     }
 
@@ -609,7 +559,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
             }
         }
         Log.d(TAG, "safe altitude is " + String.valueOf(altitude));
-        ToastHelper.getInstance().showShortToast("safe altitude is " + String.valueOf(altitude));
+        ToastHelper.getInstance().showShortToast("安全飞行高度:" + String.valueOf(altitude));
         return altitude;
     }
 
@@ -680,7 +630,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
     private void addListener() {
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().addListener(eventNotificationListener);
-            ToastHelper.getInstance().showShortToast("add listener");
+//            ToastHelper.getInstance().showShortToast("add listener");
         }
     }
 
@@ -691,7 +641,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
 
         if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().removeListener(eventNotificationListener);
-            ToastHelper.getInstance().showShortToast("remove listener");
+//            ToastHelper.getInstance().showShortToast("remove listener");
         }
     }
 
@@ -710,7 +660,7 @@ public class MissionParametersAdjustmentActivity extends Activity implements Vie
                         missionProcessingWithMark();
                     }
                 })
-                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 

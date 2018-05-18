@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.hitices.autopatrol.AutoPatrolApplication;
 import com.hitices.autopatrol.R;
 import com.hitices.autopatrol.entity.dataSupport.PatrolMission;
-import com.hitices.autopatrol.helper.ContextHelper;
 import com.hitices.autopatrol.helper.MissionConstraintHelper;
 import com.hitices.autopatrol.helper.MissionHelper;
 import com.hitices.autopatrol.helper.PermissionHelper;
@@ -26,7 +25,6 @@ import com.hitices.autopatrol.helper.ToastHelper;
 
 import org.litepal.LitePal;
 import org.opencv.android.OpenCVLoader;
-import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -60,8 +58,6 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
     private ImageView droneLogoImage;
 
     private boolean isDroneConnected;
-
-    private long mExitTime = 0;
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -72,6 +68,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
             }
         }
     };
+    private long mExitTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,7 +226,7 @@ public class AppMainActivity extends AppCompatActivity implements View.OnClickLi
                         MissionHelper helper = new MissionHelper(f.getAbsolutePath(), new PatrolMission());
                         PatrolMission patrolMission = helper.getPatrolMission();
 //                        System.out.println("testNameB:"+patrolMission.getName());
-                        Log.e("missionName", patrolMission.getName());
+//                        Log.e("missionName", patrolMission.getName());
                         if (!names.contains(patrolMission.getName())) {
                             patrolMission.save();
                         }
